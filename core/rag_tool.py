@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
 
 import chromadb
 from llama_index.core import Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
+
+from core.semantic_chunking import dedupe_keep_order
 
 
 VECTOR_STORE_DIR = Path("vector_store")
@@ -24,20 +25,6 @@ KEYWORD_MAP: dict[str, str] = {
     "水电费": "水电费相关：关注费用承担主体、计费方式、抄表与结算周期，避免不明扣费条款。",
     "违约金": "违约金相关：关注约定是否过高、是否与实际损失匹配，存在调整空间。",
 }
-
-
-def _dedupe_keep_order(items: Iterable[str]) -> list[str]:
-    seen: set[str] = set()
-    out: list[str] = []
-    for s in items:
-        normalized = " ".join(s.split())
-        if not normalized:
-            continue
-        if normalized in seen:
-            continue
-        seen.add(normalized)
-        out.append(s.strip())
-    return out
 
 
 def retrieve_legal_context(contract_text: str) -> str:
@@ -86,6 +73,6 @@ def retrieve_legal_context(contract_text: str) -> str:
         if keyword in contract_text:
             forced_hits.append(f"[关键词召回] {keyword}：{hint}")
 
-    merged = _dedupe_keep_order([*semantic_hits, *forced_hits])
+    merged = dedupe_keep_order([*semantic_hits, *forced_hits])
     return "\n\n".join(merged)
 

@@ -19,9 +19,11 @@ if os.path.isdir(_torch_lib):
 
 import chromadb
 from llama_index.core import Settings, StorageContext, VectorStoreIndex
-from llama_index.core import SimpleDirectoryReader
+from llama_index.core.schema import Document
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
+
+from core.semantic_chunking import split_by_article
 
 
 DATA_DIR = Path("data")
@@ -50,7 +52,11 @@ def main() -> None:
     if not txt_files:
         raise FileNotFoundError(f"{DATA_DIR.resolve()} 下未找到任何 .txt 文件")
 
-    documents = SimpleDirectoryReader(input_dir=str(DATA_DIR), required_exts=[".txt"]).load_data()
+    documents: list[Document] = []
+    for p in txt_files:
+        raw = p.read_text(encoding="utf-8")
+        for chunk in split_by_article(raw):
+            documents.append(Document(text=chunk, metadata={"source": p.name}))
 
     VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
     client = chromadb.PersistentClient(path=str(VECTOR_STORE_DIR))
