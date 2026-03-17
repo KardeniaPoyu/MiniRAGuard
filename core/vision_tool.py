@@ -3,12 +3,16 @@ from __future__ import annotations
 import json
 import os
 
+from dotenv import load_dotenv
+
 try:
     # openai>=1.x
     from openai import OpenAI
 except Exception as e:  # noqa: BLE001
     OpenAI = None  # type: ignore[assignment]
     _OPENAI_IMPORT_ERROR = e
+
+load_dotenv()
 
 
 DEFAULT_QWEN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
