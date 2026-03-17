@@ -6,9 +6,23 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 from pathlib import Path
+
+# Workaround for OpenMP duplicate library and DLL paths on Windows
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+_venv_path = os.path.abspath(".venv")
+_torch_lib = os.path.join(_venv_path, "Lib", "site-packages", "torch", "lib")
+if os.path.isdir(_torch_lib):
+    os.environ['PATH'] = _torch_lib + os.pathsep + os.environ['PATH']
+    if hasattr(os, 'add_dll_directory'):
+        try:
+            os.add_dll_directory(_torch_lib)
+        except Exception:
+            pass
+
 
 
 REPO_ROOT = Path(__file__).resolve().parent
