@@ -4,11 +4,15 @@ import json
 import os
 import re
 
+from dotenv import load_dotenv
+
 try:
     from openai import OpenAI  # openai>=1.x
 except Exception as e:  # noqa: BLE001
     OpenAI = None  # type: ignore[assignment]
     _OPENAI_IMPORT_ERROR = e
+
+load_dotenv()
 
 
 DEFAULT_BASE_URL = "https://api.deepseek.com"
