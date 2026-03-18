@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import time
 import traceback
 from typing import Any
 
@@ -14,6 +16,8 @@ from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
 from core.reviewer import review_contract
 from core.vision_tool import extract_contract
+
+logger = logging.getLogger("uvicorn")
 
 
 class AnalyzeRequest(BaseModel):
@@ -70,6 +74,7 @@ async def analyze(req: AnalyzeRequest) -> Any:
 
     legal_context = retrieve_legal_context(contract_text)
     result = review_contract(contract_text, legal_context)
+
     set_cache(contract_text, result)
     return result
 

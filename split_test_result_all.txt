@@ -1,0 +1,31 @@
+=== File: beijing_rental_regulations.txt ===
+Total chunks found: 75
+
+✅ All chunks start with Article title correctly.
+Strict matches (\b): 75
+Relaxed matches (no \b): 75
+✅ Strict and relaxed regex match count is identical. \b is safe.
+
+=== File: civil_code.txt ===
+Total chunks found: 58
+
+✅ All chunks start with Article title correctly.
+Strict matches (\b): 58
+Relaxed matches (no \b): 58
+✅ Strict and relaxed regex match count is identical. \b is safe.
+
+=== File: rental_regulation.txt ===
+Total chunks found: 50
+
+✅ All chunks start with Article title correctly.
+Strict matches (\b): 50
+Relaxed matches (no \b): 50
+✅ Strict and relaxed regex match count is identical. \b is safe.
+
+=== File: SPC_interpretation_urban_housing_lease_disputes_2020.txt ===
+Total chunks found: 16
+
+✅ All chunks start with Article title correctly.
+Strict matches (\b): 16
+Relaxed matches (no \b): 16
+✅ Strict and relaxed regex match count is identical. \b is safe.

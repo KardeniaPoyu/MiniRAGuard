@@ -1,0 +1,8 @@
+Total chunks found: 58
+
+✅ All chunks start with Article title correctly.
+
+Strict matches (\b): 58
+Relaxed matches (no \b): 58
+
+✅ Strict and relaxed regex match count is identical. \b is safe.

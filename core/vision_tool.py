@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 from dotenv import load_dotenv
 
@@ -93,10 +94,15 @@ def extract_contract(image_base64: str) -> str:
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"Qwen-VL 响应结构异常：{e}") from e
 
+    match = re.search(r"\{[\s\S]*\}", content)
+    if not match:
+        raise RuntimeError(f"Qwen-VL 返回内容中未找到 JSON 结构：{content}")
+    content = match.group()
+
     try:
         payload = json.loads(content)
     except Exception as e:  # noqa: BLE001
-        raise RuntimeError(f"Qwen-VL 返回非 JSON：{content}") from e
+        raise RuntimeError(f"Qwen-VL 返回非法 JSON：{content}") from e
 
     is_contract = payload.get("is_contract")
     contract_text = payload.get("contract_text", "")
