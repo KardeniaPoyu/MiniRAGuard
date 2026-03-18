@@ -51,21 +51,31 @@ def retrieve_legal_context(contract_text: str) -> str:
     vector_store = ChromaVectorStore(chroma_collection=collection)
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
-    # 路径一：语义检索 Top-3
-    retriever = index.as_retriever(similarity_top_k=3)
-    nodes = retriever.retrieve(contract_text)
+    # 路径一：分段语义检索（解决整页合同文本向量高度淡化、稀释，导致对不上具体法条的缺陷）
+    import re
+    clauses = re.split(r'(?=\b第[一二三四五六七八九十]+条\b|条款)|\n+', contract_text)
+    clauses = [c.strip() for c in clauses if len(c.strip()) > 10]
+    clauses = clauses[:15]  # 限制前15段，防阻塞超时
+
+    retriever = index.as_retriever(similarity_top_k=2)
     semantic_hits: list[str] = []
-    for n in nodes:
-        node = getattr(n, "node", None)
-        text = None
-        if node is not None:
-            if hasattr(node, "get_content"):
-                text = node.get_content()
-            else:
-                text = getattr(node, "text", None)
-        if not text:
-            text = str(n)
-        semantic_hits.append(text)
+    
+    for clause in clauses:
+        try:
+            nodes = retriever.retrieve(clause)
+            for n in nodes:
+                node = getattr(n, "node", None)
+                text = None
+                if node is not None:
+                    if hasattr(node, "get_content"):
+                        text = node.get_content()
+                    else:
+                        text = getattr(node, "text", None)
+                if not text:
+                    text = str(n)
+                semantic_hits.append(text)
+        except Exception:
+            pass
 
     # 路径二：关键词强制召回
     forced_hits: list[str] = []
