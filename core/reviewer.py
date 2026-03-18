@@ -101,6 +101,7 @@ def review_contract(contract_text: str, legal_context: str) -> dict:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0,
+            max_tokens=2000,
         )
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"DeepSeek API 调用失败：{e}") from e

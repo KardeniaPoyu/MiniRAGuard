@@ -59,10 +59,10 @@ def chat(question: str, context: dict, history: list) -> str:
         resp = _client().chat.completions.create(
             model=model,
             messages=messages,
-            temperature=0.2,
+            temperature=0.7,
+            max_tokens=800,
         )
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"DeepSeek API 调用失败：{e}") from e
 
     return (resp.choices[0].message.content or "").strip()
-

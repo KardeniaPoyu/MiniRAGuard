@@ -1,8 +1,7 @@
-from __future__ import annotations
-
+import hashlib
 import logging
-import time
 import traceback
+from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
@@ -11,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from core.cache_tool import get_cache, init_db, set_cache
+from core.cache_tool import get_cache_by_md5, init_db, set_cache_by_md5
 from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
 from core.reviewer import review_contract
@@ -30,7 +29,22 @@ class ChatRequest(BaseModel):
     history: list[dict[str, Any]]
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app_ctx: FastAPI):  # type: ignore[no-untyped-def]
+    init_db()
+
+    # 启动时预加载
+    import logging
+    logger = logging.getLogger("uvicorn")
+    logger.info("[startup] 预加载 RAG 索引...")
+    from core.rag_tool import retrieve_legal_context
+    retrieve_legal_context("押金 提前退租 维修")  # dry run
+    logger.info("[startup] RAG 索引预加载完成")
+
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,11 +53,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    init_db()
 
 
 @app.exception_handler(Exception)
@@ -55,6 +64,13 @@ async def _unhandled_exception_handler(request, exc: Exception):  # type: ignore
 
 @app.post("/api/analyze")
 async def analyze(req: AnalyzeRequest) -> Any:
+    # 优化三：图片 MD5 层面的精确缓存，跳过提取变动
+    image_md5 = hashlib.md5("".join(req.images).encode()).hexdigest()
+
+    cached = get_cache_by_md5(image_md5)
+    if cached is not None:
+        return cached
+
     try:
         pages: list[str] = []
         for img_b64 in req.images:
@@ -68,14 +84,11 @@ async def analyze(req: AnalyzeRequest) -> Any:
         raise
 
     contract_text = "\n\n".join(pages).strip()
-    cached = get_cache(contract_text)
-    if cached is not None:
-        return cached
 
     legal_context = retrieve_legal_context(contract_text)
     result = review_contract(contract_text, legal_context)
 
-    set_cache(contract_text, result)
+    set_cache_by_md5(image_md5, result)
     return result
 
 
