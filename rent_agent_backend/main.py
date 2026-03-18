@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import logging
 import traceback
@@ -62,6 +63,19 @@ async def _unhandled_exception_handler(request, exc: Exception):  # type: ignore
     return JSONResponse(status_code=500, content={"error": "服务内部错误，请稍后重试"})
 
 
+def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
+    pages: list[str] = []
+    for img_b64 in req.images:
+        pages.append(extract_contract(img_b64))
+
+    contract_text = "\n\n".join(pages).strip()
+    legal_context = retrieve_legal_context(contract_text)
+    result = review_contract(contract_text, legal_context)
+
+    set_cache_by_md5(image_md5, result)
+    return result
+
+
 @app.post("/api/analyze")
 async def analyze(req: AnalyzeRequest) -> Any:
     # 优化三：图片 MD5 层面的精确缓存，跳过提取变动
@@ -72,9 +86,17 @@ async def analyze(req: AnalyzeRequest) -> Any:
         return cached
 
     try:
-        pages: list[str] = []
-        for img_b64 in req.images:
-            pages.append(extract_contract(img_b64))
+        # 增加 180 秒的超时保护，熔断同步阻塞线程
+        result = await asyncio.wait_for(
+            asyncio.to_thread(_do_analyze_work, req, image_md5),
+            timeout=180.0
+        )
+        return result
+    except asyncio.TimeoutError:
+        return JSONResponse(
+            status_code=408,
+            content={"error": "分析超时，请重试"}
+        )
     except ValueError as e:
         if str(e) == "NOT_CONTRACT":
             return JSONResponse(
@@ -82,14 +104,6 @@ async def analyze(req: AnalyzeRequest) -> Any:
                 content={"error": "请上传合同图片，检测到非合同内容"},
             )
         raise
-
-    contract_text = "\n\n".join(pages).strip()
-
-    legal_context = retrieve_legal_context(contract_text)
-    result = review_contract(contract_text, legal_context)
-
-    set_cache_by_md5(image_md5, result)
-    return result
 
 
 @app.post("/api/chat")

@@ -19,6 +19,8 @@ while True:
         time.sleep(1)
 print("Server is Ready!")
 
+b64 = b64 + " " # 强行扰动 MD5 绕开缓存
+
 results = []
 
 def run_test(test_id):
