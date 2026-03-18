@@ -71,9 +71,27 @@ def retrieve_legal_context(contract_text: str) -> str:
                         text = node.get_content()
                     else:
                         text = getattr(node, "text", None)
+                    
+                    # ==== 新增：自动附带法规出处 ====
+                    metadata = getattr(node, "metadata", {})
+                    file_name = metadata.get("file_name", "") or ""
+                    source_title = ""
+                    if "beijing_rental_regulations" in file_name:
+                        source_title = "《北京市住房租赁条例》"
+                    elif "civil_code" in file_name:
+                        source_title = "《民法典》"
+                    elif "urban_housing_lease" in file_name:
+                        source_title = "《最高法租赁纠纷司法解释》"
+                    elif "rental_regulation" in file_name:
+                        source_title = "《住房租赁管理条例(参考)》"
+
+                    if source_title and text:
+                        text = f"【来源：{source_title}】\n{text}"
+
                 if not text:
                     text = str(n)
-                semantic_hits.append(text)
+                if text:
+                    semantic_hits.append(text)
         except Exception:
             pass
 
