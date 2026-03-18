@@ -4,6 +4,11 @@ import os
 import sys
 from pathlib import Path
 
+# 添加模块搜索路径，以便能找到 core
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
 # Workaround for OpenMP duplicate library and DLL paths on Windows
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 _venv_path = os.path.abspath(".venv")
@@ -26,8 +31,8 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from core.semantic_chunking import split_by_article
 
 
-DATA_DIR = Path("data")
-VECTOR_STORE_DIR = Path("vector_store")
+DATA_DIR = BASE_DIR / "data"
+VECTOR_STORE_DIR = BASE_DIR / "vector_store"
 COLLECTION_NAME = "civil_code"
 EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 

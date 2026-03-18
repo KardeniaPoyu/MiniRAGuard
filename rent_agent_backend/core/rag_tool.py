@@ -9,8 +9,8 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from core.semantic_chunking import dedupe_keep_order
 
-
-VECTOR_STORE_DIR = Path("vector_store")
+BASE_DIR = Path(__file__).resolve().parent.parent
+VECTOR_STORE_DIR = BASE_DIR / "vector_store"
 COLLECTION_NAME = "civil_code"
 EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 
