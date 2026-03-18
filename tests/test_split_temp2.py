@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.abspath('rent_agent_backend'))
 import re
 import sys
 from pathlib import Path

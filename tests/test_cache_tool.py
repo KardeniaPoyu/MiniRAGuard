@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.abspath('rent_agent_backend'))
 """
 运行前需确保 .env 已配置
 
