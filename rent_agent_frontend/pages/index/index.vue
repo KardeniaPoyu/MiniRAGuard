@@ -318,15 +318,6 @@ export default {
         }
       }
 
-      // 换行转 <br>，然后还原占位符
-      result = result
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        // 注意：占位符在 escape 之前已插入，这里直接还原
-      // 重新来：先 escape，再替换，再还原占位
-      // 改用安全顺序：先收集区间，再分段 escape
-      // 简化实现：占位符已在原始字符串操作，escape 只影响非占位符部分
       let html = ''
       const parts = result.split(/(\u0002\d+\u0003)/)
       for (const part of parts) {
