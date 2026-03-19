@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import logging
+import os
 import traceback
 from contextlib import asynccontextmanager
 from typing import Any
@@ -47,9 +48,14 @@ async def lifespan(app_ctx: FastAPI):  # type: ignore[no-untyped-def]
 
 app = FastAPI(lifespan=lifespan)
 
+# 生产环境请在 .env 中设置 ALLOWED_ORIGINS=https://your-domain.com
+# 多个来源用英文逗号分隔；留空则允许所有来源（仅限开发环境）
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "").strip()
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()] or ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -113,6 +119,7 @@ async def chat_api(req: ChatRequest) -> dict[str, str]:
 
 
 if __name__ == "__main__":
+    # 本地调试用（reload=True 仅限开发）；生产环境请使用 Dockerfile CMD 启动
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 

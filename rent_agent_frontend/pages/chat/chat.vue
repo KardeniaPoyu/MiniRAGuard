@@ -126,6 +126,7 @@
 </template>
 
 <script>
+import BASE_URL from '../../config.js'
 export default {
   name: 'ChatPage',
 
@@ -255,7 +256,7 @@ export default {
       this.scrollToBottom()
 
       uni.request({
-        url: 'http://127.0.0.1:8000/api/chat',
+        url: BASE_URL + '/api/chat',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         timeout: 60000,
