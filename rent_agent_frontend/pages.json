@@ -17,6 +17,15 @@
         "navigationBarTextStyle": "white",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/helpline/helpline",
+      "style": {
+        "navigationBarTitleText": "法律求助热线",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "globalStyle": {
