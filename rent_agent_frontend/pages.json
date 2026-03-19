@@ -26,6 +26,15 @@
         "navigationBarTextStyle": "white",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/risklib/risklib",
+      "style": {
+        "navigationBarTitleText": "高频风险规则库",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "globalStyle": {
@@ -33,6 +42,12 @@
     "navigationBarTitleText": "青居智选",
     "navigationBarBackgroundColor": "#1A3A5C",
     "backgroundColor": "#F4F6F9"
+  },
+  "networkTimeout": {
+    "request": 180000,
+    "connectSocket": 60000,
+    "uploadFile": 180000,
+    "downloadFile": 60000
   },
   "tabBar": null
 }

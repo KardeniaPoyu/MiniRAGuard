@@ -14,6 +14,13 @@ def _md5(text: str) -> str:
 def init_db() -> None:
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS cache (md5 TEXT PRIMARY KEY, result TEXT)")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS risk_stats (
+                risk_type TEXT PRIMARY KEY,
+                count INTEGER DEFAULT 0,
+                last_seen TEXT
+            )
+        """)
 
 
 def get_cache(text: str) -> dict | None:
@@ -45,3 +52,28 @@ def set_cache_by_md5(md5: str, result: dict) -> None:
         conn.execute("INSERT OR REPLACE INTO cache (md5, result) VALUES (?, ?)", (md5, payload))
         conn.commit()
 
+
+def update_risk_stats(analysis_results: list) -> None:
+    from datetime import date
+    today = date.today().isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        for item in analysis_results:
+            risk_type = (item.get("risk_type") or "").strip()
+            if not risk_type:
+                continue
+            conn.execute("""
+                INSERT INTO risk_stats (risk_type, count, last_seen)
+                VALUES (?, 1, ?)
+                ON CONFLICT(risk_type) DO UPDATE SET
+                    count = count + 1,
+                    last_seen = excluded.last_seen
+            """, (risk_type, today))
+        conn.commit()
+
+
+def get_risk_stats() -> list:
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute(
+            "SELECT risk_type, count, last_seen FROM risk_stats ORDER BY count DESC"
+        ).fetchall()
+    return [{"risk_type": r[0], "count": r[1], "last_seen": r[2]} for r in rows]

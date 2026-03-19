@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from core.cache_tool import get_cache_by_md5, init_db, set_cache_by_md5
+from core.cache_tool import get_cache_by_md5, get_risk_stats, init_db, set_cache_by_md5, update_risk_stats
 from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
 from core.reviewer import review_contract
@@ -78,6 +78,8 @@ def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
     legal_context = retrieve_legal_context(contract_text)
     result = review_contract(contract_text, legal_context)
 
+    result["contract_text"] = contract_text
+    update_risk_stats(result.get("analysis_results", []))
     set_cache_by_md5(image_md5, result)
     return result
 
@@ -116,6 +118,11 @@ async def analyze(req: AnalyzeRequest) -> Any:
 async def chat_api(req: ChatRequest) -> dict[str, str]:
     answer = chat(req.question, req.context, req.history)
     return {"answer": answer}
+
+
+@app.get("/api/risk-stats")
+async def risk_stats_api() -> list:
+    return get_risk_stats()
 
 
 if __name__ == "__main__":

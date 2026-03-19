@@ -193,6 +193,11 @@
         <text class="helpline-btn-text">法律求助热线</text>
       </view>
 
+      <!-- 高频风险规则库入口 -->
+      <view class="helpline-btn" @tap="goToRisklib">
+        <text class="helpline-btn-text">高频风险规则库</text>
+      </view>
+
     </view>
 
   </view>
@@ -248,12 +253,14 @@ export default {
   computed: {
     // 合同原文高亮 HTML
     highlightedContractText() {
-      if (!this.results || !this.results.analysis_results) return ''
-      const combined = this.results.analysis_results
-        .map(item => item.original_text || '')
-        .filter(t => t.length > 0)
-        .join('\n\n')
-      return this.buildHighlightHtml(combined)
+      if (!this.results) return ''
+      // 优先使用完整合同文本，降级使用拼接片段
+      const fullText = this.results.contract_text
+        || (this.results.analysis_results || [])
+             .map(item => item.original_text || '')
+             .filter(t => t.length > 0)
+             .join('\n\n')
+      return this.buildHighlightHtml(fullText)
     },
 
     // { clause_id → category_key }
@@ -475,6 +482,10 @@ export default {
 
     toggleExpand(idx) {
       this.$set(this.expandedMap, idx, !this.expandedMap[idx])
+    },
+
+    goToRisklib() {
+      uni.navigateTo({ url: '/pages/risklib/risklib' })
     }
   }
 }
