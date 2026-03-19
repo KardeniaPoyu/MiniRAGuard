@@ -77,9 +77,39 @@
         <text class="summary-text">{{ results.summary }}</text>
       </view>
 
-      <!-- 风险条款列表 -->
+      <!-- ====== 4.1 分类导航栏 ====== -->
+      <view class="category-nav-wrap">
+        <scroll-view scroll-x class="category-scroll">
+          <view class="category-list">
+            <view
+              v-for="cat in categoryList"
+              :key="cat.key"
+              class="category-tab"
+              :class="activeCategory === cat.key ? 'category-tab--active' : ''"
+              @tap="activeCategory = cat.key"
+            >
+              <text
+                class="category-tab-text"
+                :class="activeCategory === cat.key ? 'category-tab-text--active' : ''"
+              >{{ cat.label }}</text>
+              <!-- 条款数量角标（全部标签不显示） -->
+              <view v-if="cat.key !== 'all'" class="category-badge" :class="cat.hasHigh ? 'category-badge--high' : 'category-badge--normal'">
+                <text class="category-badge-text">{{ cat.count }}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- ====== 4.2 过滤后的风险条款列表 ====== -->
+      <!-- 空状态 -->
+      <view v-if="filteredResults.length === 0" class="empty-category">
+        <text>该类条款未发现风险</text>
+      </view>
+
+      <!-- 条款卡片 -->
       <view
-        v-for="(item, idx) in results.analysis_results"
+        v-for="(item, idx) in filteredResults"
         :key="item.clause_id"
         class="clause-card"
       >
@@ -144,20 +174,95 @@
 
 <script>
 import BASE_URL from '../../config.js'
+
+// 分类映射表（顺序即优先级，先匹配先归类）
+const CATEGORY_MAP = [
+  { key: 'rent',    label: '租金',    keywords: ['租金', '租费', '滞纳', '迟延'] },
+  { key: 'deposit', label: '押金',    keywords: ['押金', '定金', '保证金', '担保'] },
+  { key: 'repair',  label: '维修责任', keywords: ['维修', '修缮', '损坏', '修复'] },
+  { key: 'exit',    label: '解约条件', keywords: ['退租', '解除', '终止', '解约', '违约'] },
+  { key: 'privacy', label: '居住权利', keywords: ['入户', '检查', '隐私', '安宁', '居住'] },
+  { key: 'renew',   label: '续租条款', keywords: ['续租', '续签', '期满', '到期'] },
+  { key: 'other',   label: '其他',    keywords: [] }  // 兜底
+]
+
 export default {
   name: 'IndexPage',
 
   data() {
     return {
-      images: [],         // 原始临时路径列表
-      loading: false,     // 加载状态
-      results: null,      // 接口返回结果
-      showCacheTag: false,// 极速模式标签
-      expandedMap: {}     // 原文展开状态 {idx: true/false}
+      images: [],           // 原始临时路径列表
+      loading: false,       // 加载状态
+      results: null,        // 接口返回结果
+      showCacheTag: false,  // 极速模式标签
+      expandedMap: {},      // 原文展开状态 {idx: true/false}
+      activeCategory: 'all' // 当前选中分类 key
+    }
+  },
+
+  computed: {
+    // 一次性计算每个条款的分类：{ clause_id: category_key }
+    itemCategoryMap() {
+      if (!this.results || !this.results.analysis_results) return {}
+      const map = {}
+      for (const item of this.results.analysis_results) {
+        map[item.clause_id] = this.getCategory(item)
+      }
+      return map
+    },
+
+    // 动态生成有条款的分类列表（含"全部"）
+    categoryList() {
+      if (!this.results || !this.results.analysis_results) return []
+
+      const countMap = {}   // { key: count }
+      const highMap = {}    // { key: hasHigh }
+
+      for (const item of this.results.analysis_results) {
+        const key = this.itemCategoryMap[item.clause_id] || 'other'
+        countMap[key] = (countMap[key] || 0) + 1
+        if (item.risk_level === '高风险') {
+          highMap[key] = true
+        }
+      }
+
+      const list = [{ key: 'all', label: '全部', count: this.results.analysis_results.length, hasHigh: false }]
+      for (const cat of CATEGORY_MAP) {
+        if (countMap[cat.key]) {
+          list.push({
+            key: cat.key,
+            label: cat.label,
+            count: countMap[cat.key],
+            hasHigh: !!highMap[cat.key]
+          })
+        }
+      }
+      return list
+    },
+
+    // 按当前分类过滤后的条款列表
+    filteredResults() {
+      if (!this.results || !this.results.analysis_results) return []
+      if (this.activeCategory === 'all') return this.results.analysis_results
+      return this.results.analysis_results.filter(
+        item => this.itemCategoryMap[item.clause_id] === this.activeCategory
+      )
     }
   },
 
   methods: {
+    // ---- 归类函数 ----
+    getCategory(item) {
+      const text = (item.risk_type || '') + (item.reason || '')
+      for (const cat of CATEGORY_MAP) {
+        if (cat.keywords.length === 0) continue // 跳过兜底，最后处理
+        for (const kw of cat.keywords) {
+          if (text.includes(kw)) return cat.key
+        }
+      }
+      return 'other'
+    },
+
     // ---- 选择图片 ----
     chooseImages() {
       const remaining = 10 - this.images.length
@@ -220,6 +325,8 @@ export default {
       this.loading = true
       this.results = null
       this.showCacheTag = false
+      this.activeCategory = 'all'  // 重置分类
+      this.expandedMap = {}
 
       let base64List = []
       try {
@@ -691,5 +798,92 @@ export default {
   font-weight: 600;
   color: #1A3A5C;
   letter-spacing: 2rpx;
+}
+
+/* ===== 分类导航栏 ===== */
+.category-nav-wrap {
+  background-color: #FFFFFF;
+  border-bottom: 1rpx solid #E0E0E0;
+  margin-bottom: 20rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.category-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.category-list {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: 0 8rpx;
+}
+
+.category-tab {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 20rpx 28rpx 16rpx;
+  border-bottom: 4rpx solid transparent;
+  flex-shrink: 0;
+}
+
+.category-tab--active {
+  border-bottom: 4rpx solid #1A3A5C;
+}
+
+.category-tab-text {
+  font-size: 26rpx;
+  color: #90A4AE;
+  white-space: nowrap;
+}
+
+.category-tab-text--active {
+  color: #1A3A5C;
+  font-weight: 600;
+}
+
+/* 角标 */
+.category-badge {
+  margin-left: 6rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  padding: 0 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-badge--high {
+  background-color: #E74C3C;
+}
+
+.category-badge--normal {
+  background-color: #B0BEC5;
+}
+
+.category-badge-text {
+  font-size: 20rpx;
+  color: #FFFFFF;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ===== 空状态 ===== */
+.empty-category {
+  padding: 60rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-category text {
+  font-size: 28rpx;
+  color: #90A4AE;
+  text-align: center;
 }
 </style>
