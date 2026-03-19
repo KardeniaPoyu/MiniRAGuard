@@ -1,0 +1,29 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "青居智选",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "default"
+      }
+    },
+    {
+      "path": "pages/chat/chat",
+      "style": {
+        "navigationBarTitleText": "AI 法律助手",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "青居智选",
+    "navigationBarBackgroundColor": "#1A3A5C",
+    "backgroundColor": "#F4F6F9"
+  },
+  "tabBar": null
+}
