@@ -112,7 +112,24 @@ def review_contract(contract_text: str, legal_context: str) -> dict:
         raise RuntimeError(f"DeepSeek API 调用失败：{e}") from e
 
     content = (resp.choices[0].message.content or "").strip()
-    return _parse_json_with_fallback(content)
+    result = _parse_json_with_fallback(content)
+
+    required_fields = ["overall_risk", "summary", "analysis_results"]
+    for field in required_fields:
+        if field not in result:
+            raise ValueError(f"DeepSeek 返回 JSON 缺少字段：{field}")
+
+    if not isinstance(result["analysis_results"], list):
+        raise ValueError("analysis_results 必须是数组")
+
+    for item in result["analysis_results"]:
+        item.setdefault("risk_level", "中风险")
+        item.setdefault("risk_type", "待确认")
+        item.setdefault("reason", "")
+        item.setdefault("legal_basis", "")
+        item.setdefault("advice", "")
+
+    return result
 
 
 if __name__ == "__main__":

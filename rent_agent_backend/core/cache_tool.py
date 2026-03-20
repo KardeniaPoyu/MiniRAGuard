@@ -21,6 +21,13 @@ def init_db() -> None:
                 last_seen TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS risk_stats_log (
+                image_md5 TEXT,
+                risk_type TEXT,
+                PRIMARY KEY (image_md5, risk_type)
+            )
+        """)
 
 
 def get_cache(text: str) -> dict | None:
@@ -53,7 +60,7 @@ def set_cache_by_md5(md5: str, result: dict) -> None:
         conn.commit()
 
 
-def update_risk_stats(analysis_results: list) -> None:
+def update_risk_stats(analysis_results: list, image_md5: str) -> None:
     from datetime import date
     today = date.today().isoformat()
     with sqlite3.connect(DB_PATH) as conn:
@@ -61,6 +68,21 @@ def update_risk_stats(analysis_results: list) -> None:
             risk_type = (item.get("risk_type") or "").strip()
             if not risk_type:
                 continue
+            
+            # 去重：检查是否已记录
+            exists = conn.execute(
+                "SELECT 1 FROM risk_stats_log WHERE image_md5=? AND risk_type=?",
+                (image_md5, risk_type)
+            ).fetchone()
+            if exists:
+                continue
+
+            # 写入日志
+            conn.execute(
+                "INSERT OR IGNORE INTO risk_stats_log (image_md5, risk_type) VALUES (?, ?)",
+                (image_md5, risk_type)
+            )
+
             conn.execute("""
                 INSERT INTO risk_stats (risk_type, count, last_seen)
                 VALUES (?, 1, ?)

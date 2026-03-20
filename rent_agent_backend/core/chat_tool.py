@@ -36,6 +36,9 @@ def chat(question: str, context: dict, history: list) -> str:
     - messages：system → history(按顺序) → 当前 question(user)
     """
 
+    # 历史记录截断
+    history = history[-12:] if len(history) > 12 else history
+
     model = os.getenv("DEEPSEEK_MODEL", DEFAULT_MODEL).strip()
     context_json = json.dumps(context, ensure_ascii=False)
 

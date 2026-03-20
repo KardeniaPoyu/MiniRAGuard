@@ -25,6 +25,11 @@
 - **请求**：`{ "question": "...", "context": {...}, "history": [{"role":"user|assistant","content":"..."}] }`
 - **响应**：`{ "answer": "..." }`（自由文本）
 
+## 部署与安装
+
+- **服务器安装命令**：`pip install -r requirements.txt`
+- **注意**：`torch` 不在依赖列表中，`sentence-transformers` 会自动安装适合 CPU 的依赖，无需手动指定。
+
 ## Git 协作约定（建议）
 
 - **分支**：`main` 保持可部署/可演示；日常开发使用 `feat/*`、`fix/*` 等功能分支并通过 PR 合并。
