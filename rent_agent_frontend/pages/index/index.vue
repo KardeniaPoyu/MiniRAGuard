@@ -3,8 +3,16 @@
 
     <!-- ====== 1. 顶部标题栏 ====== -->
     <view class="header">
-      <text class="header-title">青居智选</text>
-      <text class="header-sub">租房合同智能审查</text>
+      <view class="header-main">
+        <view class="header-text">
+          <text class="header-title">青居智选</text>
+          <text class="header-sub">租房合同智能审查</text>
+        </view>
+        <view class="header-profile-btn" @tap="goToProfile">
+          <text class="header-profile-icon">👤</text>
+          <text class="header-profile-text">我的</text>
+        </view>
+      </view>
     </view>
 
     <!-- ====== 2. 上传区域 ====== -->
@@ -426,11 +434,28 @@ export default {
       uni.request({
         url: BASE_URL + '/api/analyze',
         method: 'POST',
-        header: { 'Content-Type': 'application/json' },
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': (() => { const t = uni.getStorageSync('token'); return t ? `Bearer ${t}` : '' })()
+        },
         timeout: 180000,
         data: { images: base64List },
         success: (res) => {
           this.loading = false
+          if (res.statusCode === 403) {
+            uni.showModal({
+              title: '审查次数已用完',
+              content: '观看一个短视频广告，即可获得3次审查机会',
+              confirmText: '去获取',
+              cancelText: '取消',
+              success: (modal) => {
+                if (modal.confirm) {
+                  uni.navigateTo({ url: '/pages/profile/profile' })
+                }
+              }
+            })
+            return
+          }
           if (res.statusCode === 200 && res.data && !res.data.error) {
             this.results = res.data
             this.expandedMap = {}
@@ -449,9 +474,13 @@ export default {
           uni.showToast({ title: '网络请求失败，请检查网络', icon: 'none' })
         }
       })
+
     },
 
-    // ---- 跳转 ----
+    goToProfile() {
+      uni.navigateTo({ url: '/pages/profile/profile' })
+    },
+
     goToChat() {
       uni.navigateTo({ url: '/pages/chat/chat?context=' + encodeURIComponent(JSON.stringify(this.results)) })
     },
@@ -503,9 +532,17 @@ export default {
 .header {
   background-color: #1A3A5C;
   padding: 40rpx 40rpx 36rpx;
+}
+.header-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-text {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 .header-title {
   font-size: 44rpx;
@@ -518,6 +555,23 @@ export default {
   color: rgba(255, 255, 255, 0.75);
   margin-top: 10rpx;
   letter-spacing: 2rpx;
+}
+.header-profile-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255,255,255,0.12);
+  border-radius: 16rpx;
+  padding: 12rpx 22rpx;
+}
+.header-profile-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+.header-profile-text {
+  font-size: 20rpx;
+  color: rgba(255,255,255,0.85);
+  margin-top: 4rpx;
 }
 
 /* ===== 通用 section ===== */

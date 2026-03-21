@@ -1,6 +1,13 @@
 {
   "pages": [
     {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
+    },
+    {
       "path": "pages/index/index",
       "style": {
         "navigationBarTitleText": "青居智选",
@@ -35,8 +42,17 @@
         "navigationBarTextStyle": "white",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "个人中心",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
+  "subPackages": [],
   "globalStyle": {
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "青居智选",
@@ -48,6 +64,5 @@
     "connectSocket": 60000,
     "uploadFile": 180000,
     "downloadFile": 60000
-  },
-  "tabBar": null
+  }
 }

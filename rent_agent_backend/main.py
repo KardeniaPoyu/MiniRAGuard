@@ -2,17 +2,31 @@ import asyncio
 import hashlib
 import logging
 import os
+import secrets
 import traceback
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, Optional
 
+import httpx
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from core.cache_tool import get_cache_by_md5, get_risk_stats, init_db, set_cache_by_md5, update_risk_stats
+from core.cache_tool import (
+    consume_free_use,
+    get_cache_by_md5,
+    get_or_create_user,
+    get_risk_stats,
+    get_user_by_token,
+    init_db,
+    save_user_token,
+    set_cache_by_md5,
+    update_risk_stats,
+    update_user_profile,
+    restore_free_use,
+)
 from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
 from core.reviewer import review_contract
@@ -26,6 +40,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# ──────────────────────────── Pydantic Models ────────────────────────────
+
 class AnalyzeRequest(BaseModel):
     images: list[str]
 
@@ -36,38 +52,56 @@ class ChatRequest(BaseModel):
     history: list[dict[str, Any]]
 
 
+class LoginRequest(BaseModel):
+    code: str
+
+
+class ProfileUpdateRequest(BaseModel):
+    nickname: str = ""
+    school: str = ""
+    grade: str = ""
+    student_id: str = ""
+
+
+# ──────────────────────────── Helpers ────────────────────────────
+
+def _extract_token(request: Request) -> Optional[str]:
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth[len("Bearer "):].strip()
+        return token if token else None
+    return None
+
+
 def get_max_concurrent():
-    # 优先从环境变量读取（部署时可调整）
     env_val = os.getenv("MAX_CONCURRENT_ANALYZE")
     if env_val:
         return int(env_val)
-    # 降级：根据可用内存估算
     try:
         import psutil
         available_mb = psutil.virtual_memory().available / 1024 / 1024
-        # 每个请求预留 400MB，最少保证 1 个，最多不超过 10 个
         return max(1, min(10, int(available_mb / 400)))
     except ImportError:
-        return 2  # psutil 不可用时的保守默认值
+        return 2
 
 
 analyze_semaphore = asyncio.Semaphore(get_max_concurrent())
 
 
+# ──────────────────────────── Lifespan ────────────────────────────
+
 @asynccontextmanager
 async def lifespan(app_ctx: FastAPI):  # type: ignore[no-untyped-def]
     init_db()
 
-    # 启动时环境变量检查
     required_keys = ["QWEN_API_KEY", "DEEPSEEK_API_KEY"]
     missing = [k for k in required_keys if not os.getenv(k)]
     if missing:
         raise RuntimeError(f"缺少必要环境变量：{missing}，请检查 .env 文件")
 
-    # 启动时预加载
     logger.info("[startup] 预加载 RAG 索引...")
     from core.rag_tool import retrieve_legal_context
-    retrieve_legal_context("押金 提前退租 维修")  # dry run
+    retrieve_legal_context("押金 提前退租 维修")
     logger.info("[startup] RAG 索引预加载完成")
 
     yield
@@ -75,8 +109,6 @@ async def lifespan(app_ctx: FastAPI):  # type: ignore[no-untyped-def]
 
 app = FastAPI(lifespan=lifespan)
 
-# 生产环境请在 .env 中设置 ALLOWED_ORIGINS=https://your-domain.com
-# 多个来源用英文逗号分隔；留空则允许所有来源（仅限开发环境）
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "").strip()
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()] or ["*"]
 
@@ -95,6 +127,140 @@ async def _unhandled_exception_handler(request, exc: Exception):  # type: ignore
     return JSONResponse(status_code=500, content={"error": "服务内部错误，请稍后重试"})
 
 
+# ──────────────────────────── /api/login ────────────────────────────
+
+@app.post("/api/login")
+async def login(req: LoginRequest):
+    # 🌟 新增：开发测试/答辩演示 专用免授权 Mock 通道
+    if req.code == "test_code":
+        openid = "mock_test_user_openid"
+        user = get_or_create_user(openid)
+        token = secrets.token_hex(32)
+        save_user_token(openid, token)
+        logger.info("使用 Mock 账号免授权登录成功")
+        return {
+            "token": token,
+            "user": {
+                "openid": user["openid"],
+                "nickname": user["nickname"] or "测试用户",
+                "school": user["school"] or "测试大学",
+                "grade": user["grade"] or "大三",
+                "student_id": user["student_id"],
+                "is_vip": user["is_vip"],
+                "free_uses_remaining": user["free_uses_remaining"],
+            }
+        }
+
+    appid = os.getenv("WECHAT_APPID", "")
+    secret = os.getenv("WECHAT_SECRET", "")
+
+    wx_url = (
+        f"https://api.weixin.qq.com/sns/jscode2session"
+        f"?appid={appid}&secret={secret}&js_code={req.code}&grant_type=authorization_code"
+    )
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
+            resp = await client.get(wx_url)
+            wx_data = resp.json()
+        except Exception:
+            logger.error("微信接口请求失败", exc_info=True)
+            return JSONResponse(status_code=400, content={"error": "登录失败"})
+
+    if "errcode" in wx_data and wx_data["errcode"] != 0:
+        logger.warning("微信 jscode2session 返回错误: %s", wx_data)
+        return JSONResponse(status_code=400, content={"error": "登录失败"})
+
+    openid = wx_data.get("openid")
+    if not openid:
+        return JSONResponse(status_code=400, content={"error": "登录失败"})
+
+    user = get_or_create_user(openid)
+    token = secrets.token_hex(32)
+    save_user_token(openid, token)
+
+    return {
+        "token": token,
+        "user": {
+            "openid": user["openid"],
+            "nickname": user["nickname"],
+            "school": user["school"],
+            "grade": user["grade"],
+            "student_id": user["student_id"],
+            "is_vip": user["is_vip"],
+            "free_uses_remaining": user["free_uses_remaining"],
+        }
+    }
+
+
+# ──────────────────────────── /api/user/profile ────────────────────────────
+
+@app.get("/api/user/profile")
+async def get_profile(request: Request):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+    return {
+        "openid": user["openid"],
+        "nickname": user["nickname"],
+        "school": user["school"],
+        "grade": user["grade"],
+        "student_id": user["student_id"],
+        "is_vip": user["is_vip"],
+        "free_uses_remaining": user["free_uses_remaining"],
+    }
+
+
+@app.post("/api/user/profile")
+async def update_profile(req: ProfileUpdateRequest, request: Request):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+
+    update_user_profile(
+        openid=user["openid"],
+        nickname=req.nickname,
+        school=req.school,
+        grade=req.grade,
+        student_id=req.student_id,
+    )
+
+    updated = get_user_by_token(token)
+    return {
+        "openid": updated["openid"],
+        "nickname": updated["nickname"],
+        "school": updated["school"],
+        "grade": updated["grade"],
+        "student_id": updated["student_id"],
+        "is_vip": updated["is_vip"],
+        "free_uses_remaining": updated["free_uses_remaining"],
+    }
+
+
+@app.post("/api/user/watch-ad")
+async def watch_ad(request: Request):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+
+    result = restore_free_use(user["openid"], count=3)
+    return {
+        "free_uses_remaining": result["free_uses_remaining"],
+        "message": "已恢复3次审查机会"
+    }
+
+
+# ──────────────────────────── /api/analyze ────────────────────────────
+
 def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
     pages: list[str] = []
     for img_b64 in req.images:
@@ -111,14 +277,27 @@ def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
 
 
 @app.post("/api/analyze")
-async def analyze(req: AnalyzeRequest) -> Any:
-    # 优化三：图片 MD5 层面的精确缓存，跳过提取变动
+async def analyze(req: AnalyzeRequest, request: Request) -> Any:
+    # 第一步：先查缓存（缓存命中不消耗次数）
     image_md5 = hashlib.md5("".join(req.images).encode()).hexdigest()
-
     cached = get_cache_by_md5(image_md5)
     if cached is not None:
+        cached["cache_hit"] = True
         return cached
 
+    # 第二步：缓存未命中，才检查并消耗次数
+    token = _extract_token(request)
+    if token:
+        user = get_user_by_token(token)
+        if user:
+            allowed = consume_free_use(user["openid"])
+            if not allowed:
+                return JSONResponse(
+                    status_code=403,
+                    content={"error": "免费次数已用完，请订阅会员"}
+                )
+
+    # 第三步：并发限制检查
     if analyze_semaphore.locked():
         return JSONResponse(
             status_code=429,
@@ -128,13 +307,14 @@ async def analyze(req: AnalyzeRequest) -> Any:
             }
         )
 
+    # 第四步：执行分析
     try:
         async with analyze_semaphore:
-            # 增加 180 秒的超时保护，熔断同步阻塞线程
             result = await asyncio.wait_for(
                 asyncio.to_thread(_do_analyze_work, req, image_md5),
                 timeout=180.0
             )
+            result["cache_hit"] = False
             return result
     except asyncio.TimeoutError:
         return JSONResponse(
@@ -149,6 +329,8 @@ async def analyze(req: AnalyzeRequest) -> Any:
             )
         raise
 
+
+# ──────────────────────────── Other endpoints ────────────────────────────
 
 @app.post("/api/chat")
 async def chat_api(req: ChatRequest) -> dict[str, str]:
@@ -169,28 +351,10 @@ async def health():
         "cache_db": os.path.exists("./cache.db"),
         "qwen_key_set": bool(os.getenv("QWEN_API_KEY")),
         "deepseek_key_set": bool(os.getenv("DEEPSEEK_API_KEY")),
+        "wechat_configured": bool(os.getenv("WECHAT_APPID") and os.getenv("WECHAT_SECRET")),
         "max_concurrent": get_max_concurrent()
     }
 
 
 if __name__ == "__main__":
-    # 本地调试用（reload=True 仅限开发）；生产环境请使用 Dockerfile CMD 启动
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-
-# -----------------------------
-# .env 模板（示例值请自行替换）
-# -----------------------------
-#
-# # Qwen-VL（阿里云 DashScope 兼容模式）
-# # QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-# # QWEN_MODEL=qwen-vl-max
-# # QWEN_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-#
-# # DeepSeek
-# # DEEPSEEK_BASE_URL=https://api.deepseek.com
-# # DEEPSEEK_MODEL=deepseek-chat
-# # DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-MAX_CONCURRENT_ANALYZE=2   # 1GB内存填2，2GB内存填3
-
