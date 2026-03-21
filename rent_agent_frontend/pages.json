@@ -50,6 +50,20 @@
         "navigationBarBackgroundColor": "#1A3A5C",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/records/records",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
+    },
+    {
+      "path": "pages/result/result",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
     }
   ],
   "subPackages": [],

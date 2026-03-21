@@ -26,6 +26,10 @@ from core.cache_tool import (
     update_risk_stats,
     update_user_profile,
     restore_free_use,
+    save_analyze_record,
+    get_analyze_records,
+    get_record_detail,
+    delete_analyze_record,
 )
 from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
@@ -259,6 +263,51 @@ async def watch_ad(request: Request):
     }
 
 
+@app.get("/api/user/records")
+async def get_records(request: Request, limit: int = 20):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+
+    limit = min(max(limit, 1), 50)
+    records = get_analyze_records(user["openid"], limit)
+    return records
+
+
+@app.get("/api/user/records/{image_md5}")
+async def get_record(image_md5: str, request: Request):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+
+    detail = get_record_detail(user["openid"], image_md5)
+    if not detail:
+        return JSONResponse(status_code=404, content={"error": "记录不存在"})
+    detail["cache_hit"] = True  # 表示历史记录
+    return detail
+
+
+@app.delete("/api/user/records/{record_id}")
+async def delete_record(record_id: int, request: Request):
+    token = _extract_token(request)
+    if not token:
+        return JSONResponse(status_code=401, content={"error": "未登录"})
+    user = get_user_by_token(token)
+    if not user:
+        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
+
+    success = delete_analyze_record(user["openid"], record_id)
+    if success:
+        return {"message": "已删除"}
+    return JSONResponse(status_code=404, content={"error": "记录不存在"})
+
+
 # ──────────────────────────── /api/analyze ────────────────────────────
 
 def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
@@ -281,21 +330,31 @@ async def analyze(req: AnalyzeRequest, request: Request) -> Any:
     # 第一步：先查缓存（缓存命中不消耗次数）
     image_md5 = hashlib.md5("".join(req.images).encode()).hexdigest()
     cached = get_cache_by_md5(image_md5)
+    token = _extract_token(request)
+    user = None
+    if token:
+        user = get_user_by_token(token)
+
     if cached is not None:
         cached["cache_hit"] = True
+        if token and user:
+            save_analyze_record(
+                openid=user["openid"],
+                image_md5=image_md5,
+                overall_risk=cached.get("overall_risk", ""),
+                summary=cached.get("summary", ""),
+                clause_count=len(cached.get("analysis_results", []))
+            )
         return cached
 
     # 第二步：缓存未命中，才检查并消耗次数
-    token = _extract_token(request)
-    if token:
-        user = get_user_by_token(token)
-        if user:
-            allowed = consume_free_use(user["openid"])
-            if not allowed:
-                return JSONResponse(
-                    status_code=403,
-                    content={"error": "免费次数已用完，请订阅会员"}
-                )
+    if token and user:
+        allowed = consume_free_use(user["openid"])
+        if not allowed:
+            return JSONResponse(
+                status_code=403,
+                content={"error": "免费次数已用完，请观看广告恢复次数"}
+            )
 
     # 第三步：并发限制检查
     if analyze_semaphore.locked():
@@ -315,6 +374,14 @@ async def analyze(req: AnalyzeRequest, request: Request) -> Any:
                 timeout=180.0
             )
             result["cache_hit"] = False
+            if token and user:
+                save_analyze_record(
+                    openid=user["openid"],
+                    image_md5=image_md5,
+                    overall_risk=result.get("overall_risk", ""),
+                    summary=result.get("summary", ""),
+                    clause_count=len(result.get("analysis_results", []))
+                )
             return result
     except asyncio.TimeoutError:
         return JSONResponse(

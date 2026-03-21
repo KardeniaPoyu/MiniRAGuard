@@ -329,7 +329,7 @@ export default {
         if (result.includes(word)) {
           const ph = `\u0002${placeholders.length}\u0003`
           placeholders.push(`<span style="${style}">${word}</span>`)
-          result = result.replace(word, ph) // 只替换第一次出现
+          result = result.split(word).join(ph) // 替换所有出现的位置
         }
       }
 

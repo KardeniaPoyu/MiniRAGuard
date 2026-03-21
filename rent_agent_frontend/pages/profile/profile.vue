@@ -49,6 +49,13 @@
       </view>
     </view>
 
+    <!-- ===== 我的审查记录 ===== -->
+    <view class="record-entry" @tap="goToRecords">
+      <text class="record-entry-label">我的审查记录</text>
+      <text class="record-entry-count">{{ recordCount }} 条</text>
+      <text class="record-entry-arrow">›</text>
+    </view>
+
     <!-- ===== 编辑资料区域 ===== -->
     <view v-if="showEdit" class="section-card edit-section">
       <text class="section-title">编辑资料</text>
@@ -106,6 +113,7 @@ export default {
         is_vip: 0,
         free_uses_remaining: 3
       },
+      recordCount: 0,
       showEdit: false,
       saving: false,
       form: {
@@ -129,6 +137,7 @@ export default {
   },
   onShow() {
     this.loadProfile()
+    this.loadRecordCount()
   },
   methods: {
     loadProfile() {
@@ -221,6 +230,25 @@ export default {
           uni.showToast({ title: '网络错误，请重试', icon: 'none' })
         }
       })
+    },
+
+    loadRecordCount() {
+      const token = uni.getStorageSync('token')
+      if (!token) return
+      uni.request({
+        url: BASE_URL + '/api/user/records?limit=50',
+        method: 'GET',
+        header: { Authorization: `Bearer ${token}` },
+        success: (res) => {
+          if (res.statusCode === 200 && Array.isArray(res.data)) {
+            this.recordCount = res.data.length
+          }
+        }
+      })
+    },
+
+    goToRecords() {
+      uni.navigateTo({ url: '/pages/records/records' })
     },
 
     toggleEdit() {
@@ -422,6 +450,39 @@ page {
   font-weight: 600;
   color: #FFFFFF;
   letter-spacing: 2rpx;
+}
+
+/* 审查记录入口 */
+.record-entry {
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 24rpx 30rpx 0;
+  padding: 30rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.record-entry:active {
+  background-color: #FAFAFA;
+}
+.record-entry-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1A3A5C;
+  flex: 1;
+}
+.record-entry-count {
+  font-size: 26rpx;
+  color: #90A4AE;
+  margin-right: 10rpx;
+}
+.record-entry-arrow {
+  font-size: 34rpx;
+  color: #B0BEC5;
+  line-height: 1;
+  margin-top: -4rpx;
 }
 
 /* ===== 编辑资料 ===== */

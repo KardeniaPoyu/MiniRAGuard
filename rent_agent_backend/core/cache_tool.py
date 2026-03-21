@@ -53,6 +53,22 @@ def init_db() -> None:
                 expires_at TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS analyze_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                openid TEXT NOT NULL,
+                image_md5 TEXT NOT NULL,
+                overall_risk TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                clause_count INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_records_openid 
+            ON analyze_records(openid, created_at DESC)
+        """)
+        conn.commit()
 
 
 # ──────────────────────────── cache ────────────────────────────
@@ -259,3 +275,88 @@ def restore_free_use(openid: str, count: int = 3) -> dict:
             (openid,)
         ).fetchone()
     return {"free_uses_remaining": row[0] if row else 0}
+
+
+# ──────────────────────────── analyze_records ────────────────────────────
+
+def save_analyze_record(
+    openid: str,
+    image_md5: str,
+    overall_risk: str,
+    summary: str,
+    clause_count: int
+) -> None:
+    """保存一条审查记录，同一用户同一图片不重复记录。"""
+    init_db()
+    now = _now_iso()
+    with sqlite3.connect(DB_PATH) as conn:
+        exists = conn.execute(
+            "SELECT 1 FROM analyze_records WHERE openid=? AND image_md5=?",
+            (openid, image_md5)
+        ).fetchone()
+        if exists:
+            return
+        conn.execute(
+            """INSERT INTO analyze_records
+               (openid, image_md5, overall_risk, summary, clause_count, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (openid, image_md5, overall_risk, summary, clause_count, now)
+        )
+        conn.commit()
+
+
+def get_analyze_records(openid: str, limit: int = 20) -> list:
+    """获取用户的审查记录列表，最多返回 limit 条，按时间倒序。"""
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute(
+            """SELECT id, image_md5, overall_risk, summary, clause_count, created_at
+               FROM analyze_records
+               WHERE openid=?
+               ORDER BY created_at DESC
+               LIMIT ?""",
+            (openid, limit)
+        ).fetchall()
+    return [
+        {
+            "id": r[0],
+            "image_md5": r[1],
+            "overall_risk": r[2],
+            "summary": r[3],
+            "clause_count": r[4],
+            "created_at": r[5]
+        }
+        for r in rows
+    ]
+
+
+def get_record_detail(openid: str, image_md5: str) -> dict | None:
+    """
+    获取某条记录的完整审查结果。
+    先验证该记录属于该用户，再从 cache 表取完整 JSON。
+    """
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        record = conn.execute(
+            "SELECT 1 FROM analyze_records WHERE openid=? AND image_md5=?",
+            (openid, image_md5)
+        ).fetchone()
+        if not record:
+            return None
+        row = conn.execute(
+            "SELECT result FROM cache WHERE md5=?",
+            (image_md5,)
+        ).fetchone()
+    return json.loads(row[0]) if row else None
+
+
+def delete_analyze_record(openid: str, record_id: int) -> bool:
+    """删除一条审查记录（只删索引，不删缓存）。"""
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "DELETE FROM analyze_records WHERE id=? AND openid=?",
+            (record_id, openid)
+        )
+        conn.commit()
+    return cur.rowcount > 0
