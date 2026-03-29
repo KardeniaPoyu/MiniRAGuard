@@ -1,36 +1,37 @@
 <template>
   <view class="page">
-
-    <!-- ===== 顶部 Logo 区 ===== -->
-    <view class="hero">
-      <view class="hero-inner">
-        <view class="logo-circle">
-          <text class="logo-icon">🏠</text>
-        </view>
-        <text class="brand-title">青居智选</text>
-        <text class="brand-sub">租房合同智能审查</text>
-      </view>
-      <!-- 底部圆弧 -->
-      <view class="hero-arc"></view>
+    
+    <!-- Top Text Group -->
+    <view class="top-text-group">
+      <view class="text-welcome">Welcome to</view>
+      <view class="text-youthhome">YouthHome</view>
+      <view class="text-ai">AI</view>
     </view>
 
-    <!-- ===== 下半白色卡片 ===== -->
-    <view class="card">
-      <text class="welcome-title">你好，欢迎使用青居智选</text>
-      <text class="welcome-desc">使用微信账号一键登录，保存您的审查记录</text>
+    <!-- Center Logo & Name -->
+    <view class="center-content">
+      <image class="main-logo" src="/static/logo.png" mode="aspectFit"></image>
+      <view class="brand-name">青居智选</view>
+    </view>
 
-      <!-- 微信登录按钮 -->
-      <view class="wx-btn" :class="loading ? 'wx-btn--loading' : ''" @tap="handleLogin">
-        <view class="wx-btn-inner">
-          <text class="wx-logo">
-            <!-- 微信 logo SVG 近似 -->
-            💬
-          </text>
-          <text class="wx-btn-text">{{ loading ? '登录中...' : '微信一键登录' }}</text>
-        </view>
+    <!-- Login Button -->
+    <view class="login-action">
+      <button class="wx-login-btn" :class="{'btn-loading': loading}" @tap="handleLogin">
+        {{ loading ? '登录中...' : '微信登录' }}
+      </button>
+    </view>
+
+    <!-- Bottom Agreement -->
+    <view class="agreement-section">
+      <view class="checkbox-circle" @tap="toggleAgreement">
+        <view v-if="agreed" class="checked-dot"></view>
       </view>
-
-      <text class="privacy-tip">登录即表示同意用户协议和隐私政策</text>
+      <view class="agreement-text">
+        <text class="text-black" @tap="toggleAgreement">我同意青居智选 </text>
+        <text class="text-blue">《用户服务协议》</text>
+        <text class="text-black"> 和 </text>
+        <text class="text-blue">《隐私条款》</text>
+      </view>
     </view>
 
   </view>
@@ -43,32 +44,40 @@ export default {
   name: 'LoginPage',
   data() {
     return {
-      loading: false
+      loading: false,
+      agreed: false
     }
   },
   methods: {
+    toggleAgreement() {
+      this.agreed = !this.agreed;
+    },
     handleLogin() {
-      if (this.loading) return
-      this.loading = true
+      if (!this.agreed) {
+        uni.showToast({ title: '请先阅读并同意用户协议和隐私条款', icon: 'none' });
+        return;
+      }
+      if (this.loading) return;
+      this.loading = true;
 
       // #ifdef MP-WEIXIN
       // 1. 微信小程序环境：走正常授权流程
       uni.login({
         provider: 'weixin',
         success: (loginRes) => {
-          this.loginWithCode(loginRes.code)
+          this.loginWithCode(loginRes.code);
         },
         fail: () => {
-          this.loading = false
-          uni.showToast({ title: '微信授权失败', icon: 'none' })
+          this.loading = false;
+          uni.showToast({ title: '微信授权失败', icon: 'none' });
         }
-      })
+      });
       // #endif
 
       // #ifndef MP-WEIXIN
       // 2. 非微信环境（如 HBuilderX H5 预览）：使用测试通道 bypass
-      uni.showToast({ title: 'H5 预览：使用测试账号', icon: 'none' })
-      this.loginWithCode("test_code")
+      uni.showToast({ title: 'H5 预览：使用测试账号', icon: 'none' });
+      this.loginWithCode("test_code");
       // #endif
     },
 
@@ -79,22 +88,21 @@ export default {
         header: { 'Content-Type': 'application/json' },
         data: { code },
         success: (res) => {
-          this.loading = false
+          this.loading = false;
           if (res.statusCode === 200 && res.data && res.data.token) {
-            uni.setStorageSync('token', res.data.token)
-            uni.setStorageSync('user', JSON.stringify(res.data.user))
-            uni.redirectTo({ url: '/pages/index/index' })
+            uni.setStorageSync('token', res.data.token);
+            uni.setStorageSync('user', JSON.stringify(res.data.user));
+            uni.redirectTo({ url: '/pages/index/index' });
           } else {
-            uni.showToast({ title: '登录失败，请重试', icon: 'none' })
+            uni.showToast({ title: '登录失败，请重试', icon: 'none' });
           }
         },
         fail: () => {
-          this.loading = false
-          uni.showToast({ title: '登录请求失败', icon: 'none' })
+          this.loading = false;
+          uni.showToast({ title: '登录请求失败', icon: 'none' });
         }
-      })
+      });
     }
-
   }
 }
 </script>
@@ -102,123 +110,136 @@ export default {
 <style scoped>
 .page {
   min-height: 100vh;
-  background-color: #F4F6F9;
+  background-color: #FFFFFF;
   display: flex;
   flex-direction: column;
-}
-
-/* ===== Hero 区 ===== */
-.hero {
-  background-color: #1A3A5C;
-  height: 52vh;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 80rpx;
+  box-sizing: border-box;
 }
-.hero-inner {
+
+/* ===== Top Text Group ===== */
+.top-text-group {
+  margin-top: 150rpx;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-bottom: 60rpx;
 }
-.logo-circle {
-  width: 140rpx;
-  height: 140rpx;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 28rpx;
-  border: 3rpx solid rgba(255, 255, 255, 0.3);
-}
-.logo-icon {
-  font-size: 70rpx;
-  line-height: 1;
-}
-.brand-title {
-  font-size: 56rpx;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: 6rpx;
-}
-.brand-sub {
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.75);
-  margin-top: 14rpx;
+
+.text-welcome {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #B5D0E6;
   letter-spacing: 2rpx;
-}
-/* 底部圆弧 */
-.hero-arc {
-  position: absolute;
-  bottom: -2rpx;
-  left: 0;
-  right: 0;
-  height: 80rpx;
-  background-color: #F4F6F9;
-  border-radius: 80rpx 80rpx 0 0;
+  margin-bottom: 5rpx;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* ===== 卡片 ===== */
-.card {
+.text-youthhome {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #B5D0E6;
+  letter-spacing: 2rpx;
+  line-height: 1.1;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.text-ai {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #B5D0E6;
+  letter-spacing: 2rpx;
+  line-height: 1.1;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ===== Center Logo & Name ===== */
+.center-content {
   flex: 1;
-  background-color: #F4F6F9;
-  padding: 60rpx 48rpx 80rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.welcome-title {
-  font-size: 38rpx;
-  font-weight: 700;
-  color: #1A3A5C;
-  margin-bottom: 20rpx;
-  text-align: center;
-}
-.welcome-desc {
-  font-size: 28rpx;
-  color: #78909C;
-  text-align: center;
-  line-height: 1.6;
-  margin-bottom: 72rpx;
+  justify-content: center;
+  margin-top: -80rpx;
 }
 
-/* ===== 微信登录按钮 ===== */
-.wx-btn {
-  width: 100%;
-  background-color: #07C160;
-  border-radius: 100rpx;
-  padding: 36rpx 0;
-  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.35);
-  transition: opacity 0.2s;
+.main-logo {
+  width: 500rpx;
+  height: 380rpx;
 }
-.wx-btn--loading {
+
+.brand-name {
+  margin-top: 10rpx;
+  font-size: 80rpx;
+  color: #3B5373;
+  font-family: 'Songti SC', 'STSong', 'SimSun', serif; 
+  font-weight: 600;
+  letter-spacing: 10rpx;
+}
+
+/* ===== Login Button ===== */
+.login-action {
+  margin-bottom: 220rpx;
+  width: 100%;
+}
+
+.wx-login-btn {
+  background-color: #8CBAED;
+  color: #FFFFFF;
+  font-size: 34rpx;
+  font-weight: 400;
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 6rpx 20rpx rgba(140, 186, 237, 0.4);
+  margin: 0;
+  border: none;
+}
+.wx-login-btn::after {
+  border: none;
+}
+.btn-loading {
   opacity: 0.7;
 }
-.wx-btn-inner {
+
+/* ===== Bottom Agreement ===== */
+.agreement-section {
+  position: absolute;
+  bottom: 80rpx;
+  left: 0;
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
-.wx-logo {
-  font-size: 40rpx;
-  margin-right: 16rpx;
-  line-height: 1;
-}
-.wx-btn-text {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #FFFFFF;
-  letter-spacing: 2rpx;
+
+.checkbox-circle {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 2rpx solid #888888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
 }
 
-/* ===== 隐私提示 ===== */
-.privacy-tip {
-  font-size: 22rpx;
-  color: #B0BEC5;
-  margin-top: 40rpx;
-  text-align: center;
+.checked-dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background-color: #8CBAED;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+}
+
+.text-black {
+  color: #333333;
+}
+
+.text-blue {
+  color: #559DF3;
 }
 </style>
