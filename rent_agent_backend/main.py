@@ -3,9 +3,16 @@ import hashlib
 import logging
 import os
 import secrets
+import sys
 import traceback
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, Optional
+
+# 添加模块搜索路径，以便能找到 core
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 import httpx
 import uvicorn
