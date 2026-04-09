@@ -42,21 +42,21 @@
 
 以自带的 **“单据/合同合规风控助手”** 实例为演示：
 
-https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
+![MiniRAGuard Demo](./demo.mp4)
 
 <br/>
 
 ## 🔥 核心功能
 
-- **基于 Qwen-VL API 的视觉提取 (Vision LLM)**
-  系统调用 Qwen-VL API 进行图像信息的识别与提取，相较于传统 OCR 能够更好地处理包含复杂排版、手写字体或画质不佳的源文档，提升非结构化图像的文本转换准确率。
-- **结合本地知识库的 RAG 检索生成 (Fact-based RAG)**
-  针对法务、财务等严肃场景，系统使用 Sentence-Transformers 构建本地向量数据库（VectorDB）。大模型在进行推理前会优先从本地数据库检索相关的规范条例，从而减少常识性“幻觉”并提供具体的判断出处。
-- **基本并发与缓存控制 (Concurrency & Caching)**
-  - **MD5 缓存机制**：计算文件 MD5，拦截重复文件的校验请求并直接返回本地缓存，减少不必要的 LLM API 调用开销及响应时间。
-  - **并发信号量控制**：后端部署了基于信号量的线程流控机制，限制高并发场景下抛向大模型的并发数，保障服务稳定运行。
-- **前后端分离架构 (Full-Stack Support)**
-  提供基于 FastAPI 的纯异步服务端，以及使用 Vue/UniApp 编写的跨平台客户端代码（支持 Web 及微信小程序），开发者部署后即可直接使用完整业务流。
+- **基于 Qwen-VL API 的深度视觉提取 (Vision LLM)**
+  系统化集成 Qwen-VL API 进行文档识别，直接规避传统 OCR 在复杂排版或模糊单据上的识别错误。
+- **结合本地知识库的 RAG 推理护栏 (Fact-based RAG)**
+  针对医疗、财务等严谨场景，通过 Sentence-Transformers 检索私有向量库（VectorDB），强制模型进行基于事实的“智审”，彻底杜绝常识性幻觉。
+- **动态缓存命中与并发流控 (Performance & Tech)**
+  - **MD5 热缓存命中**：自动比对上传文件指纹，对于重复任务实现 **100% 缓存命中回调**，极大程度节省 Token 消耗与计算时长。
+  - **基于信号量的并发保护**：防止突发请求导致内存溢出或 API 熔断，保障系统在高压环境下的业务可用性。
+- **开箱即用的极简全栈架构 (Full-Stack Support)**
+  提供 FastAPI (Backend) 与 UniApp (Frontend) 完整代码，开发者仅需修改 Prompt 定位即可快速平移至其他审核业务场景。
 
 ---
 
