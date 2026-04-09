@@ -61,15 +61,15 @@ https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
 
 ## 🔥 Key Features
 
-- **Deep Vision Extraction via Qwen-VL API (Vision LLM)**  
-  Systematically integrates the Qwen-VL API for document recognition, effectively bypassing traditional OCR errors in complex layouts or blurry receipts.
-- **RAG Reasoning Guardrail for Audit Reliability (Fact-based RAG)**  
-  Implemented for rigorous domains like healthcare and finance. By retrieving from private vector databases (VectorDB) via Sentence-Transformers, the model acts as a "Guardrail," enforcing fact-based audits and eliminating hallucinations.
-- **Dynamic Cache Hits & Concurrency Flow Control (Performance & Reliability)**  
-  - **MD5 Heat-Cache Hits**: Automatically fingerprints uploaded files to achieve **100% cache hits** for repeated tasks, significantly reducing Token consumption and latency.
-  - **Semaphore-based Concurrency Protection**: Prevents system crashes or API throttling caused by traffic spikes, ensuring high availability in production environments.
-- **Out-of-the-box Full-Stack Template (Full-Stack Support)**  
-  Provides a complete FastAPI (Backend) and UniApp (Frontend) architecture. Developers can rapidly pivot to other audit scenarios just by modifying the System Prompt.
+- **Vision Extraction via Qwen-VL API (Vision LLM)**  
+  The system calls the Qwen-VL API for image information recognition and extraction. Compared to traditional OCR, it can better handle complex typesetting, handwritten text, or poor-quality source documents, improving the accuracy of text conversion from unstructured images.
+- **RAG-based Local Knowledge Retrieval (Fact-based RAG)**  
+  Designed for legal, financial, and other serious contexts, the system uses Sentence-Transformers to build a local vector database (VectorDB). Before reasoning, the LLM retrieves relevant regulations from the local database, which helps reduce common-sense "hallucinations" and provides concrete sources for its judgments.
+- **Concurrency & Cache Control mechanisms (Concurrency & Caching)**  
+  - **MD5 Caching Mechanism**: Calculates the file MD5 to intercept repeated document verifications, returning local cache results directly. This reduces unnecessary LLM API tokens and lowers response latency.
+  - **Semaphore Concurrency Control**: The backend deploys a semaphore-based flow control mechanism to limit the number of concurrent requests passed to the LLM during traffic spikes, ensuring stable service operation.
+- **Separation of Frontend and Backend (Full-Stack Support)**  
+  Provides a pure asynchronous server based on FastAPI and cross-platform client code built with Vue/UniApp (supporting Web and WeChat Mini Programs). Developers can use the complete business flow directly after deployment.
 
 ---
 
