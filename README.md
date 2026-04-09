@@ -55,7 +55,7 @@ Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Pe
 
 Demonstrating with the built-in **"Receipt/Contract Compliance Guardrail"** instance:
 
-https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
+./demo.mp4
 
 <br/>
 

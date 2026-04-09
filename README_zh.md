@@ -42,7 +42,7 @@
 
 以自带的 **“单据/合同合规风控助手”** 实例为演示：
 
-https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
+./demo.mp4
 
 <br/>
 
