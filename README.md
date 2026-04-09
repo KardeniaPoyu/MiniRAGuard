@@ -1,19 +1,6 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f2027,50:203a43,100:2c5364&height=220&section=header&text=MiniRaguard&fontSize=42&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Multimodal%20RAG%20Guardrail%20Framework&descAlignY=55&descAlign=50"/>
-</p>
-
-<p align="center">
-  <b>📸 Upload → 👁️ Vision → 📚 RAG → 🧠 LLM → 🛡️ Guardrail</b>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi">
-  <img src="https://img.shields.io/badge/Qwen--VL-ff6a00?style=for-the-badge">
-  <img src="https://img.shields.io/badge/DeepSeek-0d6efd?style=for-the-badge">
-  <img src="https://img.shields.io/badge/RAG-Knowledge%20Driven-purple?style=for-the-badge">
 </p>
 <div align="center">
-
 <h1>🛡️ MiniRaguard</h1>
 
 <p>
@@ -25,9 +12,13 @@
 📄 文档审查 / ⚖️ 合规风控 / 🏥 医疗票据分析 / 🧾 合同助手 的 AI 系统
 </p>
 
-<p>
-⚡ FastAPI Backend · 👁️ VLM (Qwen-VL) · 📚 RAG · 💬 LLM Agents
-</p>
+
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi">
+  <img src="https://img.shields.io/badge/Qwen--VL-ff6a00?style=for-the-badge">
+  <img src="https://img.shields.io/badge/DeepSeek-0d6efd?style=for-the-badge">
+  <img src="https://img.shields.io/badge/RAG-Knowledge%20Driven-purple?style=for-the-badge">
+
+
 
 <p>
 <a href="https://github.com/KardeniaPoyu/MiniRaguard/stargazers">
