@@ -1,8 +1,8 @@
 <div align="center">
   <!-- TODO: 添加项目高分辨率 Logo 或 横幅图像 -->
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="Qingju Banner"> -->
+  <!-- <img src="./docs/assets/banner.png" width="100%" alt="OpenRaguard Banner"> -->
 
-  <h1>🏠 青居 (Qingju) - 多模态 RAG 万能审查框架</h1>
+  <h1>🏠 OpenRaguard (OpenRaguard) - 多模态 RAG 万能审查框架</h1>
 
   <p>
     <strong>一个基于 FastAPI + UniApp + VLM(大视觉模型) + RAG 的通用文档智能审查全栈模板</strong>
@@ -13,9 +13,9 @@
   </p>
 
   <p>
-    <a href="https://github.com/KardeniaPoyu/Qingju/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/Qingju?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
-    <a href="https://github.com/KardeniaPoyu/Qingju/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/Qingju?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
-    <a href="https://github.com/KardeniaPoyu/Qingju/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/Qingju?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
+    <a href="https://github.com/KardeniaPoyu/OpenRaguard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
+    <a href="https://github.com/KardeniaPoyu/OpenRaguard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
+    <a href="https://github.com/KardeniaPoyu/OpenRaguard/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=B0C4B1" alt="License"></a>
   </p>
   <p>
@@ -43,7 +43,7 @@
 
 ## ✨ 框架愿景
 
-**“青居 (Qingju)”** 不仅仅是一个保护大学生的**租房合同审查工具**，它更是一个**泛用的多模态文档风控与解析模板**。
+**“OpenRaguard (OpenRaguard)”** 不仅仅是一个保护大学生的**合规文档审查工具**，它更是一个**泛用的多模态文档风控与解析模板**。
 
 在基层社会治理、法务审核、投诉信访处理等场景中，经常面临“文档图片模糊”、“难以准确匹配法规”、“大模型幻觉严重”等共同痛点。本项目为你提供了一套可复用的标准全栈架构（`UniApp 小程序` + `FastAPI 并发服务端` + `VLM 视觉抽取` + `RAG 法律风控`）。你只需替换后端的知识库（TXT/MD文件）和稍微调整 Prompt，即可在 **10 分钟内** 将其改造为你专属领域的 AI 智能审查助手！
 
@@ -53,14 +53,19 @@
 
 ## 🖼️ 业务实例演示 (Demo)
 
-为了展示框架的能力，本项目默认自带了 **“租房合同法律风险审查系统（青居智选）”** 这一具体实例。
+为了展示框架的能力，本项目默认自带了 **“单据/合同合规风控助手”** 这一具体实例。
 
-👉 **[点击这里下载或观看演示视频](./demo.mp4)**
+*(💡 提示：由于是本地 README，如果视频无法直接预览，推送到 Github 后即可在网页端呈现自动播放的高清效果！)*
 
-https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4
+<div align="center">
+  <video src="https://github.com/KardeniaPoyu/OpenRaguard/raw/main/demo.mp4" controls="controls" autoplay="autoplay" loop="loop" muted="muted" width="80%">
+    您的浏览器不支持视频标签。
+  </video>
+</div>
 
 <div align="center">
   <table>
+
     <tr>
       <td align="center"><b>📸 拍照 / 截图上传</b></td>
       <td align="center"><b>⚠️ 领域知识 RAG 匹配</b></td>
@@ -120,8 +125,8 @@ graph TD
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/KardeniaPoyu/Qingju.git
-cd Qingju/rent_agent_backend
+git clone https://github.com/KardeniaPoyu/OpenRaguard.git
+cd OpenRaguard/backend
 
 # 2. 安装环境依赖
 pip install -r requirements.txt
@@ -138,7 +143,7 @@ python main.py
 
 ### 📱 2. 前端部署 (Uni-app 跨端展示)
 
-1. 请使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 导入 `rent_agent_frontend` 目录。
+1. 请使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 导入 `frontend` 目录。
 2. 打开 `config.js`，将 `BASE_URL` 指向你的后端接口。
 3. 点击“运行 - 运行到小程序模拟器”！
 
@@ -148,9 +153,9 @@ python main.py
 
 这是将本框架改造为**“基层信访/社会治理诉求分析平台”**或**“商业合同助手”**的黄金三步：
 
-1. **替换领域知识**：清空 `rent_agent_backend/data/` 中的法律文件，放入你的业务文件（如：物业管理条例、劳动法、社区投诉处理手册）。
-2. **重置缓存与向量**：删除 `rent_agent_backend/cache.db` 和 `vector_store/` 目录。系统再次启动时会自动消费你的新知识库。
-3. **微调提示词 (Prompt)**：修改 `rent_agent_backend/core/chat_tool.py` 中的 System Prompt，让大模型的角色从“租房顾问”转变为“医保审核员”或“社区网格员”！
+1. **替换领域知识**：清空 `backend/data/` 中的法律文件，放入你的业务文件（如：物业管理条例、劳动法、社区投诉处理手册）。
+2. **重置缓存与向量**：删除 `backend/cache.db` 和 `vector_store/` 目录。系统再次启动时会自动消费你的新知识库。
+3. **微调提示词 (Prompt)**：修改 `backend/core/chat_tool.py` 中的 System Prompt，让大模型的角色从“风控顾问”转变为“医保审核员”或“社区网格员”！
 
 ---
 
@@ -172,10 +177,10 @@ python main.py
 
 本项目代码遵循 [MIT License](LICENSE) 协议完全开源。
 
-*(注：系统默认搭载的“租房审查”实例仅作技术演示，输出不作为正式法律意见。)*
+*(注：系统默认搭载的“业务审查”实例仅作技术演示，输出不作为正式法律意见。)*
 
 <div align="center">
-  <i>Made with ❤️ by the Qingju Team.</i>
+  <i>Made with ❤️ by the OpenRaguard Team.</i>
 </div>
 
 

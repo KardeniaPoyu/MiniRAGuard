@@ -19,11 +19,11 @@ DEFAULT_BASE_URL = "https://api.deepseek.com"
 DEFAULT_MODEL = "deepseek-chat"
 
 SYSTEM_PROMPT = (
-    "你是一位专业的租房合同法律顾问，擅长识别霸王条款和不公平条款。\n"
+    "你是一位专业的合规文档法律顾问，擅长识别霸王条款和不公平条款。\n"
     "只返回 JSON，不输出任何解释文字，不使用 markdown 代码块。"
 )
 
-USER_PROMPT_TPL = """请分析以下租房合同，结合参考法条，识别所有风险条款。
+USER_PROMPT_TPL = """请分析以下合规文档，结合参考法条，识别所有风险条款。
 
 【合同原文】
 {contract_text}

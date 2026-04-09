@@ -7,8 +7,8 @@
         <view class="logo-circle">
           <text class="logo-icon">🏠</text>
         </view>
-        <text class="brand-title">青居智选</text>
-        <text class="brand-sub">租房合同智能审查</text>
+        <text class="brand-title">OpenRaguard AI</text>
+        <text class="brand-sub">合规文档智能审查</text>
       </view>
       <!-- 底部圆弧 -->
       <view class="hero-arc"></view>
@@ -16,7 +16,7 @@
 
     <!-- ===== 下半白色卡片 ===== -->
     <view class="card">
-      <text class="welcome-title">你好，欢迎使用青居智选</text>
+      <text class="welcome-title">你好，欢迎使用OpenRaguard AI</text>
       <text class="welcome-desc">使用微信账号一键登录，保存您的审查记录</text>
 
       <!-- 微信登录按钮 -->

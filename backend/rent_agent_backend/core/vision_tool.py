@@ -21,7 +21,7 @@ DEFAULT_QWEN_MODEL = "qwen-vl-max"
 
 SYSTEM_PROMPT = "你是一个专业的合同文字提取助手，只提取文字，不做任何分析。"
 
-USER_PROMPT = """你将收到一张图片（可能是租房合同页面，也可能不是合同）。
+USER_PROMPT = """你将收到一张图片（可能是合规文档页面，也可能不是合同）。
 请你严格只输出以下 JSON，不要输出任何其他内容（不要代码块、不要解释、不要额外字段）：
 {
   "is_contract": true或false,

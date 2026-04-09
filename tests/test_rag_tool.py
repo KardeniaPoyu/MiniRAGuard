@@ -49,7 +49,7 @@ def _require_deps() -> None:
     if missing:
         print("依赖缺失，无法运行 rag_tool 测试：", ", ".join(missing))
         print("请先安装后端依赖，例如：")
-        print("  pip install -r rent_agent_backend/requirements.txt")
+        print("  pip install -r backend/requirements.txt")
         print("或按需安装：")
         print("  pip install llama-index-core llama-index-vector-stores-chroma "
               "llama-index-embeddings-huggingface chromadb sentence-transformers")

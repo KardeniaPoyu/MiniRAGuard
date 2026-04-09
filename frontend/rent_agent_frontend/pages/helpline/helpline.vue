@@ -15,9 +15,9 @@
     <!-- ====== 内容区 ====== -->
     <scroll-view scroll-y class="content" :style="{ paddingTop: navbarTotalHeight + 'px' }">
 
-      <!-- 第一组：租房纠纷相关 -->
+      <!-- 第一组：业务纠纷相关 -->
       <view class="group-section">
-        <text class="group-title">租房纠纷相关</text>
+        <text class="group-title">业务纠纷相关</text>
         <view
           v-for="item in rentalLines"
           :key="item.number"

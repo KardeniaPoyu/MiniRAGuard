@@ -43,7 +43,7 @@ def chat(question: str, context: dict, history: list) -> str:
     context_json = json.dumps(context, ensure_ascii=False)
 
     system_prompt = (
-        "你是一位租房法律助手，正在帮助一位大学生理解其租房合同的审查结果。\n"
+        "你是一位业务法律助手，正在帮助一位大学生理解其合规文档的审查结果。\n"
         "用简洁易懂的语言回答，避免使用专业术语堆砌。\n"
         f"已知的合同审查结果如下：\n{context_json}"
     )

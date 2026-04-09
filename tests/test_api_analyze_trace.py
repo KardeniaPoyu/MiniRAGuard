@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, os.path.abspath('rent_agent_backend'))
+sys.path.insert(0, os.path.abspath('backend'))
 import base64
 import json
 import time

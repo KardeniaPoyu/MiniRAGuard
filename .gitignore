@@ -17,8 +17,8 @@ venv/
 
 # --- Backend runtime artifacts (per tech doc v1.6) ---
 cache.db
-rent_agent_backend/cache.db
-rent_agent_backend/vector_store/
+backend/cache.db
+backend/vector_store/
 
 # --- Logs ---
 *.log

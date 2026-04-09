@@ -16,7 +16,7 @@
 
       <!-- 页面说明区 -->
       <view class="desc-card">
-        <text class="desc-text">基于系统已审查的合同案例统计，帮助你了解租房合同中最常见的风险条款类型。</text>
+        <text class="desc-text">基于系统已审查的合同案例统计，帮助你了解合规文档中最常见的风险条款类型。</text>
       </view>
 
       <!-- 加载中 -->

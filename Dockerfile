@@ -1,5 +1,5 @@
 # ============================================================
-# 青居智选 · Dockerfile
+# OpenRaguard AI · Dockerfile
 # 基础镜像：python:3.11-slim（Debian Bookworm）
 # ============================================================
 
@@ -32,7 +32,7 @@ COPY . .
 
 # ---------- 构建向量库（首次部署时执行；也可在 CMD 前挂载 volume 跳过）----------
 # 取消注释下一行以在构建镜像时预先建库（需要联网下载嵌入模型 ~90MB）
-# RUN python -m rent_agent_backend.scripts.build_index
+# RUN python -m backend.scripts.build_index
 
 EXPOSE 8000
 
@@ -42,7 +42,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
 
 # ---------- 启动命令 ----------
 # workers=2：适合 2 核服务器；根据实际 CPU 核数调整
-CMD ["uvicorn", "rent_agent_backend.main:app", \
+CMD ["uvicorn", "backend.main:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
      "--workers", "2"]
