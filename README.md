@@ -146,7 +146,7 @@ Turn this framework into your exclusive vertical tool in 3 golden steps:
 
 ## 🤝 Contributing & License
 
-**"Open Source Changes the World, AI Empowers Everything."**
+**"In praise of the open-source spirit."**
 
 Whether you fixed a typo or built an amazing production app using MiniRAGuard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 

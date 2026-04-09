@@ -146,7 +146,7 @@ python main.py
 
 ## 🤝 Contributing & License
 
-**“开源改变世界，AI 赋能万物。”**
+**“我赞美开源精神。”**
 
 无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
