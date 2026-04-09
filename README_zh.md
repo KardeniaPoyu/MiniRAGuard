@@ -151,7 +151,3 @@ python main.py
 无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
-
-<div align="center">
-  <i>Made with ❤️ by the MiniRAGuard Team</i>
-</div>
