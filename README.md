@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
   </p>
 
-[**English**](./README.md) | [**简体中文**](./README_zh.md)
+[**English**](./README.md) | [**简体中文**](./README_zh.md) | [**日本語**](./README_ja.md)
 
 </div>
 
@@ -55,7 +55,7 @@ Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Pe
 
 Demonstrating with the built-in **"Receipt/Contract Compliance Guardrail"** instance:
 
-./demo.mp4
+<video src="./demo.mp4" width="100%" controls></video>
 
 <br/>
 
