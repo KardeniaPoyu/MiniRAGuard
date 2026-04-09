@@ -1,11 +1,11 @@
 <div align="center">
   <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>馃洝锔?MiniRAGuard</h1>
+  <h1>🛡️ MiniRAGuard</h1>
 
   <p>
     <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
-    <em>璁╀换浣曚汉鐢?10 鍒嗛挓锛屼粠闆舵瀯寤轰紒涓氱骇鏂囨。鏅鸿兘椋庢帶绯荤粺銆?/em>
+    <em>让任何人用 10 分钟，从零构建企业级文档智能风控系统。</em>
   </p>
 
   <p>
@@ -22,60 +22,47 @@
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
   </p>
 
-[**English**](./README.md) | [**绠€浣撲腑鏂?*](./README_zh.md)
+[**English**](./README.md) | [**简体中文**](./README_zh.md)
 
 </div>
 
 <br/>
 
-## 馃摉 Table of Contents
+## ✨ 什么是 MiniRAGuard?
 
-- [鉁?What is MiniRAGuard?](#-what-is-miniraguard)
-- [馃殌 Live Demo](#-live-demo)
-- [馃敟 Key Features](#-key-features)
-- [馃彈锔?Architecture](#锔?architecture)
-- [馃殌 Quick Start](#-quick-start)
-- [馃洜锔?Build Your Own App](#锔?build-your-own-app)
-- [馃搱 Star History](#-star-history)
-- [馃 Contributing & License](#-contributing--license)
+在各类垂直领域（医疗审核、财务报表、信访维权、合同法务），我们经常面临三大阻碍：**图片数据模糊**、**大模型幻觉频发**、**高并发难以承载**。
+
+**MiniRAGuard** 提供了一个**极轻量、开箱即用**的开源全栈解决方案（后端分析引擎 + 跨端小程序）。它创新性地结合了 **VLM (大视觉模型)** 和 **RAG (检索增强生成)**，强制 AI 基于你的本地知识库进行事实推理。
+
+无论你是想搭建一个“医疗单据智审助手”，还是“社区民情研判总机”，只需**扔进你的 TXT 库，修改一段 Prompt**，即可立刻上线。
 
 ---
 
-## 鉁?What is MiniRAGuard?
+## 🚀 业务实例演示 (Demo)
 
-鍦ㄥ悇绫诲瀭鐩撮鍩燂紙鍖荤枟瀹℃牳銆佽储鍔℃姤琛ㄣ€佷俊璁跨淮鏉冦€佸悎鍚屾硶鍔★級锛屾垜浠粡甯搁潰涓翠笁澶ч樆纰嶏細**鍥剧墖鏁版嵁妯＄硦**銆?*澶фā鍨嬪够瑙夐鍙?*銆?*楂樺苟鍙戦毦浠ユ壙杞?*銆?
-
-**MiniRAGuard** 鎻愪緵浜嗕竴涓?*鏋佽交閲忋€佸紑绠卞嵆鐢?*鐨勫紑婧愬叏鏍堣В鍐虫柟妗堬紙鍚庣鍒嗘瀽寮曟搸 + 璺ㄧ灏忕▼搴忥級銆傚畠鍒涙柊鎬у湴缁撳悎浜?**VLM (澶ц瑙夋ā鍨?** 鍜?**RAG (妫€绱㈠寮虹敓鎴?**锛屽己鍒?AI 鍩轰簬浣犵殑鏈湴鐭ヨ瘑搴撹繘琛屼簨瀹炴帹鐞嗐€?
-
-鏃犺浣犳槸鎯虫惌寤轰竴涓€滃尰鐤楀崟鎹櫤瀹″姪鎵嬧€濓紝杩樻槸鈥滅ぞ鍖烘皯鎯呯爺鍒ゆ€绘満鈥濓紝鍙渶**鎵旇繘浣犵殑 TXT 搴擄紝淇敼涓€娈?Prompt**锛屽嵆鍙珛鍒讳笂绾裤€?
-
----
-
-## 馃殌 Live Demo
-
-浠ヨ嚜甯︾殑 **鈥滃崟鎹?鍚堝悓鍚堣椋庢帶鍔╂墜鈥?* 瀹炰緥涓烘紨绀猴細
+以自带的 **“单据/合同合规风控助手”** 实例为演示：
 
 https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
 
 <br/>
 
-## 馃敟 Key Features
+## 🔥 核心功能
 
-- **鍩轰簬 Qwen-VL API 鐨勮瑙夋彁鍙?(Vision LLM)**
-  绯荤粺璋冪敤 Qwen-VL API 杩涜鍥惧儚淇℃伅鐨勮瘑鍒笌鎻愬彇锛岀浉杈冧簬浼犵粺 OCR 鑳藉鏇村ソ鍦板鐞嗗寘鍚鏉傛帓鐗堛€佹墜鍐欏瓧浣撴垨鐢昏川涓嶄匠鐨勬簮鏂囨。锛屾彁鍗囬潪缁撴瀯鍖栧浘鍍忕殑鏂囨湰杞崲鍑嗙‘鐜囥€?
-- **缁撳悎鏈湴鐭ヨ瘑搴撶殑 RAG 妫€绱㈢敓鎴?(Fact-based RAG)**
-  閽堝娉曞姟銆佽储鍔＄瓑涓ヨ們鍦烘櫙锛岀郴缁熶娇鐢?Sentence-Transformers 鏋勫缓鏈湴鍚戦噺鏁版嵁搴擄紙VectorDB锛夈€傚ぇ妯″瀷鍦ㄨ繘琛屾帹鐞嗗墠浼氫紭鍏堜粠鏈湴鏁版嵁搴撴绱㈢浉鍏崇殑瑙勮寖鏉′緥锛屼粠鑰屽噺灏戝父璇嗘€р€滃够瑙夆€濆苟鎻愪緵鍏蜂綋鐨勫垽鏂嚭澶勩€?
-- **鍩烘湰骞跺彂涓庣紦瀛樻帶鍒?(Concurrency & Caching)**
-  - **MD5 缂撳瓨鏈哄埗**锛氳绠楁枃浠?MD5锛屾嫤鎴噸澶嶆枃浠剁殑鏍￠獙璇锋眰骞剁洿鎺ヨ繑鍥炴湰鍦扮紦瀛橈紝鍑忓皯涓嶅繀瑕佺殑 LLM API 璋冪敤寮€閿€鍙婂搷搴旀椂闂淬€?
-  - **骞跺彂淇″彿閲忔帶鍒?*锛氬悗绔儴缃蹭簡鍩轰簬淇″彿閲忕殑绾跨▼娴佹帶鏈哄埗锛岄檺鍒堕珮骞跺彂鍦烘櫙涓嬫姏鍚戝ぇ妯″瀷鐨勫苟鍙戞暟锛屼繚闅滄湇鍔＄ǔ瀹氳繍琛屻€?
-- **鍓嶅悗绔垎绂绘灦鏋?(Full-Stack Support)**
-  鎻愪緵鍩轰簬 FastAPI 鐨勭函寮傛鏈嶅姟绔紝浠ュ強浣跨敤 Vue/UniApp 缂栧啓鐨勮法骞冲彴瀹㈡埛绔唬鐮侊紙鏀寔 Web 鍙婂井淇″皬绋嬪簭锛夛紝寮€鍙戣€呴儴缃插悗鍗冲彲鐩存帴浣跨敤瀹屾暣涓氬姟娴併€?
+- **基于 Qwen-VL API 的视觉提取 (Vision LLM)**
+  系统调用 Qwen-VL API 进行图像信息的识别与提取，相较于传统 OCR 能够更好地处理包含复杂排版、手写字体或画质不佳的源文档，提升非结构化图像的文本转换准确率。
+- **结合本地知识库的 RAG 检索生成 (Fact-based RAG)**
+  针对法务、财务等严肃场景，系统使用 Sentence-Transformers 构建本地向量数据库（VectorDB）。大模型在进行推理前会优先从本地数据库检索相关的规范条例，从而减少常识性“幻觉”并提供具体的判断出处。
+- **基本并发与缓存控制 (Concurrency & Caching)**
+  - **MD5 缓存机制**：计算文件 MD5，拦截重复文件的校验请求并直接返回本地缓存，减少不必要的 LLM API 调用开销及响应时间。
+  - **并发信号量控制**：后端部署了基于信号量的线程流控机制，限制高并发场景下抛向大模型的并发数，保障服务稳定运行。
+- **前后端分离架构 (Full-Stack Support)**
+  提供基于 FastAPI 的纯异步服务端，以及使用 Vue/UniApp 编写的跨平台客户端代码（支持 Web 及微信小程序），开发者部署后即可直接使用完整业务流。
 
 ---
 
-## 馃彈锔?Architecture
+## 🏗️ 技术架构
 
-绉夋壙楂樺唴鑱氥€佷綆鑰﹀悎鐨勪紭闆呰璁＄悊蹇碉紝涓氬姟娴佸涓濊埇椤烘粦锛?
+秉承高内聚、低耦合的优雅设计理念，业务流如丝般顺滑：
 
 ```mermaid
 graph TD
@@ -98,60 +85,60 @@ graph TD
 
 ---
 
-## 馃殌 Quick Start
+## 🚀 快速开始
 
-鏋勫缓浣犵殑 AI 搴旂敤锛熷彧闇€鍗佸垎閽燂紒
+构建你的 AI 应用？只需十分钟！
 
-### 1. 閮ㄧ讲楂樺彲鐢ㄥ悗绔?(Backend)
+### 1. 部署高可用后端 (Backend)
 
 ```bash
-# 1. 鍏嬮殕浠ｇ爜浠撳簱
+# 1. 克隆代码仓库
 git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
 cd MiniRAGuard/backend
 
-# 2. 瀹夎 Python 渚濊禆 
+# 2. 安装 Python 依赖 
 pip install -r requirements.txt
 
-# 3. 鐜鍙橀噺閰嶇疆 (濉叆浣犵殑 API KEY)
+# 3. 环境变量配置 (填入你的 API KEY)
 cp .env.example .env
 
-# 4. 涓€閿捣椋烇紒
+# 4. 一键起飞！
 python main.py
 ```
-> 馃憠 璁块棶 `http://localhost:8000/docs` 鏌ョ湅浜や簰寮?API 鏂囨。銆?
+> 👉 访问 `http://localhost:8000/docs` 查看交互式 API 文档。
 
-### 2. 閮ㄧ讲璺ㄧ瀹㈡埛绔?(Frontend)
+### 2. 部署跨端客户端 (Frontend)
 
-1. 涓嬭浇 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE銆?
-2. 灏?`frontend` 鐩綍瀵煎叆銆?
-3. 淇敼 `config.js` 涓殑 `BASE_URL` 涓轰綘鍒氬垰閮ㄧ讲鐨勫悗绔湇鍔″湴鍧€銆?
-4. 涓€閿繍琛岃嚦鍐呯疆娴忚鍣ㄦ垨寰俊寮€鍙戣€呭伐鍏凤紒
-
----
-
-## 馃洜锔?Build Your Own App
-鎶婅繖濂楁鏋跺彉鎴愪綘鐨勪笓灞炲埄鍣紒榛勯噾涓夋璧帮細
-
-1. **娉ㄥ叆绉佹湁鐭ヨ瘑**锛氭竻绌?`backend/data/` 鐩綍锛屾墧杩涚鍚堜綘涓氬姟鍦烘櫙鐨?TXT 鎴?Markdown 鎵嬪唽銆?
-2. **娓呯悊缂撳瓨閲嶅**锛氬垹闄?`backend/cache.db` 鍜?`vector_store/` 鐩綍锛岀郴缁熶笅娆″惎鍔ㄥ皢鑷姩鈥滄秷鍖栤€濇柊鐭ヨ瘑銆?
-3. **娉ㄥ叆鐏甸瓊 Prompt**锛氭墦寮€ `backend/core/chat_tool.py`锛屾洿鏀归《鏍忕殑 System Prompt 瀹氫綅銆傦紙姣斿浠庘€滈鎺ч【闂€濇敼鎴愨€滀笁鐢插尰闄㈣储鍔℃姤閿€瀹℃牳鍛樷€濓級銆?
+1. 下载 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE。
+2. 将 `frontend` 目录导入。
+3. 修改 `config.js` 中的 `BASE_URL` 为你刚刚部署的后端服务地址。
+4. 一键运行至内置浏览器或微信开发者工具！
 
 ---
 
-## 馃搱 Star History
+## 🛠️ 打造你自己的应用
+把这套框架变成你的专属利器！黄金三步走：
+
+1. **注入私有知识**：清空 `backend/data/` 目录，扔进符合你业务场景的 TXT 或 Markdown 手册。
+2. **清理缓存重塑**：删除 `backend/cache.db` 和 `vector_store/` 目录，系统下次启动将自动“消化”新知识。
+3. **注入灵魂 Prompt**：打开 `backend/core/chat_tool.py`，更改顶栏的 System Prompt 定位。（比如从“风控顾问”改成“三甲医院财务报销审核员”）。
+
+---
+
+## 📈 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
 
 ---
 
-## 馃 Contributing & License
+## 🤝 参与贡献与开源协议
 
-**鈥滄垜璧炵編寮€婧愮簿绁炪€傗€?*
+**“我赞美开源精神。”**
 
-鏃犺浣犳槸淇ˉ浜嗕竴涓嫾鍐欓敊璇紝杩樻槸鍦ㄤ綘鐨勪笟鍔′腑鐢?MiniRAGuard 鍋氬嚭浜嗘儕鑹崇殑钀藉湴搴旂敤锛屾垜浠兘鏈熷緟浣犵殑 Pull Request锛佽瑙?[CONTRIBUTING.md](CONTRIBUTING.md)銆?
+无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-鏈」鐩噰鐢?**[MIT](LICENSE)** 寮€婧愬崗璁€傚鏋滀綘瑙夊緱杩欎釜椤圭洰瀵逛綘鏈夊府鍔╋紝涓嶅Θ鐐逛竴涓?猸?**Star** 榧撳姳涓€涓嬩綔鑰咃紒
+本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
 
 <div align="center">
-  <i>Made with 鉂わ笍 by the MiniRAGuard Team</i>
+  <i>Made with ❤️ by the MiniRAGuard Team</i>
 </div>

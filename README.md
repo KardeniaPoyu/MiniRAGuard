@@ -1,7 +1,7 @@
 <div align="center">
   <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>馃洝锔?MiniRAGuard</h1>
+  <h1>🛡️ MiniRAGuard</h1>
 
   <p>
     <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
@@ -22,26 +22,26 @@
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
   </p>
 
-[**English**](./README.md) | [**绠€浣撲腑鏂?*](./README_zh.md)
+[**English**](./README.md) | [**简体中文**](./README_zh.md)
 
 </div>
 
 <br/>
 
-## 馃摉 Table of Contents
+## 📖 Table of Contents
 
-- [鉁?What is MiniRAGuard?](#-what-is-miniraguard)
-- [馃殌 Live Demo](#-live-demo)
-- [馃敟 Key Features](#-key-features)
-- [馃彈锔?Architecture](#锔?architecture)
-- [馃殌 Quick Start](#-quick-start)
-- [馃洜锔?Build Your Own App](#锔?build-your-own-app)
-- [馃搱 Star History](#-star-history)
-- [馃 Contributing & License](#-contributing--license)
+- [✨ What is MiniRAGuard?](#-what-is-miniraguard)
+- [🚀 Live Demo](#-live-demo)
+- [🔥 Key Features](#-key-features)
+- [🏗️ Architecture](#️-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [🛠️ Build Your Own App](#️-build-your-own-app)
+- [📈 Star History](#-star-history)
+- [🤝 Contributing & License](#-contributing--license)
 
 ---
 
-## 鉁?What is MiniRAGuard?
+## ✨ What is MiniRAGuard?
 
 Across various professional domains (medical audits, financial reports, legal compliance, petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
 
@@ -51,7 +51,7 @@ Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Pe
 
 ---
 
-## 馃殌 Live Demo
+## 🚀 Live Demo
 
 Demonstrating with the built-in **"Receipt/Contract Compliance Guardrail"** instance:
 
@@ -59,7 +59,7 @@ https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
 
 <br/>
 
-## 馃敟 Key Features
+## 🔥 Key Features
 
 - **Vision Extraction via Qwen-VL API (Vision LLM)**  
   The system calls the Qwen-VL API for image information recognition and extraction. Compared to traditional OCR, it can better handle complex typesetting, handwritten text, or poor-quality source documents, improving the accuracy of text conversion from unstructured images.
@@ -73,7 +73,7 @@ https://github.com/KardeniaPoyu/MiniRAGuard/raw/main/demo.mp4
 
 ---
 
-## 馃彈锔?Architecture
+## 🏗️ Architecture
 
 Adhering to an elegant design philosophy of high cohesion and low coupling, the business flow is silky smooth:
 
@@ -98,7 +98,7 @@ graph TD
 
 ---
 
-## 馃殌 Quick Start
+## 🚀 Quick Start
 
 Build your AI app? Just 10 minutes!
 
@@ -118,7 +118,7 @@ cp .env.example .env
 # 4. Launch!
 python main.py
 ```
-> 馃憠 Visit `http://localhost:8000/docs` to view the interactive API documentation.
+> 👉 Visit `http://localhost:8000/docs` to view the interactive API documentation.
 
 ### 2. Deploy the Cross-Platform Client (Frontend)
 
@@ -129,7 +129,7 @@ python main.py
 
 ---
 
-## 馃洜锔?Build Your Own App
+## 🛠️ Build Your Own App
 Turn this framework into your exclusive vertical tool in 3 golden steps:
 
 1. **Inject Private Knowledge**: Clear the `backend/data/` directory and drop in TXT or Markdown manuals relevant to your business domain.
@@ -138,18 +138,20 @@ Turn this framework into your exclusive vertical tool in 3 golden steps:
 
 ---
 
-## 馃搱 Star History
+## 📈 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
 
 ---
 
-## 馃 Contributing & License
+## 🤝 Contributing & License
 
 **"In praise of the open-source spirit."**
 
 Whether you fixed a typo or built an amazing production app using MiniRAGuard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a 猸?**Star** for encouragement!
+This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a ⭐ **Star** for encouragement!
 
-
+<div align="center">
+  <i>Made with ❤️ by the MiniRAGuard Team</i>
+</div>
