@@ -5,7 +5,7 @@
 
   <p>
     <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
-    <em>让任何人用 10 分钟，从零构建企业级文档智能风控系统。</em>
+    <em>Empowering anyone to build an enterprise-level document AI guardrail system from scratch in 10 minutes.</em>
   </p>
 
   <p>
@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
   </p>
 
-[**English**](./README_EN.md) | [**简体中文**](./README.md)
+[**English**](./README.md) | [**简体中文**](./README_zh.md)
 
 </div>
 
@@ -43,17 +43,17 @@
 
 ## ✨ What is MiniRaguard?
 
-在各类垂直领域（医疗审核、财务报表、信访维权、合同法务），我们经常面临三大阻碍：**图片数据模糊**、**大模型幻觉频发**、**高并发难以承载**。
+Across various professional domains (medical audits, financial reports, legal compliance, petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
 
-**MiniRaguard** 提供了一个**极轻量、开箱即用**的开源全栈解决方案（后端分析引擎 + 跨端小程序）。它创新性地结合了 **VLM (大视觉模型)** 和 **RAG (检索增强生成)**，强制 AI 基于你的本地知识库进行事实推理。
+**MiniRaguard** provides a **lightweight, plug-and-play** open-source full-stack solution (Backend Analytics Engine + Cross-platform Mini Program). It innovatively combines **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, forcing AI to reason strictly based on your local knowledge base.
 
-无论你是想搭建一个“医疗单据智审助手”，还是“社区民情研判总机”，只需**扔进你的 TXT 库，修改一段 Prompt**，即可立刻上线。
+Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Petition Analytics Terminal," just **drop your TXT files into the library and modify a single Prompt** to go live immediately.
 
 ---
 
 ## 🚀 Live Demo
 
-以自带的 **“单据/合同合规风控助手”** 实例为演示：
+Demonstrating with the built-in **"Receipt/Contract Compliance Guardrail"** instance:
 
 https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4
 
@@ -61,21 +61,21 @@ https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4
 
 ## 🔥 Key Features
 
-- **基于端云协同的深度视觉提取 (Vision LLM)**
-  系统原生接入深度视觉模型（Qwen-VL），能够直接规避传统 OCR 排版解析错误、手写难以识别的工程瓶颈，适用于褶皱票据、逆光照片、混合排版等复杂信息录入场景。
-- **事实基准检索生成架构 (Fact-based RAG)**
-  针对严肃法务、财务、政务场景，模型通过高并发检索比对本地向量数据库内的垂直领域规范，严格约束大模型推理过程，有效杜绝常识性“幻觉”以及法规引用的张冠李戴。
-- **高并发与内存安全自适应机制 (Adaptive Concurrency)**
-  - **MD5 状态热缓存**：对于已验证过的重复文件实施缓存阻截，极大程度缩减大模型 Token 成本并实现秒级响应。
-  - **动态信号量阻塞锁**：在应用层实现并发强关联控制，能够有效抵御突发推理请求引起的服务崩溃，单节点即可承载数百用户。
-- **开箱即用的跨端服务架构 (Full-Stack Support)**
-  框架内置完善的 Vue/UniApp 跨平台独立组件（支持 Web 及微信客户端环境），从接口到视图均开箱即用，避免开发者陷入前后端联调的冗余工作。
+- **Vision Extraction via Qwen-VL API (Vision LLM)**  
+  The system calls the Qwen-VL API for image information recognition and extraction. Compared to traditional OCR, it can better handle complex typesetting, handwritten text, or poor-quality source documents, improving the accuracy of text conversion from unstructured images.
+- **RAG-based Local Knowledge Retrieval (Fact-based RAG)**  
+  Designed for legal, financial, and other serious contexts, the system uses Sentence-Transformers to build a local vector database (VectorDB). Before reasoning, the LLM retrieves relevant regulations from the local database, which helps reduce common-sense "hallucinations" and provides concrete sources for its judgments.
+- **Concurrency & Cache Control mechanisms (Concurrency & Caching)**  
+  - **MD5 Caching Mechanism**: Calculates the file MD5 to intercept repeated document verifications, returning local cache results directly. This reduces unnecessary LLM API tokens and lowers response latency.
+  - **Semaphore Concurrency Control**: The backend deploys a semaphore-based flow control mechanism to limit the number of concurrent requests passed to the LLM during traffic spikes, ensuring stable service operation.
+- **Separation of Frontend and Backend (Full-Stack Support)**  
+  Provides a pure asynchronous server based on FastAPI and cross-platform client code built with Vue/UniApp (supporting Web and WeChat Mini Programs). Developers can use the complete business flow directly after deployment.
 
 ---
 
 ## 🏗️ Architecture
 
-秉承高内聚、低耦合的优雅设计理念，业务流如丝般顺滑：
+Adhering to an elegant design philosophy of high cohesion and low coupling, the business flow is silky smooth:
 
 ```mermaid
 graph TD
@@ -100,41 +100,41 @@ graph TD
 
 ## 🚀 Quick Start
 
-构建你的 AI 应用？只需十分钟！
+Build your AI app? Just 10 minutes!
 
-### 1. 部署高可用后端 (Backend)
+### 1. Deploy the High-Availability Backend
 
 ```bash
-# 1. 克隆代码仓库
+# 1. Clone the repository
 git clone https://github.com/KardeniaPoyu/Qingju.git
 cd Qingju/backend
 
-# 2. 安装 Python 依赖 
+# 2. Install Python dependencies
 pip install -r requirements.txt
 
-# 3. 环境变量配置 (填入你的 API KEY)
+# 3. Environment configuration (Insert your API KEYs)
 cp .env.example .env
 
-# 4. 一键起飞！
+# 4. Launch!
 python main.py
 ```
-> 👉 访问 `http://localhost:8000/docs` 查看交互式 API 文档。
+> 👉 Visit `http://localhost:8000/docs` to view the interactive API documentation.
 
-### 2. 部署跨端客户端 (Frontend)
+### 2. Deploy the Cross-Platform Client (Frontend)
 
-1. 下载 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE。
-2. 将 `frontend` 目录导入。
-3. 修改 `config.js` 中的 `BASE_URL` 为你刚刚部署的后端服务地址。
-4. 一键运行至内置浏览器或微信开发者工具！
+1. Download the [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE.
+2. Import the `frontend` directory.
+3. Modify the `BASE_URL` in `config.js` to point to your newly deployed backend service.
+4. Run securely in the built-in browser or WeChat DevTools!
 
 ---
 
 ## 🛠️ Build Your Own App
-把这套框架变成你的专属利器！黄金三步走：
+Turn this framework into your exclusive vertical tool in 3 golden steps:
 
-1. **注入私有知识**：清空 `backend/data/` 目录，扔进符合你业务场景的 TXT 或 Markdown 手册。
-2. **清理缓存重塑**：删除 `backend/cache.db` 和 `vector_store/` 目录，系统下次启动将自动“消化”新知识。
-3. **注入灵魂 Prompt**：打开 `backend/core/chat_tool.py`，更改顶栏的 System Prompt 定位。（比如从“风控顾问”改成“三甲医院财务报销审核员”）。
+1. **Inject Private Knowledge**: Clear the `backend/data/` directory and drop in TXT or Markdown manuals relevant to your business domain.
+2. **Rebuild Cache & Vectors**: Delete the `backend/cache.db` and `vector_store/` directories. The system will automatically "digest" the new knowledge on the next startup.
+3. **Inject the Soul Prompt**: Open `backend/core/chat_tool.py` and change the System Prompt identity at the top (e.g., from "Risk Control Advisor" to "Tier-3 Hospital Financial Reimbursement Auditor").
 
 ---
 
@@ -146,11 +146,11 @@ python main.py
 
 ## 🤝 Contributing & License
 
-**“开源改变世界，AI 赋能万物。”**
+**"Open Source Changes the World, AI Empowers Everything."**
 
-无论你是修补了一个拼写错误，还是在你的业务中用 MiniRaguard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Whether you fixed a typo or built an amazing production app using MiniRaguard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
+This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a ⭐ **Star** for encouragement!
 
 <div align="center">
   <i>Made with ❤️ by the MiniRaguard Team</i>
