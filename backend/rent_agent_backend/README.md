@@ -1,4 +1,4 @@
-# OpenRaguard Backend | OpenRaguard后端
+# MiniRaguard Backend | MiniRaguard后端
 
 基于 FastAPI 构建的高性能法律风险审查引擎。
 

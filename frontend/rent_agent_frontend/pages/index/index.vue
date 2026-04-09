@@ -5,7 +5,7 @@
     <view class="header">
       <view class="header-main">
         <view class="header-text">
-          <text class="header-title">OpenRaguard AI</text>
+          <text class="header-title">MiniRaguard AI</text>
           <text class="header-sub">合规文档智能审查</text>
         </view>
         <view class="header-profile-btn" @tap="goToProfile">

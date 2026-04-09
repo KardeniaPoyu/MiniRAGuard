@@ -1,8 +1,8 @@
 <div align="center">
   <!-- TODO: 添加项目高分辨率 Logo 或 横幅图像 -->
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="OpenRaguard Banner"> -->
+  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRaguard Banner"> -->
 
-  <h1>🏠 OpenRaguard (OpenRaguard) - 多模态 RAG 万能审查框架</h1>
+  <h1>🏠 MiniRaguard (MiniRaguard) - 多模态 RAG 万能审查框架</h1>
 
   <p>
     <strong>一个基于 FastAPI + UniApp + VLM(大视觉模型) + RAG 的通用文档智能审查全栈模板</strong>
@@ -13,9 +13,9 @@
   </p>
 
   <p>
-    <a href="https://github.com/KardeniaPoyu/OpenRaguard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
-    <a href="https://github.com/KardeniaPoyu/OpenRaguard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
-    <a href="https://github.com/KardeniaPoyu/OpenRaguard/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/OpenRaguard?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
+    <a href="https://github.com/KardeniaPoyu/MiniRaguard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/MiniRaguard?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
+    <a href="https://github.com/KardeniaPoyu/MiniRaguard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/MiniRaguard?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
+    <a href="https://github.com/KardeniaPoyu/MiniRaguard/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/MiniRaguard?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=B0C4B1" alt="License"></a>
   </p>
   <p>
@@ -43,7 +43,7 @@
 
 ## ✨ 框架愿景
 
-**“OpenRaguard (OpenRaguard)”** 不仅仅是一个保护大学生的**合规文档审查工具**，它更是一个**泛用的多模态文档风控与解析模板**。
+**“MiniRaguard (MiniRaguard)”** 不仅仅是一个保护大学生的**合规文档审查工具**，它更是一个**泛用的多模态文档风控与解析模板**。
 
 在基层社会治理、法务审核、投诉信访处理等场景中，经常面临“文档图片模糊”、“难以准确匹配法规”、“大模型幻觉严重”等共同痛点。本项目为你提供了一套可复用的标准全栈架构（`UniApp 小程序` + `FastAPI 并发服务端` + `VLM 视觉抽取` + `RAG 法律风控`）。你只需替换后端的知识库（TXT/MD文件）和稍微调整 Prompt，即可在 **10 分钟内** 将其改造为你专属领域的 AI 智能审查助手！
 
@@ -58,7 +58,7 @@
 *(💡 提示：由于是本地 README，如果视频无法直接预览，推送到 Github 后即可在网页端呈现自动播放的高清效果！)*
 
 <div align="center">
-  <video src="https://github.com/KardeniaPoyu/OpenRaguard/raw/main/demo.mp4" controls="controls" autoplay="autoplay" loop="loop" muted="muted" width="80%">
+  <video src="https://github.com/KardeniaPoyu/MiniRaguard/raw/main/demo.mp4" controls="controls" autoplay="autoplay" loop="loop" muted="muted" width="80%">
     您的浏览器不支持视频标签。
   </video>
 </div>
@@ -125,8 +125,8 @@ graph TD
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/KardeniaPoyu/OpenRaguard.git
-cd OpenRaguard/backend
+git clone https://github.com/KardeniaPoyu/MiniRaguard.git
+cd MiniRaguard/backend
 
 # 2. 安装环境依赖
 pip install -r requirements.txt
@@ -180,7 +180,7 @@ python main.py
 *(注：系统默认搭载的“业务审查”实例仅作技术演示，输出不作为正式法律意见。)*
 
 <div align="center">
-  <i>Made with ❤️ by the OpenRaguard Team.</i>
+  <i>Made with ❤️ by the MiniRaguard Team.</i>
 </div>
 
 

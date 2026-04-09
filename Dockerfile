@@ -1,5 +1,5 @@
 # ============================================================
-# OpenRaguard AI · Dockerfile
+# MiniRaguard AI · Dockerfile
 # 基础镜像：python:3.11-slim（Debian Bookworm）
 # ============================================================
 

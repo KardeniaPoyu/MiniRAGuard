@@ -1,6 +1,6 @@
-# OpenRaguard Frontend | OpenRaguard前端
+# MiniRaguard Frontend | MiniRaguard前端
 
-基于 Uni-app (Vue) 开发的“OpenRaguard AI”微信小程序客户端。
+基于 Uni-app (Vue) 开发的“MiniRaguard AI”微信小程序客户端。
 
 ## ✨ 界面预览
 
