@@ -43,7 +43,7 @@
 
 ## ✨ What is MiniRAGuard?
 
-Across various professional domains (medical audits, financial reports, legal compliance, petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
+Across various **vertical audit fields** (such as medical audits, financial reports, legal compliance, or petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
 
 **MiniRAGuard** provides a **lightweight, plug-and-play** open-source full-stack solution (Backend Analytics Engine + Cross-platform Mini Program). It innovatively combines **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, forcing AI to reason strictly based on your local knowledge base.
 
