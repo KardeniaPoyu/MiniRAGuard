@@ -58,7 +58,7 @@
 *(💡 提示：由于是本地 README，如果视频无法直接预览，推送到 Github 后即可在网页端呈现自动播放的高清效果！)*
 
 <div align="center">
-  <video src="https://github.com/KardeniaPoyu/MiniRaguard/raw/main/demo.mp4" controls="controls" autoplay="autoplay" loop="loop" muted="muted" width="80%">
+  <video src="https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4" controls="controls" autoplay="autoplay" loop="loop" muted="muted" width="80%">
     您的浏览器不支持视频标签。
   </video>
 </div>
