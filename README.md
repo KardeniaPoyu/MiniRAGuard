@@ -28,6 +28,19 @@
 
 <br/>
 
+## 📖 Table of Contents
+
+- [✨ What is MiniRaguard?](#-what-is-miniraguard)
+- [🚀 Live Demo](#-live-demo)
+- [🔥 Key Features](#-key-features)
+- [🏗️ Architecture](#️-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [🛠️ Build Your Own App](#️-build-your-own-app)
+- [📈 Star History](#-star-history)
+- [🤝 Contributing & License](#-contributing--license)
+
+---
+
 ## ✨ What is MiniRaguard?
 
 在各类垂直领域（医疗审核、财务报表、信访维权、合同法务），我们经常面临三大阻碍：**图片数据模糊**、**大模型幻觉频发**、**高并发难以承载**。
@@ -42,25 +55,21 @@
 
 以自带的 **“单据/合同合规风控助手”** 实例为演示：
 
-<div align="center">
-  <video src="https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4" controls width="85%">
-    您的浏览器不支持视频标签。
-  </video>
-</div>
+https://github.com/KardeniaPoyu/Qingju/raw/main/demo.mp4
 
 <br/>
 
 ## 🔥 Key Features
 
-- 👁️ **端云协同的「火眼金睛」 (Vision LLM)**  
-  原生接入 **Qwen-VL-Max**，告别传统 OCR 的呆板。手写字、逆光图、折叠票据，万物皆可精准萃取。
-- 🛡️ **拒止幻觉的「护城河」 (Fact-based RAG)**  
-  不盲信大模型的底座知识！通过外挂轻量级微缩本地知识库向量引擎，做到**“断案皆有出处”**，极其适合严肃场景（法务、财务、政务）。
-- ⚡ **为高并发而生的「极客内核」 (Extreme Performance)**  
-  - **MD5 热缓存拦截**：相同文件不再二次消耗算力和 Token，秒级出图！
-  - **动态信号量并发锁**：自适应内存环境排队保护，一台轻量级云服务器即可承载数百用户并发。
-- 🧩 **全端落地的「开箱即用」 (Full-Stack Ready)**  
-  自带高颜值的 Uni-app 跨端小程序（支持微信/Web），从交互到 API，你只需 Clone 就能跑。
+- **基于端云协同的深度视觉提取 (Vision LLM)**
+  系统原生接入深度视觉模型（Qwen-VL），能够直接规避传统 OCR 排版解析错误、手写难以识别的工程瓶颈，适用于褶皱票据、逆光照片、混合排版等复杂信息录入场景。
+- **事实基准检索生成架构 (Fact-based RAG)**
+  针对严肃法务、财务、政务场景，模型通过高并发检索比对本地向量数据库内的垂直领域规范，严格约束大模型推理过程，有效杜绝常识性“幻觉”以及法规引用的张冠李戴。
+- **高并发与内存安全自适应机制 (Adaptive Concurrency)**
+  - **MD5 状态热缓存**：对于已验证过的重复文件实施缓存阻截，极大程度缩减大模型 Token 成本并实现秒级响应。
+  - **动态信号量阻塞锁**：在应用层实现并发强关联控制，能够有效抵御突发推理请求引起的服务崩溃，单节点即可承载数百用户。
+- **开箱即用的跨端服务架构 (Full-Stack Support)**
+  框架内置完善的 Vue/UniApp 跨平台独立组件（支持 Web 及微信客户端环境），从接口到视图均开箱即用，避免开发者陷入前后端联调的冗余工作。
 
 ---
 
