@@ -10,7 +10,7 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "MiniRaguard AI",
+        "navigationBarTitleText": "MiniRAGuard AI",
         "navigationBarBackgroundColor": "#1A3A5C",
         "navigationBarTextStyle": "white",
         "navigationStyle": "default"
@@ -69,7 +69,7 @@
   "subPackages": [],
   "globalStyle": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "MiniRaguard AI",
+    "navigationBarTitleText": "MiniRAGuard AI",
     "navigationBarBackgroundColor": "#1A3A5C",
     "backgroundColor": "#F4F6F9"
   },

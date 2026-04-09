@@ -1,7 +1,7 @@
 <div align="center">
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRaguard Banner"> -->
+  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>🛡️ MiniRaguard</h1>
+  <h1>🛡️ MiniRAGuard</h1>
 
   <p>
     <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
@@ -30,7 +30,7 @@
 
 ## 📖 Table of Contents
 
-- [✨ What is MiniRaguard?](#-what-is-miniraguard)
+- [✨ What is MiniRAGuard?](#-what-is-miniraguard)
 - [🚀 Live Demo](#-live-demo)
 - [🔥 Key Features](#-key-features)
 - [🏗️ Architecture](#️-architecture)
@@ -41,11 +41,11 @@
 
 ---
 
-## ✨ What is MiniRaguard?
+## ✨ What is MiniRAGuard?
 
 在各类垂直领域（医疗审核、财务报表、信访维权、合同法务），我们经常面临三大阻碍：**图片数据模糊**、**大模型幻觉频发**、**高并发难以承载**。
 
-**MiniRaguard** 提供了一个**极轻量、开箱即用**的开源全栈解决方案（后端分析引擎 + 跨端小程序）。它创新性地结合了 **VLM (大视觉模型)** 和 **RAG (检索增强生成)**，强制 AI 基于你的本地知识库进行事实推理。
+**MiniRAGuard** 提供了一个**极轻量、开箱即用**的开源全栈解决方案（后端分析引擎 + 跨端小程序）。它创新性地结合了 **VLM (大视觉模型)** 和 **RAG (检索增强生成)**，强制 AI 基于你的本地知识库进行事实推理。
 
 无论你是想搭建一个“医疗单据智审助手”，还是“社区民情研判总机”，只需**扔进你的 TXT 库，修改一段 Prompt**，即可立刻上线。
 
@@ -148,10 +148,10 @@ python main.py
 
 **“开源改变世界，AI 赋能万物。”**
 
-无论你是修补了一个拼写错误，还是在你的业务中用 MiniRaguard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
 
 <div align="center">
-  <i>Made with ❤️ by the MiniRaguard Team</i>
+  <i>Made with ❤️ by the MiniRAGuard Team</i>
 </div>

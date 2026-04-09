@@ -1,7 +1,7 @@
 <div align="center">
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRaguard Banner"> -->
+  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>🛡️ MiniRaguard</h1>
+  <h1>🛡️ MiniRAGuard</h1>
 
   <p>
     <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
@@ -30,7 +30,7 @@
 
 ## 📖 Table of Contents
 
-- [✨ What is MiniRaguard?](#-what-is-miniraguard)
+- [✨ What is MiniRAGuard?](#-what-is-miniraguard)
 - [🚀 Live Demo](#-live-demo)
 - [🔥 Key Features](#-key-features)
 - [🏗️ Architecture](#️-architecture)
@@ -41,11 +41,11 @@
 
 ---
 
-## ✨ What is MiniRaguard?
+## ✨ What is MiniRAGuard?
 
 Across various professional domains (medical audits, financial reports, legal compliance, petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
 
-**MiniRaguard** provides a **lightweight, plug-and-play** open-source full-stack solution (Backend Analytics Engine + Cross-platform Mini Program). It innovatively combines **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, forcing AI to reason strictly based on your local knowledge base.
+**MiniRAGuard** provides a **lightweight, plug-and-play** open-source full-stack solution (Backend Analytics Engine + Cross-platform Mini Program). It innovatively combines **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, forcing AI to reason strictly based on your local knowledge base.
 
 Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Petition Analytics Terminal," just **drop your TXT files into the library and modify a single Prompt** to go live immediately.
 
@@ -148,10 +148,10 @@ Turn this framework into your exclusive vertical tool in 3 golden steps:
 
 **"Open Source Changes the World, AI Empowers Everything."**
 
-Whether you fixed a typo or built an amazing production app using MiniRaguard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Whether you fixed a typo or built an amazing production app using MiniRAGuard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a ⭐ **Star** for encouragement!
 
 <div align="center">
-  <i>Made with ❤️ by the MiniRaguard Team</i>
+  <i>Made with ❤️ by the MiniRAGuard Team</i>
 </div>

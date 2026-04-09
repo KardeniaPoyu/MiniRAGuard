@@ -1,6 +1,6 @@
-# Contributing to MiniRaguard
+# Contributing to MiniRAGuard
 
-Thank you for your interest in contributing to MiniRaguard (MiniRaguard AI)! We welcome contributions from the community to help make rental contracts safer for everyone.
+Thank you for your interest in contributing to MiniRAGuard (MiniRAGuard AI)! We welcome contributions from the community to help make rental contracts safer for everyone.
 
 ## How to Contribute
 

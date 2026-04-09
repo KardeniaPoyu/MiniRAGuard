@@ -1,6 +1,6 @@
 # 🏡 合规文档智能审查助手 - 项目白皮书 (MVP 修正版) 🏡
 
-> 数据契约对齐：`docs/MiniRaguard AI_技术文档_v1.6.md`
+> 数据契约对齐：`docs/MiniRAGuard AI_技术文档_v1.6.md`
 
 ---
 

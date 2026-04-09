@@ -1,5 +1,5 @@
-﻿602cb46 docs: rename to MiniRaguard
-b23c90a chore: rebrand as MiniRaguard and use git mv for safe renaming
+﻿602cb46 docs: rename to MiniRAGuard
+b23c90a chore: rebrand as MiniRAGuard and use git mv for safe renaming
 55e993e docs: rebrand as a general purpose RAG+VLM document analysis template and add demo video
 6381311 chore: format repository to high-star open source standards (badges, docs, tree)
 d11b7d8 Update main.py
