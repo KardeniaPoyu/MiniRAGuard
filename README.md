@@ -152,6 +152,3 @@ Whether you fixed a typo or built an amazing production app using MiniRAGuard in
 
 This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a ⭐ **Star** for encouragement!
 
-<div align="center">
-  <i>Made with ❤️ by the MiniRAGuard Team</i>
-</div>

@@ -139,6 +139,3 @@ python main.py
 
 本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
 
-<div align="center">
-  <i>Made with ❤️ by the MiniRAGuard Team</i>
-</div>
