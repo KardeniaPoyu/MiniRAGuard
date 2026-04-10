@@ -19,10 +19,12 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# 运行时产物（容器中重新生成）
+# Runtime artifacts (should be unique per environment)
 cache.db
-rent_agent_backend/cache.db
-rent_agent_backend/vector_store/
+miniraguard/cache.db
+examples/rent_assistant/backend/cache.db
+examples/rent_assistant/data/vector_store/
+vector_store/
 
 # Git
 .git/
