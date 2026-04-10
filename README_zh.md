@@ -4,8 +4,8 @@
   <h1>🛡️ MiniRAGuard</h1>
 
   <p>
-    <strong>轻量级全栈 RAG 智能体模板 (含 Vue + FastAPI 完整源码)</strong><br>
-    <em>以租房中介与合同合规审查为官方 Demo，助你快速搭建属于自己的垂直领域多模态 AI 助手。</em>
+        <strong>轻量级全栈 RAG 审查智能体模板</strong><br>
+    <em>让任何人用 10 分钟，快速搭建属于自己的垂直领域多模态 AI RAG审查助手。</em>
   </p>
 
   <p>
@@ -43,29 +43,39 @@
 
 在医疗审核、财务报表、信访审查等**垂直审核领域**，开发者常面临三大痛点：**图像数据模糊无序**、**LLM 幻觉频发**、**高并发请求难处理**。
 
-**MiniRAGuard** 提供了一个**极轻量、开箱即用**的开源全栈智能体模板。它创新地将 **VLM（视觉大模型）** 与 **RAG（检索增强生成）** 相结合，强迫 AI 严格基于你的本地知识库进行推理。
+针对这三点，**MiniRAGuard** 提供了一个**极轻量、开箱即用**的全栈 RAG 业务模板。它将 **VLM（视觉大模型）** 与 **RAG（检索增强生成）** 相结合，强迫 AI 严格基于你的本地知识库进行推理，帮助开发者快速为垂直领域应用接入文档检索与输出约束机制。
 
-不仅是一个简单的 RAG 实现，它还自带了完整的业务展示界面。只需**将 TXT 放入库中并修改一段 Prompt**，即可上线属于你的垂直领域助手。
+**MiniRAGuard** 旨在为 LLM 赋能的复杂文档审查流程提供工程上的确定性与边界控制。它不仅包含一个极简的 RAG 实现，还自带了完整的业务展示界面。只需**将 TXT 放入库中并修改一段 Prompt**，即可上线属于你的垂直领域助手，十分钟完成一个微信小程序/网站的上线及部署，非常方便初学者学习 RAG 架构。
 
 ---
 
-## 🔥 核心亮点
+## 🚀 业务实例演示 (Demo)
 
+以自带的 **“单据/合同合规风控助手”** 实例为演示：
+
+<video src="./demo.mp4" width="100%" controls></video>
+
+<br/>
+
+## 🔥 核心功能
+
+- **结合本地知识库的 RAG 检索生成 (Fact-based RAG)**
+  针对法务、财务等严肃场景，系统使用 Sentence-Transformers 构建本地向量数据库（VectorDB）。大模型在进行推理前会优先从本地数据库检索相关的规范条例，从而减少常识性“幻觉”并提供具体的判断出处。
 - **开箱即用的多模态文档接入**  
-  集成了主流的 VLM 接口调用逻辑，支持直接上传合同扫描件、图片或 PDF，快速提取关键信息，开发者无需从零编写复杂的多模态解析代码。
+  集成了主流的 VLM 接口调用逻辑（默认Qwen-VL API），支持直接上传合同扫描件、图片或 PDF，快速提取关键信息，开发者无需从零编写复杂的多模态解析代码。
 - **轻量级合规审查工作流**  
   内置了一套基础的“审查-反馈” Prompt 模板设计，能有效约束大模型在处理敏感文本（如租约、格式条款）时的输出边界，非常适合进行业务侧的 PoC（概念验证）。
 - **前后端分离的完整业务脚手架**  
   提供 `backend` (FastAPI) 和 `frontend` (Vue/UniApp) 完整的工程化源码。开发者不仅能学到 RAG 怎么写，还能直接拥有一套可以直接向老板或导师演示的 UI 界面。
-- **并发与缓存控制机制**
-  - **MD5 缓存机制**：通过计算文件 MD5 拦截重复审核，减少 API Token 消耗。
-  - **信号量限流**：后端限流机制，在流量高峰时保证服务稳定。
+- **基本并发与缓存控制 (Concurrency & Caching)**
+  - **MD5 缓存机制**：计算文件 MD5，拦截重复文件的校验请求并直接返回本地缓存，减少不必要的 LLM API 调用开销及响应时间。
+  - **并发信号量控制**：后端部署了基于信号量的线程流控机制，限制高并发场景下抛向大模型的并发数，保障服务稳定运行。
 
 ---
 
 ## 🏗️ 技术架构
 
-秉持高内聚低耦合的设计理念：
+秉承高内聚、低耦合的优雅设计理念，业务流如丝般顺滑：
 
 ```mermaid
 graph TD
@@ -93,17 +103,27 @@ graph TD
 ### 1. 部署后端 (Backend)
 
 ```bash
-cd backend
+# 1. 克隆代码仓库
+git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
+cd MiniRAGuard/backend
+
+# 2. 安装 Python 依赖 
 pip install -r requirements.txt
+
+# 3. 环境变量配置 (填入你的 API KEY)
 cp .env.example .env
-# 编辑 .env 填入 API Keys
+
+# 4. 一键起飞！
 python main.py
 ```
+> 👉 访问 `http://localhost:8000/docs` 查看交互式 API 文档。
 
 ### 2. 部署前端 (Frontend)
 
-1. 使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 打开 `frontend` 目录。
-2. 运行至浏览器。
+1. 下载 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE。
+2. 将 `frontend` 目录导入。
+3. 修改 `config.js` 中的 `BASE_URL` 为你刚刚部署的后端服务地址。
+4. 一键运行至内置浏览器或微信开发者工具！
 
 ---
 
@@ -115,6 +135,13 @@ python main.py
 
 ---
 
-## 🤝 贡献与许可
+## 📈 Star History
 
-本项目采用 **[MIT](LICENSE)** 开源协议。欢迎提交 Pull Request！
+[![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
+
+## 🤝 参与贡献与开源协议
+
+无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
+

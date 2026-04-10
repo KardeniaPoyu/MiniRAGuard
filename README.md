@@ -4,8 +4,8 @@
   <h1>🛡️ MiniRAGuard</h1>
 
   <p>
-    <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
-    <em>Empowering anyone to build an enterprise-level document AI guardrail system from scratch in 10 minutes.</em>
+    <strong>A Lightweight Full-stack RAG Audit Agent Template</strong><br>
+    <em>Build your own vertical multimodal AI RAG audit assistant in just 10 minutes.</em>
   </p>
 
   <p>
@@ -31,68 +31,68 @@
 ## 📖 Table of Contents
 
 - [✨ What is MiniRAGuard?](#-what-is-miniraguard)
-- [🚀 Live Demo](#-live-demo)
-- [🔥 Key Features](#-key-features)
-- [🏗️ Architecture](#️-architecture)
+- [🔥 Core Highlights](#-core-highlights)
+- [🏗️ Architecture](#-architecture)
 - [🚀 Quick Start](#-quick-start)
-- [🛠️ Build Your Own App](#️-build-your-own-app)
-- [📈 Star History](#-star-history)
+- [🛠️ Build Your Own AI Agent](#-build-your-own-ai-agent)
 - [🤝 Contributing & License](#-contributing--license)
 
 ---
 
 ## ✨ What is MiniRAGuard?
 
-Across various **vertical audit fields** (such as medical audits, financial reports, legal compliance, or petition reviews), developers often face three major hurdles: **blurry/unstructured image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
+In **vertical audit fields** such as medical auditing, financial reporting, and petition review, developers often face three major pain points: **unstructured/blurry image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
 
-**MiniRAGuard** provides a **lightweight, plug-and-play** open-source full-stack solution (Backend Analytics Engine + Cross-platform Mini Program). It innovatively combines **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, forcing AI to reason strictly based on your local knowledge base.
+Addressing these issues, **MiniRAGuard** provides a **lightweight, out-of-the-box** full-stack RAG business template. By combining **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, it forces the AI to reason strictly based on your local knowledge base, helping developers quickly integrate document retrieval and output constraint mechanisms into vertical applications.
 
-Whether you want to build a "Medical Receipt Audit Assistant" or a "Community Petition Analytics Terminal," just **drop your TXT files into the library and modify a single Prompt** to go live immediately.
+**MiniRAGuard** aims to provide engineering certainty and boundary control for complex document review processes powered by LLMs. It includes not only a minimalist RAG implementation but also a complete business showcase UI. Simply **drop your TXT files into the library and modify a single Prompt** to launch your specialized assistant. Launch and deploy a WeChat mini-program or website in just ten minutes—perfect for beginners to learn the RAG architecture.
 
 ---
 
-## 🚀 Live Demo
+## 🚀 Business Instance Demo
 
-Demonstrating with the built-in **"Receipt/Contract Compliance Guardrail"** instance:
+Demonstrating with the built-in **"Receipt/Contract Compliance Risk Assistant"** instance:
 
 <video src="./demo.mp4" width="100%" controls></video>
 
 <br/>
 
-## 🔥 Key Features
+## 🔥 Core Highlights
 
-- **Vision Extraction via Qwen-VL API (Vision LLM)**  
-  The system calls the Qwen-VL API for image information recognition and extraction. Compared to traditional OCR, it can better handle complex typesetting, handwritten text, or poor-quality source documents, improving the accuracy of text conversion from unstructured images.
-- **RAG-based Local Knowledge Retrieval (Fact-based RAG)**  
-  Designed for legal, financial, and other serious contexts, the system uses Sentence-Transformers to build a local vector database (VectorDB). Before reasoning, the LLM retrieves relevant regulations from the local database, which helps reduce common-sense "hallucinations" and provides concrete sources for its judgments.
-- **Concurrency & Cache Control mechanisms (Concurrency & Caching)**  
-  - **MD5 Caching Mechanism**: Calculates the file MD5 to intercept repeated document verifications, returning local cache results directly. This reduces unnecessary LLM API tokens and lowers response latency.
-  - **Semaphore Concurrency Control**: The backend deploys a semaphore-based flow control mechanism to limit the number of concurrent requests passed to the LLM during traffic spikes, ensuring stable service operation.
-- **Separation of Frontend and Backend (Full-Stack Support)**  
-  Provides a pure asynchronous server based on FastAPI and cross-platform client code built with Vue/UniApp (supporting Web and WeChat Mini Programs). Developers can use the complete business flow directly after deployment.
+- **Fact-based RAG Search & Generation**  
+  Specifically for legal, financial, and other serious scenarios, the system uses Sentence-Transformers to build a local vector database (VectorDB). The LLM retrieves relevant regulations from the local database before reasoning, significantly reducing "hallucinations" and providing concrete sources for judgments.
+- **Out-of-the-box Multimodal Document Access**  
+  Integrated mainstream VLM interface call logic (default Qwen-VL API), supporting direct upload of contract scans, images, or PDFs to quickly extract key information. No need to write complex multimodal parsing code from scratch.
+- **Lightweight Compliance Review Workflow**  
+  Built-in basic "review-feedback" Prompt template design, effectively constraining output boundaries for sensitive texts (like leases or boilerplate clauses). Ideal for business-side PoCs (Proof of Concept).
+- **Full-stack Scaffold with Separated Frontend/Backend**  
+  Provides complete production-grade source code for `backend` (FastAPI) and `frontend` (Vue/UniApp). Developers can learn RAG implementation while having a ready-to-use UI for demonstrations to stakeholders.
+- **Concurrency & Cache Control (Concurrency & Caching)**
+  - **MD5 Caching Mechanism**: Intercepts repeated verifications by calculating file MD5, reducing unnecessary API Token consumption and latency.
+  - **Semaphore Flow Control**: Backend thread flow control ensures stable service operation during traffic spikes by limiting concurrent requests to the LLM.
 
 ---
 
 ## 🏗️ Architecture
 
-Adhering to an elegant design philosophy of high cohesion and low coupling, the business flow is silky smooth:
+Adhering to high cohesion and low coupling design principles, ensuring a silky smooth business flow:
 
 ```mermaid
 graph TD
-    User((Client Device)) -->|Upload Image Base64| API_Gateway[FastAPI Gateway]
+    User((Client)) -->|Upload Images| API_Gateway[FastAPI Gateway]
     
     subgraph Modular AI Pipeline
         API_Gateway -->|1. Vision Parse| VL[VLM Engine]
-        VL -->|2. High-confidence Text| RAG_Engine[Lightweight RAG]
+        VL -->|2. Text Content| RAG_Engine[Lightweight RAG]
         
         subgraph Local Knowledge Base
-            RAG_Engine <-->|3. Chunk Match| VectorDB[(Local Vector Store)]
+            RAG_Engine <-->|3. Knowledge Match| VectorDB[(Local Vector Store)]
         end
         
-        RAG_Engine -->|4. Strict Context| LLM[Generative DL DeepSeek]
+        RAG_Engine -->|4. Augmented Context| LLM[DeepSeek Model]
     end
     
-    LLM -->|5. Structured JSON| API_Gateway
+    LLM -->|5. Structured Result| API_Gateway
     API_Gateway -->|6. Dynamic Rendering| User
 ```
 
@@ -100,19 +100,17 @@ graph TD
 
 ## 🚀 Quick Start
 
-Build your AI app? Just 10 minutes!
-
-### 1. Deploy the High-Availability Backend
+### 1. Deploy Backend
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
 cd MiniRAGuard/backend
 
-# 2. Install Python dependencies
+# 2. Install Python dependencies 
 pip install -r requirements.txt
 
-# 3. Environment configuration (Insert your API KEYs)
+# 3. Environment configuration (Add your API KEY)
 cp .env.example .env
 
 # 4. Launch!
@@ -120,21 +118,20 @@ python main.py
 ```
 > 👉 Visit `http://localhost:8000/docs` to view the interactive API documentation.
 
-### 2. Deploy the Cross-Platform Client (Frontend)
+### 2. Deploy Frontend
 
 1. Download the [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE.
 2. Import the `frontend` directory.
-3. Modify the `BASE_URL` in `config.js` to point to your newly deployed backend service.
-4. Run securely in the built-in browser or WeChat DevTools!
+3. Update `BASE_URL` in `config.js` to your deployed backend address.
+4. Run in the built-in browser or WeChat DevTools!
 
 ---
 
-## 🛠️ Build Your Own App
-Turn this framework into your exclusive vertical tool in 3 golden steps:
+## 🛠️ Build Your Own AI Agent
 
-1. **Inject Private Knowledge**: Clear the `backend/data/` directory and drop in TXT or Markdown manuals relevant to your business domain.
-2. **Rebuild Cache & Vectors**: Delete the `backend/cache.db` and `vector_store/` directories. The system will automatically "digest" the new knowledge on the next startup.
-3. **Inject the Soul Prompt**: Open `backend/core/chat_tool.py` and change the System Prompt identity at the top (e.g., from "Risk Control Advisor" to "Tier-3 Hospital Financial Reimbursement Auditor").
+1. **Inject Private Knowledge**: Clear `backend/data/` and add your own TXT or Markdown manuals.
+2. **Rebuild Vector Index**: Delete the `vector_store/` directory; it will be automatically rebuilt on the next startup.
+3. **Adjust Business Logic**: Modify the System Prompt in `backend/core/chat_tool.py`.
 
 ---
 
@@ -142,13 +139,8 @@ Turn this framework into your exclusive vertical tool in 3 golden steps:
 
 [![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
 
----
-
 ## 🤝 Contributing & License
 
-**"In praise of the open-source spirit."**
+Whether you fixed a typo or built an amazing application in a vertical field using MiniRAGuard, we look forward to your Pull Request! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-Whether you fixed a typo or built an amazing production app using MiniRAGuard in your domain, we welcome your Pull Requests! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-This project is licensed under the **[MIT](LICENSE)** open-source license. If you find this project helpful, please give the author a ⭐ **Star** for encouragement!
-
+This project is licensed under the **[MIT](LICENSE)** license. If you find this project helpful, please give it a ⭐ **Star** for encouragement!
