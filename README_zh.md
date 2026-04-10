@@ -107,7 +107,13 @@ graph TD
 
 ## 📈 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
+<a href="https://www.star-history.com/?repos=KardeniaPoyu%2FMiniRAGuard&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## 🤝 参与贡献与开源协议
 
