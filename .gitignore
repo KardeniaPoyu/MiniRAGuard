@@ -1,39 +1,37 @@
-# --- Secrets / env ---
-.env
-.env.*
-*.env
-
-# --- Python ---
+# Python
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-coverage.xml
-htmlcov/
+*$py.class
 .venv/
-venv/
-
-# --- Backend runtime artifacts (per tech doc v1.6) ---
-cache.db
-backend/cache.db
-backend/vector_store/
-
-# --- Logs ---
-*.log
-
-# --- Node / frontend build artifacts (if any) ---
-node_modules/
+build/
 dist/
+*.egg-info/
 
-# --- UniApp / HBuilderX / IDE ---
-.hbuilderx/
+# Environment
+.env
+
+# Database & Cache
+*.db
+*.log
+vector_store/
+cache/
+
+# AI IDE & Tools
+.cursorrules
+.gemini/
+.antigravity/
+.cortex/
 .idea/
 .vscode/
 
-# --- OS ---
-Thumbs.db
-Desktop.ini
-.DS_Store
+# Project Specific
+log.txt
+reflog.txt
+demo.mp4
+backend/.env
+miniraguard/cache.db
+examples/rent_assistant/backend/cache.db
 
+# OS
+.DS_Store
+Thumbs.db

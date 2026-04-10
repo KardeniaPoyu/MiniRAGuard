@@ -31,9 +31,10 @@
 ## 📖 目次
 
 - [✨ MiniRAGuard とは？](#-miniraguard-とは)
+- [🏗️ ディレクトリ構造](#-ディレクトリ構造)
+- [🚀 クイックスタート](#-クイックスタート)
 - [🔥 核心的なハイライト](#-核心的なハイライト)
 - [🏗️ 技術アーキテクチャ](#-技術アーキテクチャ)
-- [🚀 クイックスタート](#-クイックスタート)
 - [🛠️ 独自の AI エージェントを構築する](#-独自の-ai-エージェントを構築する)
 - [🤝 貢献とライセンス](#-貢献とライセンス)
 
@@ -41,7 +42,7 @@
 
 ## ✨ MiniRAGuard とは？
 
-医療監査、財務報告、苦情審査などの**垂直監査領域**において、開発者は「画像の不鮮明さ」「LLM のハルシネーション（幻覚）」「高頻度のリクエスト処理」という 3 つの大きな課題に直面しています。
+監査、財務報告、苦情審査などの**垂直監査領域**において、開発者は「画像の不鮮明さ」「LLM のハルシネーション（幻覚）」「高頻度のリクエスト処理」という 3 つの大きな課題に直面しています。
 
 これらに対し、**MiniRAGuard** は**極めて軽量で、すぐに使える**フルスタック RAG ビジネステンプレートを提供します。**VLM (視覚大モデル)** と **RAG (検索拡張生成)** を組み合わせ、AI がローカルのナレッジベースに基づいて厳密に推論することを強制。これにより、開発者はドキュメント検索と出力制限メカニズムを垂直領域のアプリケーションに迅速に組み込むことができます。
 
@@ -49,11 +50,11 @@
 
 ---
 
-## 🚀 🚀 ビジネスデモ (Demo)
+## 🚀 ビジネスデモ (Demo)
 
-組み込みの **「領収書/契約コンプライアンスリスク監査アシスタント」** インスタンスのデモ：
+組み込みのデモ： **「賃貸アシスタント/契約コンプライアンスリスク監査」** は `examples/rent_assistant` ディレクトリにあります。
 
-<video src="./demo.mp4" width="100%" controls></video>
+[**デモ動画を表示 (GitHub Issue 添付)**](https://github.com/KardeniaPoyu/MiniRAGuard/issues/1)
 
 <br/>
 
@@ -73,9 +74,49 @@
 
 ---
 
-## 🏗️ 技術アーキテクチャ
+## 🏗️ ディレクトリ構造 (Structure)
 
-高い凝集度と低い結合度の設計思想に基づき、スムーズなビジネスフローを実現：
+```text
+.
+├── miniraguard/          # 抽象コアフレームワーク (Abstract Core)
+├── examples/
+│   └── rent_assistant/   # 公式デモ「賃貸アシスタント」
+│       ├── backend/      # 業務ロジック実装
+│       ├── frontend/     # UniApp モバイル源码
+│       └── data/         # 業務ナレッジ / ベクトル DB ストレージ
+├── docs/                 # ドキュメント
+└── tests/                # ユニットテスト
+```
+
+---
+
+## 🚀 クイックスタート (賃貸アシスタントを例に)
+
+### 1. バックエンドのデプロイ
+
+```bash
+# 1. クローンしてディレクトリに移動
+git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
+cd MiniRAGuard/examples/rent_assistant/backend
+
+# 2. 依存関係のインストールと環境設定
+pip install -r ../../../requirements.txt 
+cp .env.example .env # API キーを入力
+
+# 3. 起動！
+python main.py
+```
+
+### 2. フロントエンドのデプロイ
+
+1. [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE をダウンロードしてインストールします。
+2. `examples/rent_assistant/frontend` ディレクトリをインポート。
+3. `config.js` の `BASE_URL` をデプロイしたバックエンドのアドレスに更新します。
+4. 内蔵ブラウザまたは WeChat DevTools で実行！
+
+---
+
+## 🏗️ 技術アーキテクチャ
 
 ```mermaid
 graph TD
@@ -85,62 +126,33 @@ graph TD
         API_Gateway -->|1. 視覚解析| VL[VLM エンジン]
         VL -->|2. テキスト内容| RAG_Engine[軽量 RAG]
         
-        subgraph ローカルナレッジベース
-            RAG_Engine <-->|3. 知識マッチング| VectorDB[(ローカルベクトルDB)]
+        subgraph 本地知识库
+            RAG_Engine <-->|3. 知识匹配| VectorDB[(ローカルベクトルDB)]
         end
         
         RAG_Engine -->|4. 拡張コンテキスト| LLM[DeepSeek モデル]
     end
     
     LLM -->|5. 構造化結果| API_Gateway
-    API_Gateway -->|6. 動的レンダリング| User
+    API_Gateway -->|6. 动态呈现在| User
 ```
-
----
-
-## 🚀 クイックスタート
-
-### 1. バックエンドのデプロイ
-
-```bash
-# 1. リポジトリをクローン
-git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
-cd MiniRAGuard/backend
-
-# 2. Python 依存関係のインストール
-pip install -r requirements.txt
-
-# 3. 環境設定 (API キーを入力)
-cp .env.example .env
-
-# 4. 起動！
-python main.py
-```
-> 👉 `http://localhost:8000/docs` にアクセスして、インタラクティブな API ドキュメントを表示。
-
-### 2. フロントエンドのデプロイ
-
-1. [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE をダウンロード。
-2. `frontend` ディレクトリをインポート。
-3. `config.js` の `BASE_URL` を新しくデプロイしたバックエンドサービスに向けます。
-4. 内蔵ブラウザまたは WeChat DevTools で実行！
 
 ---
 
 ## 🛠️ 独自の AI エージェントを構築する
 
-1. **プライベートナレッジの注入**: `backend/data/` をクリアし、独自の TXT または Markdown マニュアルを追加します。
-2. **ベクトルインデックスの再構築**: `vector_store/` ディレクトリを削除します。次回の起動時に自動的に再構築されます。
-3. **ビジネスロジックの調整**: `backend/core/chat_tool.py` のシステムプロンプトを修正します。
+1. **ナレッジの注入**: `examples/rent_assistant/data/` をクリアし、独自の TXT や Markdown を追加。
+2. **インデックスの再構築**: 既存の `vector_store` を削除すると、次回の起動時に自動的に再構築されます。
+3. **ロジックの調整**: `examples/rent_assistant/backend/prompts.py` のシステムプロンプトを修正します。
 
 ---
 
-## 📈 スター履歴
+## 📈 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
 
 ## 🤝 貢献とライセンス
 
-誤字の修正でも、驚くようなプロダクションアプリの構築でも、プルリクエストをお待ちしています！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+誤字の修正から、MiniRAGuard を使った素晴らしいアプリケーションの構築まで、プルリクエストをお待ちしています！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
 
-このプロジェクトは **[MIT](LICENSE)** ライセンスの下で公開されています。このプロジェクトが役立った場合は、⭐ **Star** をいただけると励みになります！
+このプロジェクトは **[MIT](LICENSE)** ライセンスの下で公開されています。役立った場合は、⭐ **Star** をいただけると励みになります！
