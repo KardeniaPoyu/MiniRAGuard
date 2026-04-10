@@ -4,8 +4,8 @@
   <h1>🛡️ MiniRAGuard</h1>
 
   <p>
-    <strong>A Plug-and-Play Multimodal RAG Guardrail Framework</strong><br>
-    <em>让任何人用 10 分钟，从零构建企业级文档智能风控系统。</em>
+    <strong>轻量级全栈 RAG 智能体模板 (含 Vue + FastAPI 完整源码)</strong><br>
+    <em>以租房中介与合同合规审查为官方 Demo，助你快速搭建属于自己的垂直领域多模态 AI 助手。</em>
   </p>
 
   <p>
@@ -28,114 +28,93 @@
 
 <br/>
 
-## ✨ 什么是 MiniRAGuard?
+## 📖 目录
 
-在各类**垂直审核领域**（如医疗审核、财务报表、信访维权、合同法务），我们经常面临三大阻碍：**图片数据模糊**、**大模型幻觉频发**、**高并发难以承载**。
-
-**MiniRAGuard** 提供了一个**极轻量、开箱即用**的开源全栈解决方案（后端分析引擎 + 跨端小程序）。它创新性地结合了 **VLM (大视觉模型)** 和 **RAG (检索增强生成)**，强制 AI 基于你的本地知识库进行事实推理。
-
-无论你是想搭建一个“医疗单据智审助手”，还是“社区民情研判总机”，只需**扔进你的 TXT 库，修改一段 Prompt**，即可立刻上线。
+- [✨ 什么是 MiniRAGuard？](#-什么是-miniraguard)
+- [🔥 核心亮点](#-核心亮点)
+- [🏗️ 技术架构](#-技术架构)
+- [🚀 快速开始](#-快速开始)
+- [🛠️ 打造属于你的 AI 智能体](#-打造属于你的-ai-智能体)
+- [🤝 贡献与许可](#-贡献与许可)
 
 ---
 
-## 🚀 业务实例演示 (Demo)
+## ✨ 什么是 MiniRAGuard？
 
-以自带的 **“单据/合同合规风控助手”** 实例为演示：
+在医疗审核、财务报表、信访审查等**垂直审核领域**，开发者常面临三大痛点：**图像数据模糊无序**、**LLM 幻觉频发**、**高并发请求难处理**。
 
-<video src="./demo.mp4" width="100%" controls></video>
+**MiniRAGuard** 提供了一个**极轻量、开箱即用**的开源全栈智能体模板。它创新地将 **VLM（视觉大模型）** 与 **RAG（检索增强生成）** 相结合，强迫 AI 严格基于你的本地知识库进行推理。
 
-<br/>
+不仅是一个简单的 RAG 实现，它还自带了完整的业务展示界面。只需**将 TXT 放入库中并修改一段 Prompt**，即可上线属于你的垂直领域助手。
 
-## 🔥 核心功能
+---
 
-- **基于 Qwen-VL API 的视觉提取 (Vision LLM)**
-  系统调用 Qwen-VL API 进行图像信息的识别与提取，相较于传统 OCR 能够更好地处理包含复杂排版、手写字体或画质不佳的源文档，提升非结构化图像的文本转换准确率。
-- **结合本地知识库的 RAG 检索生成 (Fact-based RAG)**
-  针对法务、财务等严肃场景，系统使用 Sentence-Transformers 构建本地向量数据库（VectorDB）。大模型在进行推理前会优先从本地数据库检索相关的规范条例，从而减少常识性“幻觉”并提供具体的判断出处。
-- **基本并发与缓存控制 (Concurrency & Caching)**
-  - **MD5 缓存机制**：计算文件 MD5，拦截重复文件的校验请求并直接返回本地缓存，减少不必要的 LLM API 调用开销及响应时间。
-  - **并发信号量控制**：后端部署了基于信号量的线程流控机制，限制高并发场景下抛向大模型的并发数，保障服务稳定运行。
-- **前后端分离架构 (Full-Stack Support)**
-  提供基于 FastAPI 的纯异步服务端，以及使用 Vue/UniApp 编写的跨平台客户端代码（支持 Web 及微信小程序），开发者部署后即可直接使用完整业务流。
+## 🔥 核心亮点
+
+- **开箱即用的多模态文档接入**  
+  集成了主流的 VLM 接口调用逻辑，支持直接上传合同扫描件、图片或 PDF，快速提取关键信息，开发者无需从零编写复杂的多模态解析代码。
+- **轻量级合规审查工作流**  
+  内置了一套基础的“审查-反馈” Prompt 模板设计，能有效约束大模型在处理敏感文本（如租约、格式条款）时的输出边界，非常适合进行业务侧的 PoC（概念验证）。
+- **前后端分离的完整业务脚手架**  
+  提供 `backend` (FastAPI) 和 `frontend` (Vue/UniApp) 完整的工程化源码。开发者不仅能学到 RAG 怎么写，还能直接拥有一套可以直接向老板或导师演示的 UI 界面。
+- **并发与缓存控制机制**
+  - **MD5 缓存机制**：通过计算文件 MD5 拦截重复审核，减少 API Token 消耗。
+  - **信号量限流**：后端限流机制，在流量高峰时保证服务稳定。
 
 ---
 
 ## 🏗️ 技术架构
 
-秉承高内聚、低耦合的优雅设计理念，业务流如丝般顺滑：
+秉持高内聚低耦合的设计理念：
 
 ```mermaid
 graph TD
-    User((Client Device)) -->|Upload Image Base64| API_Gateway[FastAPI Gateway]
+    User((客户端)) -->|上传图片| API_Gateway[FastAPI 网关]
     
-    subgraph Modular AI Pipeline
-        API_Gateway -->|1. Vision Parse| VL[VLM Engine]
-        VL -->|2. High-confidence Text| RAG_Engine[Lightweight RAG]
+    subgraph 模块化 AI 管道
+        API_Gateway -->|1. 视觉解析| VL[VLM 引擎]
+        VL -->|2. 文本内容| RAG_Engine[轻量级 RAG]
         
-        subgraph Local Knowledge Base
-            RAG_Engine <-->|3. Chunk Match| VectorDB[(Local Vector Store)]
+        subgraph 本地知识库
+            RAG_Engine <-->|3. 知识匹配| VectorDB[(本地向量库)]
         end
         
-        RAG_Engine -->|4. Strict Context| LLM[Generative DL DeepSeek]
+        RAG_Engine -->|4. 增强上下文| LLM[执行模型 DeepSeek]
     end
     
-    LLM -->|5. Structured JSON| API_Gateway
-    API_Gateway -->|6. Dynamic Rendering| User
+    LLM -->|5. 结构化结果| API_Gateway
+    API_Gateway -->|6. 动态呈现| User
 ```
 
 ---
 
 ## 🚀 快速开始
 
-构建你的 AI 应用？只需十分钟！
-
-### 1. 部署高可用后端 (Backend)
+### 1. 部署后端 (Backend)
 
 ```bash
-# 1. 克隆代码仓库
-git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
-cd MiniRAGuard/backend
-
-# 2. 安装 Python 依赖 
+cd backend
 pip install -r requirements.txt
-
-# 3. 环境变量配置 (填入你的 API KEY)
 cp .env.example .env
-
-# 4. 一键起飞！
+# 编辑 .env 填入 API Keys
 python main.py
 ```
-> 👉 访问 `http://localhost:8000/docs` 查看交互式 API 文档。
 
-### 2. 部署跨端客户端 (Frontend)
+### 2. 部署前端 (Frontend)
 
-1. 下载 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE。
-2. 将 `frontend` 目录导入。
-3. 修改 `config.js` 中的 `BASE_URL` 为你刚刚部署的后端服务地址。
-4. 一键运行至内置浏览器或微信开发者工具！
+1. 使用 [HBuilderX](https://www.dcloud.io/hbuilderx.html) 打开 `frontend` 目录。
+2. 运行至浏览器。
 
 ---
 
-## 🛠️ 打造你自己的应用
-把这套框架变成你的专属利器！黄金三步走：
+## 🛠️ 打造属于你的 AI 智能体
 
-1. **注入私有知识**：清空 `backend/data/` 目录，扔进符合你业务场景的 TXT 或 Markdown 手册。
-2. **清理缓存重塑**：删除 `backend/cache.db` 和 `vector_store/` 目录，系统下次启动将自动“消化”新知识。
-3. **注入灵魂 Prompt**：打开 `backend/core/chat_tool.py`，更改顶栏的 System Prompt 定位。（比如从“风控顾问”改成“三甲医院财务报销审核员”）。
-
----
-
-## 📈 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=KardeniaPoyu/MiniRAGuard&type=Date)](https://star-history.com/#KardeniaPoyu/MiniRAGuard&Date)
+1. **注入私有知识**：清空 `backend/data/`，放入你的 TXT 或 Markdown 手册。
+2. **重建向量索引**：删除 `vector_store/` 目录，下次启动将自动重新构建。
+3. **调整业务逻辑**：修改 `backend/core/chat_tool.py` 中的 System Prompt。
 
 ---
 
-## 🤝 参与贡献与开源协议
+## 🤝 贡献与许可
 
-**“致敬开源精神。”**
-
-无论你是修补了一个拼写错误，还是在你的业务中用 MiniRAGuard 做出了惊艳的落地应用，我们都期待你的 Pull Request！详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-本项目采用 **[MIT](LICENSE)** 开源协议。如果你觉得这个项目对你有帮助，不妨点一个 ⭐ **Star** 鼓励一下作者！
-
+本项目采用 **[MIT](LICENSE)** 开源协议。欢迎提交 Pull Request！
