@@ -126,15 +126,15 @@ graph TD
         API_Gateway -->|1. 視覚解析| VL[VLM エンジン]
         VL -->|2. テキスト内容| RAG_Engine[軽量 RAG]
         
-        subgraph 本地知识库
-            RAG_Engine <-->|3. 知识匹配| VectorDB[(ローカルベクトルDB)]
+        subgraph ローカルナレッジベース
+            RAG_Engine <-->|3. 知識マッチング| VectorDB[(ローカルベクトルDB)]
         end
         
         RAG_Engine -->|4. 拡張コンテキスト| LLM[DeepSeek モデル]
     end
     
     LLM -->|5. 構造化結果| API_Gateway
-    API_Gateway -->|6. 动态呈现在| User
+    API_Gateway -->|6. 動的なレンダリング| User
 ```
 
 ---
