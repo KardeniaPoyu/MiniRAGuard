@@ -54,7 +54,7 @@ Addressing these three points, **MiniRAGuard** provides a **lightweight, out-of-
 
 Demonstrating with the built-in **"Receipt/Contract Compliance Risk Assistant"** instance located in `examples/rent_assistant`:
 
-[**Click to View Demo Video (GitHub Issue Attachment)**](https://github.com/KardeniaPoyu/MiniRAGuard/issues/1)
+https://github.com/KardeniaPoyu/MiniRAGuard/issues/1
 
 <br/>
 

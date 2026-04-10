@@ -35,15 +35,18 @@
 - [🚀 快速开始](#-快速开始)
 - [🔥 核心功能](#-核心功能)
 - [🏗️ 技术架构](#-技术架构)
+- [🛠️ 打造属于你的 AI 智能体](#-打造属于你的 AI 智能体)
 - [🤝 贡献与许可](#-贡献与许可)
 
 ---
 
 ## ✨ 什么是 MiniRAGuard？
 
-针对垂直审核领域的痛点，**MiniRAGuard** 提供了一个**极轻量、开箱即用**的全栈 RAG 业务模板。它采用了**核心框架 (miniraguard) 与业务 Demo (examples) 分离**的架构，确保工程上的确定性与边界控制。
+在医疗审核、财务报表、信访审查等**垂直审核领域**，开发者常面临三大痛点：**图像数据模糊无序**、**LLM 幻觉频发**、**高并发请求难处理**。
 
-只需**提供你的业务 Prompt 并注入知识库**，即可上线属于你的垂直领域助手。项目非常方便初学者学习 RAG 架构及部署上线。
+针对这三点，**MiniRAGuard** 提供了一个**极轻量、开箱即用**的全栈 RAG 业务模板。它将 **VLM（视觉大模型）** 与 **RAG（检索增强生成）** 相结合，强迫 AI 严格基于你的本地知识库进行推理，帮助开发者快速为垂直领域应用接入文档检索与输出约束机制。
+
+**MiniRAGuard** 旨在为 LLM 赋能的复杂文档审查流程提供工程上的确定性与边界控制。它不仅包含一个极简的 RAG 实现，还自带了完整的业务展示界面。只需**将 TXT 放入库中并修改一段 Prompt**，即可上线属于你的垂直领域助手，十分钟完成一个微信小程序/网站的上线及部署，非常方便初学者学习 RAG 架构。
 
 ---
 
@@ -51,58 +54,23 @@
 
 自带的项目落地 Demo： **“租房/合同合规风控助手”** 位于 `examples/rent_assistant` 目录下。
 
-[**点击查看演示视频 (GitHub Issue 附件)**](https://github.com/KardeniaPoyu/MiniRAGuard/issues/1)
+https://github.com/KardeniaPoyu/MiniRAGuard/issues/1
 
 <br/>
 
 ## 🔥 核心功能
 
-- **Fact-based RAG 检索生成**：利用 `miniraguard` 核心引擎，结合 Sentence-Transformers 本地向量库，有效减少幻觉。
-- **开箱即用的多模态接入**：默认集成 Qwen-VL API，轻松处理扫描件/图片。
-- **物理隔离的业务逻辑**：业务代码与框架代码彻底分离，方便二次开发。
-- **全栈移动端脚手架**：配套 UniApp (Vue) 移动端源码，支持微信小程序。
-
----
-
-## 🏗️ 目录结构 (Structure)
-
-```text
-.
-├── miniraguard/          # 核心框架代码 (Abstract Core)
-├── examples/
-│   └── rent_assistant/   # 官方落地 Demo (Rental Assistant)
-│       ├── backend/      # 业务逻辑实现
-│       ├── frontend/     # UniApp 移动端源码
-│       └── data/         # 业务知识库/向量库存储
-├── docs/                 # 项目文档
-└── tests/                # 单元测试
-```
-
----
-
-## 🚀 快速开始 (以租房助手 Demo 为例)
-
-### 1. 部署后端 (Backend)
-
-```bash
-# 1. 克隆并进入目录
-git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
-cd MiniRAGuard/examples/rent_assistant/backend
-
-# 2. 安装依赖并配置环境
-pip install -r ../../../requirements.txt 
-cp .env.example .env # 填入你的 API KEY
-
-# 3. 启动！
-python main.py
-```
-
-### 2. 部署前端 (Frontend)
-
-1. 下载并安装 [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE。
-2. 将 `examples/rent_assistant/frontend` 目录导入。
-3. 修改 `config.js` 中的 `BASE_URL` 为你刚刚部署的后端服务地址。
-4. 一键运行至内置浏览器或微信开发者工具！
+- **结合本地知识库的 RAG 检索生成 (Fact-based RAG)**
+  针对法务、财务等严肃场景，系统使用 Sentence-Transformers 构建本地向量数据库（VectorDB）。大模型在进行推理前会优先从本地数据库检索相关的规范条例，从而减少常识性“幻觉”并提供具体的判断出处。
+- **开箱即用的多模态文档接入**  
+  集成了主流的 VLM 接口调用逻辑（默认Qwen-VL API），支持直接上传合同扫描件、图片或 PDF，快速提取关键信息，开发者无需从零编写复杂的多模态解析代码。
+- **轻量级合规审查工作流**  
+  内置了一套基础的“审查-反馈” Prompt 模板设计，能有效约束大模型在处理敏感文本（如租约、格式条款）时的输出边界，非常适合进行业务侧的 PoC（概念验证）。
+- **前后端分离的完整业务脚手架**  
+  提供 `backend` (FastAPI) 和 `frontend` (Vue/UniApp) 完整的工程化源码。开发者不仅能学到 RAG 怎么写，还能直接拥有一套可以直接向老板或导师演示的 UI 界面。
+- **基本并发与缓存控制 (Concurrency & Caching)**
+  - **MD5 缓存机制**：计算文件 MD5，拦截重复文件的校验请求并直接返回本地缓存，减少不必要的 LLM API 调用开销及响应时间。
+  - **并发信号量控制**：后端部署了基于信号量的线程流控机制，限制高并发场景下抛向大模型的并发数，保障服务稳定运行。
 
 ---
 
