@@ -54,7 +54,7 @@
 
 自带的项目落地 Demo： **“租房/合同合规风控助手”** 位于 `examples/rent_assistant` 目录下。
 
-https://github.com/KardeniaPoyu/MiniRAGuard/issues/1
+https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
 <br/>
 

@@ -54,7 +54,7 @@
 
 組み込みのデモ： **「賃貸アシスタント/契約コンプライアンスリスク監査」** は `examples/rent_assistant` ディレクトリにあります。
 
-https://github.com/KardeniaPoyu/MiniRAGuard/issues/1
+https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
 <br/>
 
