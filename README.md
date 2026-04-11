@@ -74,7 +74,7 @@ https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
 ---
 
-## 🏗️ Directory Structure (Structure)
+## 🏗️ Directory Structure
 
 ```text
 .
