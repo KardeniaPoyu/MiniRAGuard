@@ -21,6 +21,8 @@ def init_db() -> None:
                 enterprise_name TEXT DEFAULT '',    -- 涉黑企业/单位标识
                 personnel_count INTEGER DEFAULT 1,  -- 涉及人数
                 amount REAL DEFAULT 0.0,            -- 涉案金额
+                claimant_privacy TEXT DEFAULT '公开', -- 保密/公开
+                prosecution_decision TEXT DEFAULT '待定', -- 待定/拟起诉/不起诉
                 
                 alert_level TEXT DEFAULT '',        -- 预警等级：红/黄/蓝
                 alert_factors TEXT DEFAULT '[]',    -- 触发的多维风险因素 (json array)
@@ -37,13 +39,13 @@ def init_db() -> None:
             )
         """)
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS collaboration_tasks (
+            CREATE TABLE IF NOT EXISTS push_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 clue_id INTEGER,
                 to_dept TEXT,
                 req_content TEXT,
-                feedback TEXT DEFAULT '',
-                evidence_urls TEXT DEFAULT '[]', -- 证据交换记录
+                feedback_content TEXT DEFAULT '',
+                feedback_images TEXT DEFAULT '[]', -- 证据交换记录
                 status TEXT DEFAULT '待签收', -- 待签收/处理中/已反馈
                 request_time TEXT,
                 feedback_time TEXT
@@ -59,6 +61,26 @@ def init_db() -> None:
                 blue_alert INTEGER DEFAULT 0,
                 pushed INTEGER,
                 resolved INTEGER
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE,
+                hashed_password TEXT,
+                role TEXT,
+                real_name TEXT,
+                created_at TEXT
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                action TEXT,
+                details TEXT,
+                ip_address TEXT,
+                created_at TEXT
             )
         """)
         conn.commit()
@@ -96,11 +118,11 @@ def update_clue_risk(clue_id: int, risk_level: str, risk_summary: str, risk_deta
         )
         conn.commit()
 
-def create_collaboration_task(clue_id: int, to_dept: str, req_content: str) -> int:
+def create_push_record(clue_id: int, to_dept: str, req_content: str) -> int:
     now = _now_iso()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute(
-            "INSERT INTO collaboration_tasks (clue_id, to_dept, req_content, request_time) VALUES (?, ?, ?, ?)",
+            "INSERT INTO push_records (clue_id, to_dept, req_content, request_time) VALUES (?, ?, ?, ?)",
             (clue_id, to_dept, req_content, now)
         )
         # Update clue assignment marking
@@ -108,13 +130,13 @@ def create_collaboration_task(clue_id: int, to_dept: str, req_content: str) -> i
         conn.commit()
         return cur.lastrowid
 
-def feedback_collaboration_task(task_id: int, feedback: str, evidence_urls: list = None) -> None:
+def feedback_push_record(task_id: int, feedback_content: str, feedback_images: list = None) -> None:
     now = _now_iso()
-    evidence_str = json.dumps(evidence_urls or [], ensure_ascii=False)
+    images_str = json.dumps(feedback_images or [], ensure_ascii=False)
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
-            "UPDATE collaboration_tasks SET feedback=?, evidence_urls=?, feedback_time=?, status='已反馈' WHERE id=?",
-            (feedback, evidence_str, now, task_id)
+            "UPDATE push_records SET feedback_content=?, feedback_images=?, feedback_time=?, status='已反馈' WHERE id=?",
+            (feedback_content, images_str, now, task_id)
         )
         conn.commit()
 
@@ -139,12 +161,12 @@ def get_clue(clue_id: int) -> dict | None:
                     pass
         
         # Get tasks
-        tasks = conn.execute("SELECT * FROM collaboration_tasks WHERE clue_id=?", (clue_id,)).fetchall()
+        tasks = conn.execute("SELECT * FROM push_records WHERE clue_id=?", (clue_id,)).fetchall()
         res['tasks'] = [dict(t) for t in tasks]
         for task in res['tasks']:
-            if task.get('evidence_urls'):
+            if task.get('feedback_images'):
                 try:
-                    task['evidence_urls'] = json.loads(task['evidence_urls'])
+                    task['feedback_images'] = json.loads(task['feedback_images'])
                 except:
                     pass
         return res
@@ -218,3 +240,39 @@ def seed_mock_data():
     ]
     for d in data:
         create_clue(*d)
+
+def seed_users():
+    from core.auth_tool import get_password_hash
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        if c > 0: return
+        now = _now_iso()
+        users = [
+            ("admin", get_password_hash("admin123"), "管理员", "系统管理员", now),
+            ("director", get_password_hash("dir123"), "部门负责人", "张主任", now),
+            ("procurator", get_password_hash("proc123"), "检察官", "李检察官", now),
+            ("observer", get_password_hash("obs123"), "观察员", "测试观察员", now)
+        ]
+        conn.executemany("INSERT INTO users (username, hashed_password, role, real_name, created_at) VALUES (?, ?, ?, ?, ?)", users)
+        conn.commit()
+
+def get_user_by_username(username: str) -> dict | None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+        return dict(row) if row else None
+
+def create_audit_log(username: str, action: str, details: str, ip: str = "") -> None:
+    now = _now_iso()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "INSERT INTO audit_logs (username, action, details, ip_address, created_at) VALUES (?, ?, ?, ?, ?)",
+            (username, action, details, ip, now)
+        )
+        conn.commit()
+        
+def get_audit_logs(limit: int = 100) -> list:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
+        return [dict(r) for r in rows]

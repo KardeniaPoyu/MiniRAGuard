@@ -22,7 +22,7 @@
               </div>
             </el-descriptions-item>
           </el-descriptions>
-          <div style="margin-top: 20px" v-if="clue.status === '待研判'">
+          <div style="margin-top: 20px" v-if="clue.status === '待研判' && role !== '观察员'">
             <el-button type="primary" size="large" @click="handleJudge" :loading="judging">提取证据并进行 AI 智能定性分流</el-button>
           </div>
         </el-card>
@@ -42,7 +42,7 @@
           <div style="font-weight:bold; margin-bottom:10px;">智能草拟检察建议/移送信：</div>
           <el-input type="textarea" :rows="5" v-model="clue.risk_detail.procuratorial_advice" />
           
-          <div style="margin-top:20px;">
+          <div style="margin-top:20px;" v-if="role !== '观察员'">
             <div style="font-weight:bold; margin-bottom:10px;">发起跨单位协同流转：</div>
             <el-select v-model="pushDept" style="width:100%; margin-bottom:10px;" placeholder="选择推送单位">
               <el-option label="人力资源与社会保障局(劳动仲裁委)" value="人社局" />
@@ -68,6 +68,7 @@ const router = useRouter()
 const clue = ref(null)
 const judging = ref(false)
 const pushDept = ref('')
+const role = ref(localStorage.getItem('role'))
 
 const loadClue = async () => {
   const res = await api.getClue(route.params.id)
@@ -76,20 +77,28 @@ const loadClue = async () => {
 
 const handleJudge = async () => {
   judging.value = true
-  await api.judgeClue(route.params.id)
-  ElMessage.success('AI 已进行定性分流')
-  await loadClue()
+  try {
+    await api.judgeClue(route.params.id)
+    ElMessage.success('AI 已进行定性分流')
+    await loadClue()
+  } catch(e) {
+    ElMessage.error(e.response?.data?.detail || '暂无权限')
+  }
   judging.value = false
 }
 
 const handlePush = async () => {
   if(!pushDept.value) return ElMessage.warning('请选择单位')
-  await api.pushTask(route.params.id, { 
-    to_dept: pushDept.value, 
-    req_content: clue.value.risk_detail.procuratorial_advice || "请核查此线索" 
-  })
-  ElMessage.success('工单已派发至政法/行政网')
-  router.push('/cases')
+  try {
+    await api.pushTask(route.params.id, { 
+      to_dept: pushDept.value, 
+      req_content: clue.value.risk_detail.procuratorial_advice || "请核查此线索" 
+    })
+    ElMessage.success('工单已派发至政法/行政网')
+    router.push('/cases')
+  } catch(e) {
+    ElMessage.error(e.response?.data?.detail || '暂无权限')
+  }
 }
 
 onMounted(() => loadClue())
