@@ -6,12 +6,12 @@ const api = axios.create({
 })
 
 export default {
-  createClue: (data) => api.post('/clues', data),
+  ingestClue: (data) => api.post('/ingest', data),
   getClue: (id) => api.get(`/clues/${id}`),
   listClues: (params) => api.get('/clues', { params }),
   judgeClue: (id) => api.post(`/clues/${id}/judge`),
-  pushClue: (id, department) => api.post(`/clues/${id}/push`, { department }),
-  resolveClue: (id, feedback) => api.post(`/clues/${id}/resolve`, { feedback }),
+  pushTask: (id, payload) => api.post(`/clues/${id}/push_task`, payload),
+  feedbackTask: (taskId, payload) => api.post(`/tasks/${taskId}/feedback`, payload),
+  resolveClue: (id) => api.post(`/clues/${id}/resolve`),
   getStats: () => api.get('/stats'),
-  chat: (question, context, history) => api.post('/chat', { question, context, history })
 }

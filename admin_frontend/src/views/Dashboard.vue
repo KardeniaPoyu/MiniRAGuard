@@ -3,39 +3,46 @@
     <el-row :gutter="20" class="stat-cards">
       <el-col :span="6">
         <el-card shadow="hover">
-          <div class="stat-title">线索总数</div>
+          <div class="stat-title">全域线索总量</div>
           <div class="stat-value">{{ stats.total }}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
-          <div class="stat-title">高风险数</div>
-          <div class="stat-value text-danger">{{ highRiskCount }}</div>
+        <el-card shadow="hover" style="background-color: #fff0f0">
+          <div class="stat-title">红色重大预警</div>
+          <div class="stat-value text-danger">{{ redAlerts }}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
-          <div class="stat-title">已推送数</div>
-          <div class="stat-value text-primary">{{ pushedCount }}</div>
+        <el-card shadow="hover" style="background-color: #fffaf0">
+          <div class="stat-title">黄色群体预警</div>
+          <div class="stat-value text-warning">{{ yellowAlerts }}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
-          <div class="stat-title">办结率</div>
-          <div class="stat-value text-success">{{ resolvedRate }}%</div>
+        <el-card shadow="hover" style="background-color: #f0f9eb">
+          <div class="stat-title">蓝色苗头预警</div>
+          <div class="stat-value text-primary">{{ blueAlerts }}</div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="charts-row">
+    <el-row :gutter="20" class="charts-row" style="margin-top: 20px;">
       <el-col :span="12">
-        <el-card header="各领域线索分布">
-          <div ref="pieChart" class="chart-box"></div>
+        <el-card header="高发涉案企业排行榜 Top 5">
+          <el-table :data="stats.hot_enterprises" style="width: 100%">
+            <el-table-column type="index" label="排名" width="80" />
+            <el-table-column prop="name" label="企业/工程名称" />
+            <el-table-column prop="count" label="被诉次数" width="100">
+               <template #default="s"><el-tag type="danger">{{ s.row.count }}次</el-tag></template>
+            </el-table-column>
+            <el-table-column prop="personnel" label="关联人数" width="100" />
+          </el-table>
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card header="线索流转漏斗">
-          <div ref="funnelChart" class="chart-box"></div>
+        <el-card header="线索办理状态分布">
+          <div ref="pieChart" class="chart-box"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -46,53 +53,26 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import api from '../api'
 
-const stats = ref({ total: 0, status_distribution: {}, risk_distribution: {}, domain_distribution: {} })
+const stats = ref({ total: 0, status_distribution: {}, alert_distribution: {}, hot_enterprises: [] })
 const pieChart = ref(null)
-const funnelChart = ref(null)
 
-const highRiskCount = computed(() => stats.value.risk_distribution['高风险'] || 0)
-const pushedCount = computed(() => stats.value.status_distribution['已推送'] || 0)
-const resolvedCount = computed(() => stats.value.status_distribution['已办结'] || 0)
-const resolvedRate = computed(() => {
-  if (stats.value.total === 0) return 0
-  return ((resolvedCount.value / stats.value.total) * 100).toFixed(1)
-})
+const redAlerts = computed(() => stats.value.alert_distribution['红色预警'] || 0)
+const yellowAlerts = computed(() => stats.value.alert_distribution['黄色预警'] || 0)
+const blueAlerts = computed(() => stats.value.alert_distribution['蓝色预警'] || 0)
 
 const renderCharts = () => {
   const echarts = window.echarts
-  if (!echarts) return
+  if (!echarts || !pieChart.value) return
 
-  // Pie Chart
   const pie = echarts.init(pieChart.value)
-  const pieData = Object.entries(stats.value.domain_distribution || {}).map(([name, value]) => ({ name, value }))
+  const pieData = Object.entries(stats.value.status_distribution || {}).map(([name, value]) => ({ name, value }))
   pie.setOption({
     tooltip: { trigger: 'item' },
     legend: { orient: 'vertical', left: 'left' },
-    color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'],
-    series: [{ name: '领域分布', type: 'pie', radius: '50%', data: pieData }]
+    series: [{ name: '当前状态', type: 'pie', radius: '60%', data: pieData }]
   })
 
-  // Funnel Chart
-  const funnel = echarts.init(funnelChart.value)
-  funnel.setOption({
-    tooltip: { trigger: 'item', formatter: '{a} <br/>{b} : {c}' },
-    series: [{
-      name: '处置流程', type: 'funnel', left: '10%', top: 60, bottom: 60, width: '80%',
-      min: 0, max: stats.value.total === 0 ? 1 : stats.value.total, minSize: '0%', maxSize: '100%',
-      sort: 'descending', gap: 2,
-      data: [
-        { value: stats.value.total, name: '录入线索' },
-        { value: stats.value.total - (stats.value.status_distribution['待研判']||0), name: '已研判' },
-        { value: pushedCount.value + resolvedCount.value, name: '已推送' },
-        { value: resolvedCount.value, name: '已办结' }
-      ]
-    }]
-  })
-
-  window.addEventListener('resize', () => {
-    pie.resize()
-    funnel.resize()
-  })
+  window.addEventListener('resize', pie.resize)
 }
 
 onMounted(async () => {
@@ -109,11 +89,10 @@ onMounted(async () => {
 
 <style scoped>
 .stat-cards { margin-bottom: 20px; }
-.stat-title { font-size: 14px; color: #909399; margin-bottom: 10px; }
-.stat-value { font-size: 24px; font-weight: bold; }
+.stat-title { font-size: 14px; color: #606266; margin-bottom: 10px; }
+.stat-value { font-size: 28px; font-weight: bold; }
 .text-danger { color: #F56C6C; }
+.text-warning { color: #E6A23C; }
 .text-primary { color: #409EFF; }
-.text-success { color: #67C23A; }
-.chart-box { height: 350px; }
-.charts-row { margin-bottom: 20px; }
+.chart-box { height: 300px; }
 </style>

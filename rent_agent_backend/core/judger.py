@@ -15,49 +15,48 @@ DEFAULT_BASE_URL = "https://api.deepseek.com"
 DEFAULT_MODEL = "deepseek-chat"
 
 SYSTEM_PROMPT = (
-    "你是一位检察院基层治理风险研判专家，\n"
-    "擅长识别食品安全、环境污染、劳动违法、公房产纠纷、金融风险等领域的违法隐患。\n"
+    "你是一位检察院数字监督平台（基层治理协同专版）的AI研判专家，\n"
+    "专门受理：欠薪、劳动违法、环境保护、市场监管等领域的外部移交与12345诉求。\n"
+    "你需要依据线索内容及相关法规，深度剖析违法事实，并作出严格的检察业务分流定向。\n"
     "只返回 JSON，不输出任何解释文字。"
 )
 
-USER_PROMPT_TPL = """请对以下基层治理线索进行风险研判，
-结合参考法规，给出结构化研判意见。
+USER_PROMPT_TPL = """请对以下基层线索进行深度检察业务风险研判。
 
-【线索内容】
-{clue_content}
+【卷宗/线索内容】
+标题: {title}
+涉事企业/人: {enterprise}
+金额: {amount}元, 涉及人数: {count}
+详情: {clue_content}
 
-【参考法规】
+【参考法规及办案指南】
 {legal_context}
 
-严格按以下 JSON 格式返回：
+请严格按以下 JSON 格式返回结果（无外部前缀，直接输出 {{）：
 {{
   "risk_level": "高风险/中风险/低风险",
-  "risk_summary": "一句话概括风险性质",
-  "domain": "识别所属领域：食品安全/环境/劳动/房产/金融/其他",
+  "risk_summary": "100字内的案情概要及危害分析",
+  "case_type": "必须选一: 行政监督线索/民事支持起诉线索/刑事拒不支付劳动报酬线索/公益诉讼线索",
   "risk_factors": [
     {{
-      "factor": "风险因素名称",
-      "description": "具体描述",
+      "factor": "提取的违法行为（如:未将工资汇入专用账户/恶意欠薪跑路/非法排污）",
+      "description": "结合案情详述",
       "legal_basis": "《相关法规》第X条",
       "severity": "高/中/低"
     }}
   ],
-  "recommended_action": "建议推送至哪个监管部门及处置建议",
-  "urgency": "立即处置/一周内处置/常规跟踪"
+  "recommended_action": "给出检察官下一步的行动建议，比如制发行政检察建议给住建局/移送公安等",
+  "procuratorial_advice": "起草一小段简要《检察建议书》框架"
 }}"""
-
 
 def _client() -> "OpenAI":
     api_key = (os.getenv("DEEPSEEK_API_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("DEEPSEEK_API_KEY 未配置")
     if OpenAI is None:
-        raise RuntimeError(
-            f"openai SDK 不可用：{_OPENAI_IMPORT_ERROR}"
-        )
+        raise RuntimeError(f"openai SDK 不可用：{_OPENAI_IMPORT_ERROR}")
     base_url = os.getenv("DEEPSEEK_BASE_URL", DEFAULT_BASE_URL).strip()
     return OpenAI(base_url=base_url, api_key=api_key)
-
 
 def _parse_json_with_fallback(raw: str) -> dict:
     try:
@@ -73,10 +72,16 @@ def _parse_json_with_fallback(raw: str) -> dict:
             return obj
     raise ValueError(f"无法解析为 JSON：{raw}")
 
-
-def judge_clue(clue_content: str, legal_context: str) -> dict:
+def judge_clue(title: str, enterprise: str, amount: float, count: int, clue_content: str, legal_context: str) -> dict:
     model = os.getenv("DEEPSEEK_MODEL", DEFAULT_MODEL).strip()
-    user_prompt = USER_PROMPT_TPL.format(clue_content=clue_content, legal_context=legal_context)
+    user_prompt = USER_PROMPT_TPL.format(
+        title=title, 
+        enterprise=enterprise, 
+        amount=amount, 
+        count=count, 
+        clue_content=clue_content, 
+        legal_context=legal_context
+    )
 
     try:
         resp = _client().chat.completions.create(
@@ -95,11 +100,10 @@ def judge_clue(clue_content: str, legal_context: str) -> dict:
     content = (resp.choices[0].message.content or "").strip()
     result = _parse_json_with_fallback(content)
 
-    required_fields = ["risk_level", "risk_summary", "domain", "risk_factors", "recommended_action", "urgency"]
+    required_fields = ["risk_level", "risk_summary", "case_type", "risk_factors", "recommended_action"]
     for field in required_fields:
         if field not in result:
             result[field] = "" if field != "risk_factors" else []
-
     if not isinstance(result.get("risk_factors"), list):
         result["risk_factors"] = []
 
