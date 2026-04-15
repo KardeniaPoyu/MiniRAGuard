@@ -31,7 +31,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from core.semantic_chunking import split_by_article
 
 
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = BASE_DIR / "data" / "regulations"
 VECTOR_STORE_DIR = BASE_DIR / "vector_store"
 COLLECTION_NAME = "civil_code"
 EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"

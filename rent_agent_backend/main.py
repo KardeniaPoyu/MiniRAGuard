@@ -1,39 +1,28 @@
 import asyncio
-import hashlib
 import logging
 import os
-import secrets
-import traceback
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
-import httpx
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from core.cache_tool import (
-    consume_free_use,
-    get_cache_by_md5,
-    get_or_create_user,
-    get_risk_stats,
-    get_user_by_token,
+from core.db_tool import (
     init_db,
-    save_user_token,
-    set_cache_by_md5,
-    update_risk_stats,
-    update_user_profile,
-    restore_free_use,
-    save_analyze_record,
-    get_analyze_records,
-    get_record_detail,
-    delete_analyze_record,
+    create_clue,
+    get_clue,
+    list_clues,
+    update_clue_risk,
+    push_clue,
+    mark_resolved,
+    get_stats,
+    save_snapshot
 )
 from core.chat_tool import chat
 from core.rag_tool import retrieve_legal_context
-from core.reviewer import review_contract
+from core.judger import judge_clue
 from core.vision_tool import extract_contract
 
 logging.basicConfig(
@@ -43,40 +32,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-# ──────────────────────────── Pydantic Models ────────────────────────────
-
-class AnalyzeRequest(BaseModel):
-    images: list[str]
-
-
-class ChatRequest(BaseModel):
-    question: str
-    context: dict[str, Any]
-    history: list[dict[str, Any]]
-
-
-class LoginRequest(BaseModel):
-    code: str
-
-
-class ProfileUpdateRequest(BaseModel):
-    nickname: str = ""
-    school: str = ""
-    grade: str = ""
-    student_id: str = ""
-
-
-# ──────────────────────────── Helpers ────────────────────────────
-
-def _extract_token(request: Request) -> Optional[str]:
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        token = auth[len("Bearer "):].strip()
-        return token if token else None
-    return None
-
-
+# Semaphores mapped to judger process
 def get_max_concurrent():
     env_val = os.getenv("MAX_CONCURRENT_ANALYZE")
     if env_val:
@@ -88,28 +44,23 @@ def get_max_concurrent():
     except ImportError:
         return 2
 
-
 analyze_semaphore = asyncio.Semaphore(get_max_concurrent())
 
-
-# ──────────────────────────── Lifespan ────────────────────────────
-
 @asynccontextmanager
-async def lifespan(app_ctx: FastAPI):  # type: ignore[no-untyped-def]
+async def lifespan(app_ctx: FastAPI):
     init_db()
-
-    required_keys = ["QWEN_API_KEY", "DEEPSEEK_API_KEY"]
+    required_keys = ["DEEPSEEK_API_KEY"]
     missing = [k for k in required_keys if not os.getenv(k)]
     if missing:
         raise RuntimeError(f"缺少必要环境变量：{missing}，请检查 .env 文件")
 
     logger.info("[startup] 预加载 RAG 索引...")
-    from core.rag_tool import retrieve_legal_context
-    retrieve_legal_context("押金 提前退租 维修")
+    try:
+        retrieve_legal_context("食品安全")
+    except Exception as e:
+        logger.warning(f"RAG预加载未完成: {e}")
     logger.info("[startup] RAG 索引预加载完成")
-
     yield
-
 
 app = FastAPI(lifespan=lifespan)
 
@@ -125,303 +76,118 @@ app.add_middleware(
 )
 
 
-@app.exception_handler(Exception)
-async def _unhandled_exception_handler(request, exc: Exception):  # type: ignore[no-untyped-def]
-    logger.error("UNHANDLED_EXCEPTION:", exc_info=True)
-    return JSONResponse(status_code=500, content={"error": "服务内部错误，请稍后重试"})
+# ===================== Models =====================
+
+class ClueCreate(BaseModel):
+    title: str
+    source: str
+    domain: str
+    content: str
+    images: Optional[list[str]] = None
+
+class PushRequest(BaseModel):
+    department: str
+
+class ResolveRequest(BaseModel):
+    feedback: str
+
+class ChatRequest(BaseModel):
+    question: str
+    context: dict[str, Any]
+    history: list[dict[str, Any]]
 
 
-# ──────────────────────────── /api/login ────────────────────────────
+# ===================== API: Clues =====================
 
-@app.post("/api/login")
-async def login(req: LoginRequest):
-    # 🌟 新增：开发测试/答辩演示 专用免授权 Mock 通道
-    if req.code == "test_code":
-        openid = "mock_test_user_openid"
-        user = get_or_create_user(openid)
-        token = secrets.token_hex(32)
-        save_user_token(openid, token)
-        logger.info("使用 Mock 账号免授权登录成功")
-        return {
-            "token": token,
-            "user": {
-                "openid": user["openid"],
-                "nickname": user["nickname"] or "测试用户",
-                "school": user["school"] or "测试大学",
-                "grade": user["grade"] or "大三",
-                "student_id": user["student_id"],
-                "is_vip": user["is_vip"],
-                "free_uses_remaining": user["free_uses_remaining"],
-            }
-        }
-
-    appid = os.getenv("WECHAT_APPID", "")
-    secret = os.getenv("WECHAT_SECRET", "")
-
-    wx_url = (
-        f"https://api.weixin.qq.com/sns/jscode2session"
-        f"?appid={appid}&secret={secret}&js_code={req.code}&grant_type=authorization_code"
+def _do_judger_work(clue_id: int, clue_content: str):
+    logger.info(f"开始研判线索 {clue_id}")
+    legal_context = retrieve_legal_context(clue_content)
+    result = judge_clue(clue_content, legal_context)
+    
+    update_clue_risk(
+        clue_id=clue_id,
+        risk_level=result.get("risk_level", "中风险"),
+        risk_summary=result.get("risk_summary", ""),
+        risk_detail=result
     )
+    logger.info(f"线索 {clue_id} 研判完成: {result.get('risk_level')}")
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            resp = await client.get(wx_url)
-            wx_data = resp.json()
-        except Exception:
-            logger.error("微信接口请求失败", exc_info=True)
-            return JSONResponse(status_code=400, content={"error": "登录失败"})
+@app.post("/api/clues")
+async def api_create_clue(req: ClueCreate, background_tasks: BackgroundTasks):
+    content = req.content
+    file_md5 = ""
+    if req.images:
+        pages = []
+        for img_b64 in req.images:
+            pages.append(extract_contract(img_b64))
+        content += "\n\n【附件文字】\n" + "\n\n".join(pages)
 
-    if "errcode" in wx_data and wx_data["errcode"] != 0:
-        logger.warning("微信 jscode2session 返回错误: %s", wx_data)
-        return JSONResponse(status_code=400, content={"error": "登录失败"})
-
-    openid = wx_data.get("openid")
-    if not openid:
-        return JSONResponse(status_code=400, content={"error": "登录失败"})
-
-    user = get_or_create_user(openid)
-    token = secrets.token_hex(32)
-    save_user_token(openid, token)
-
-    return {
-        "token": token,
-        "user": {
-            "openid": user["openid"],
-            "nickname": user["nickname"],
-            "school": user["school"],
-            "grade": user["grade"],
-            "student_id": user["student_id"],
-            "is_vip": user["is_vip"],
-            "free_uses_remaining": user["free_uses_remaining"],
-        }
-    }
-
-
-# ──────────────────────────── /api/user/profile ────────────────────────────
-
-@app.get("/api/user/profile")
-async def get_profile(request: Request):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-    return {
-        "openid": user["openid"],
-        "nickname": user["nickname"],
-        "school": user["school"],
-        "grade": user["grade"],
-        "student_id": user["student_id"],
-        "is_vip": user["is_vip"],
-        "free_uses_remaining": user["free_uses_remaining"],
-    }
-
-
-@app.post("/api/user/profile")
-async def update_profile(req: ProfileUpdateRequest, request: Request):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-
-    update_user_profile(
-        openid=user["openid"],
-        nickname=req.nickname,
-        school=req.school,
-        grade=req.grade,
-        student_id=req.student_id,
-    )
-
-    updated = get_user_by_token(token)
-    return {
-        "openid": updated["openid"],
-        "nickname": updated["nickname"],
-        "school": updated["school"],
-        "grade": updated["grade"],
-        "student_id": updated["student_id"],
-        "is_vip": updated["is_vip"],
-        "free_uses_remaining": updated["free_uses_remaining"],
-    }
-
-
-@app.post("/api/user/watch-ad")
-async def watch_ad(request: Request):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-
-    result = restore_free_use(user["openid"], count=3)
-    return {
-        "free_uses_remaining": result["free_uses_remaining"],
-        "message": "已恢复3次审查机会"
-    }
-
-
-@app.get("/api/user/records")
-async def get_records(request: Request, limit: int = 20):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-
-    limit = min(max(limit, 1), 50)
-    records = get_analyze_records(user["openid"], limit)
-    return records
-
-
-@app.get("/api/user/records/{image_md5}")
-async def get_record(image_md5: str, request: Request):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-
-    detail = get_record_detail(user["openid"], image_md5)
-    if not detail:
-        return JSONResponse(status_code=404, content={"error": "记录不存在"})
-    detail["cache_hit"] = True  # 表示历史记录
-    return detail
-
-
-@app.delete("/api/user/records/{record_id}")
-async def delete_record(record_id: int, request: Request):
-    token = _extract_token(request)
-    if not token:
-        return JSONResponse(status_code=401, content={"error": "未登录"})
-    user = get_user_by_token(token)
-    if not user:
-        return JSONResponse(status_code=401, content={"error": "登录已过期，请重新登录"})
-
-    success = delete_analyze_record(user["openid"], record_id)
-    if success:
-        return {"message": "已删除"}
-    return JSONResponse(status_code=404, content={"error": "记录不存在"})
-
-
-# ──────────────────────────── /api/analyze ────────────────────────────
-
-def _do_analyze_work(req: AnalyzeRequest, image_md5: str) -> Any:
-    pages: list[str] = []
-    for img_b64 in req.images:
-        pages.append(extract_contract(img_b64))
-
-    contract_text = "\n\n".join(pages).strip()
-    legal_context = retrieve_legal_context(contract_text)
-    result = review_contract(contract_text, legal_context)
-
-    result["contract_text"] = contract_text
-    update_risk_stats(result.get("analysis_results", []), image_md5)
-    set_cache_by_md5(image_md5, result)
-    return result
-
-
-@app.post("/api/analyze")
-async def analyze(req: AnalyzeRequest, request: Request) -> Any:
-    # 第一步：先查缓存（缓存命中不消耗次数）
-    image_md5 = hashlib.md5("".join(req.images).encode()).hexdigest()
-    cached = get_cache_by_md5(image_md5)
-    token = _extract_token(request)
-    user = None
-    if token:
-        user = get_user_by_token(token)
-
-    if cached is not None:
-        cached["cache_hit"] = True
-        if token and user:
-            save_analyze_record(
-                openid=user["openid"],
-                image_md5=image_md5,
-                overall_risk=cached.get("overall_risk", ""),
-                summary=cached.get("summary", ""),
-                clause_count=len(cached.get("analysis_results", []))
-            )
-        return cached
-
-    # 第二步：缓存未命中，才检查并消耗次数
-    if token and user:
-        allowed = consume_free_use(user["openid"])
-        if not allowed:
-            return JSONResponse(
-                status_code=403,
-                content={"error": "免费次数已用完，请观看广告恢复次数"}
-            )
-
-    # 第三步：并发限制检查
-    if analyze_semaphore.locked():
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "当前分析任务较多，请等待约30秒后重试",
-                "retry_after": 30
-            }
-        )
-
-    # 第四步：执行分析
-    try:
+    clue_id = create_clue(req.title, req.source, req.domain, content, file_md5)
+    
+    # Trigger background judger
+    async def run_judge():
         async with analyze_semaphore:
-            result = await asyncio.wait_for(
-                asyncio.to_thread(_do_analyze_work, req, image_md5),
-                timeout=180.0
-            )
-            result["cache_hit"] = False
-            if token and user:
-                save_analyze_record(
-                    openid=user["openid"],
-                    image_md5=image_md5,
-                    overall_risk=result.get("overall_risk", ""),
-                    summary=result.get("summary", ""),
-                    clause_count=len(result.get("analysis_results", []))
-                )
-            return result
-    except asyncio.TimeoutError:
-        return JSONResponse(
-            status_code=408,
-            content={"error": "分析超时，请重试"}
-        )
-    except ValueError as e:
-        if str(e) == "NOT_CONTRACT":
-            return JSONResponse(
-                status_code=400,
-                content={"error": "请上传合同图片，检测到非合同内容"},
-            )
-        raise
+            await asyncio.to_thread(_do_judger_work, clue_id, content)
 
+    background_tasks.add_task(run_judge)
+    return {"clue_id": clue_id}
 
-# ──────────────────────────── Other endpoints ────────────────────────────
+@app.post("/api/clues/{id}/judge")
+async def api_judge_clue(id: int):
+    clue = get_clue(id)
+    if not clue:
+        raise HTTPException(404, "线索不存在")
+        
+    async with analyze_semaphore:
+        await asyncio.to_thread(_do_judger_work, id, clue["content"])
+        
+    updated_clue = get_clue(id)
+    return updated_clue
+
+@app.get("/api/clues/{id}")
+async def api_get_clue(id: int):
+    clue = get_clue(id)
+    if not clue:
+        raise HTTPException(404, "线索不存在")
+    return clue
+
+@app.get("/api/clues")
+async def api_list_clues(status: Optional[str] = None, domain: Optional[str] = None, risk_level: Optional[str] = None, limit: int = 50):
+    return list_clues(status, domain, risk_level, limit)
+
+@app.post("/api/clues/{id}/push")
+async def api_push_clue(id: int, req: PushRequest):
+    clue = get_clue(id)
+    if not clue:
+        raise HTTPException(404, "线索不存在")
+    push_clue(id, req.department)
+    return {"message": "已推送", "department": req.department}
+
+@app.post("/api/clues/{id}/resolve")
+async def api_resolve_clue(id: int, req: ResolveRequest):
+    clue = get_clue(id)
+    if not clue:
+        raise HTTPException(404, "线索不存在")
+    mark_resolved(id, req.feedback)
+    return {"message": "已办结"}
+
+@app.get("/api/stats")
+async def api_get_stats():
+    return get_stats()
 
 @app.post("/api/chat")
-async def chat_api(req: ChatRequest) -> dict[str, str]:
+async def api_chat(req: ChatRequest):
     answer = chat(req.question, req.context, req.history)
     return {"answer": answer}
-
-
-@app.get("/api/risk-stats")
-async def risk_stats_api() -> list:
-    return get_risk_stats()
-
 
 @app.get("/health")
 async def health():
     return {
         "status": "ok",
         "vector_store": os.path.exists("./vector_store"),
-        "cache_db": os.path.exists("./cache.db"),
-        "qwen_key_set": bool(os.getenv("QWEN_API_KEY")),
-        "deepseek_key_set": bool(os.getenv("DEEPSEEK_API_KEY")),
-        "wechat_configured": bool(os.getenv("WECHAT_APPID") and os.getenv("WECHAT_SECRET")),
+        "db_status": os.path.exists("./risk_platform.db"),
         "max_concurrent": get_max_concurrent()
     }
 
-
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
