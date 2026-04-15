@@ -37,7 +37,9 @@ export default {
   listClues: (params) => api.get('/clues', { params }),
   judgeClue: (id) => api.post(`/clues/${id}/judge`),
   pushTask: (id, payload) => api.post(`/clues/${id}/push_task`, payload),
-  feedbackTask: (taskId, payload) => api.post(`/tasks/${taskId}/feedback`, payload),
+  feedbackTask: (taskId, payload) => api.post(`/tasks/${taskId}/feedback`, payload), // Legacy, might still exist or we should use new synergy one
+  synergyReply: (id, payload) => api.post(`/clues/${id}/synergy_reply`, payload),
+  decision: (id, payload) => api.post(`/clues/${id}/decision`, payload),
   resolveClue: (id) => api.post(`/clues/${id}/resolve`),
   getStats: () => api.get('/stats'),
   getLogs: () => api.get('/logs')
