@@ -31,14 +31,47 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { DataBoard, Tickets, Warning, Document } from '@element-plus/icons-vue'
+import { ElNotification } from 'element-plus'
+import api from './api'
 
 const route = useRoute()
 const router = useRouter()
 const username = ref(localStorage.getItem('username'))
 const role = ref(localStorage.getItem('role'))
+let pollTimer = null
+
+const checkNotifications = async () => {
+  if (!username.value || !role.value) return;
+  try {
+    const res = await api.getUnreadNotifications();
+    if (res.data && res.data.length > 0) {
+      res.data.forEach(n => {
+        ElNotification({
+          title: '🚨 业务预警通知',
+          message: n.message,
+          type: 'warning',
+          duration: 0 // Require manual close
+        })
+      });
+      // Mark as read after showing
+      await api.markNotificationsRead();
+    }
+  } catch (e) {
+    // silently fail
+  }
+}
+
+onMounted(() => {
+  if (username.value) checkNotifications();
+  pollTimer = setInterval(checkNotifications, 5000);
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer);
+})
 
 watch(() => route.path, () => {
   username.value = localStorage.getItem('username')

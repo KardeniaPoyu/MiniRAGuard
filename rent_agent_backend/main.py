@@ -26,6 +26,9 @@ from core.db_tool import (
     get_user_by_username,
     create_audit_log,
     get_audit_logs,
+    create_notification,
+    get_unread_notifications,
+    mark_notifications_read,
     DB_PATH
 )
 from core.chat_tool import chat
@@ -118,10 +121,6 @@ class PushTaskRequest(BaseModel):
 class FeedbackTaskRequest(BaseModel):
     feedback: str
     evidence_urls: Optional[list[str]] = []
-    
-class DecisionRequest(BaseModel):
-    decision: str
-    reason: str
 
 class ChatRequest(BaseModel):
     question: str
@@ -161,26 +160,25 @@ def _do_alert_work(clue_id: int):
     clue = get_clue(clue_id)
     if not clue: return
     
-    import sqlite3
-    duplicate_count = 0
-    if clue.get("enterprise_name"):
-        with sqlite3.connect(DB_PATH) as conn:
-            duplicate_count = conn.execute("SELECT COUNT(*) FROM clues WHERE enterprise_name=?", (clue["enterprise_name"],)).fetchone()[0]
-    
-    alert_level, factors = trigger_alert(
-        clue_content=clue["content"], 
-        personnel_count=clue["personnel_count"], 
-        amount=clue["amount"], 
-        source=clue["source"], 
-        duplicate_enterprise_count=duplicate_count
-    )
+    amount = clue.get("amount", 0.0)
+    if amount >= 100000:
+        alert_level = "红色预警"
+        factors = [{"factor": "涉案金额特别巨大", "desc": "总计金额超过10万元阈值"}]
+    elif amount >= 10000:
+        alert_level = "黄色预警"
+        factors = [{"factor": "涉案金额较大", "desc": "总计金额超过1万元阈值"}]
+    else:
+        alert_level = "蓝色预警"
+        factors = [{"factor": "一般性质隐患", "desc": "金额在常规阈值之下"}]
+
     update_clue_alert(clue_id, alert_level, factors)
 
 @app.post("/api/ingest")
 async def api_ingest_clue(req: IngestClue, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user), request: Request = None):
     # 关键词捕捉过滤
     keywords = ["拖欠", "欠薪", "工资", "不发钱", "报酬", "血汗钱", "讨薪"]
-    if not any(k in req.content for k in keywords):
+    matched_keyword = next((k for k in keywords if k in req.content), None)
+    if not matched_keyword:
         raise HTTPException(400, "非欠薪类线索，不进入本系统流转")
         
     final_content = req.content
@@ -191,6 +189,10 @@ async def api_ingest_clue(req: IngestClue, background_tasks: BackgroundTasks, cu
                 final_content += f"\n【图片证据文字提取】: {ocr_text}"
             except Exception as e:
                 logger.error(f"OCR提取失败: {e}")
+
+    # 发送通知提醒检察官和上级领导
+    create_notification("检察官", f"预警：系统通过 12345 拦截到新线索！触发关键词: '{matched_keyword}'，涉及企业: {req.enterprise_name or '未知'}")
+    create_notification("部门负责人", f"主管审阅：有新传入的系统线索触及底线 ({req.enterprise_name or '未知'})。")
 
     # Log it
     ip = request.client.host if request and request.client else ""
@@ -297,35 +299,6 @@ async def api_synergy_reply(id: int, req: FeedbackTaskRequest, current_user: dic
     feedback_push_record(task_id, req.feedback, req.evidence_urls)
     return {"message": "外部协同单位已反馈"}
 
-@app.post("/api/clues/{id}/decision")
-async def api_decision(id: int, req: DecisionRequest, current_user: dict = Depends(get_current_user), request: Request = None):
-    if current_user["role"] not in ["检察官", "管理员"]:
-        raise HTTPException(403, "权限不足：无权下达起诉决定")
-        
-    clue = get_clue(id)
-    if not clue:
-        raise HTTPException(404, "线索不存在")
-        
-    import sqlite3
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute("UPDATE clues SET prosecution_decision=? WHERE id=?", (req.decision, id))
-        conn.commit()
-        
-    ip = request.client.host if request and request.client else ""
-    create_audit_log(current_user["username"], "起诉裁定", f"设定线索 {id} 的判定为: {req.decision}", ip)
-    
-    if req.decision == "拟起诉":
-        # Auto forward to court
-        create_push_record(id, "人民法院", f"本院决定对 {clue['enterprise_name']} 提起公诉/支持起诉，理由: {req.reason}")
-        create_audit_log(current_user["username"], "检法协同", f"自动生成跨单位至人民法院的协同工单", ip)
-        return {"message": "决策已更新并已自动触发检法电子协同"}
-        
-    if req.decision == "不起诉":
-        mark_resolved(id)
-        return {"message": "线索已依法终结并不起诉"}
-
-    return {"message": "状态已更新"}
-
 @app.post("/api/clues/{id}/resolve")
 async def api_resolve_clue(id: int, current_user: dict = Depends(get_current_user), request: Request = None):
     if current_user["role"] == "观察员":
@@ -336,6 +309,51 @@ async def api_resolve_clue(id: int, current_user: dict = Depends(get_current_use
         
     mark_resolved(id)
     return {"message": "已结案打标"}
+
+# ===================== API: Document & Notifications =====================
+
+from fastapi import File, UploadFile
+import tempfile
+import pypdf
+import docx2txt
+
+@app.post("/api/upload_doc")
+async def api_upload_doc(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    ext = file.filename.split('.')[-1].lower() if '.' in file.filename else ''
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as temp:
+        content = await file.read()
+        temp.write(content)
+        temp.flush()
+        temp_path = temp.name
+        
+    parsed_text = ""
+    try:
+        if ext == 'pdf':
+            reader = pypdf.PdfReader(temp_path)
+            for page in reader.pages:
+                parsed_text += page.extract_text() + "\n"
+        elif ext in ['docx', 'doc']:
+            parsed_text = docx2txt.process(temp_path)
+        else:
+            parsed_text = content.decode('utf-8', errors='ignore')
+    except Exception as e:
+        logger.error(f"Failed to parse document: {e}")
+        raise HTTPException(400, "文件解析失败，请确保格式正确。")
+    finally:
+        import os
+        os.remove(temp_path)
+        
+    return {"parsed_text": parsed_text}
+
+@app.get("/api/notifications/unread")
+async def api_notifications(current_user: dict = Depends(get_current_user)):
+    return get_unread_notifications(current_user["role"])
+
+@app.post("/api/notifications/read")
+async def api_mark_notifications_read(current_user: dict = Depends(get_current_user)):
+    mark_notifications_read(current_user["role"])
+    return {"message": "状态已更新为已读"}
 
 # ===================== API: Other =====================
 

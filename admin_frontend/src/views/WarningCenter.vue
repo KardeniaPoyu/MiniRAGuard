@@ -21,7 +21,20 @@
         <el-form-item label="企业/单位"><el-input v-model="mockForm.enterprise_name" /></el-form-item>
         <el-form-item label="涉案人数"><el-input-number v-model="mockForm.personnel_count" :min="1"/></el-form-item>
         <el-form-item label="涉案金额"><el-input v-model="mockForm.amount" type="number"/></el-form-item>
+        <el-form-item label="诉求隐私">
+          <el-radio-group v-model="mockForm.claimant_privacy">
+            <el-radio label="公开">公开</el-radio>
+            <el-radio label="保密">保密</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="简明诉求"><el-input v-model="mockForm.content" type="textarea" :rows="3"/></el-form-item>
+        <el-form-item label="证据说明">
+           <el-checkbox v-model="includeMockImage">包含一张工资条图片(模拟图像识别)</el-checkbox>
+        </el-form-item>
+        <el-form-item label="上传附随文档">
+          <input type="file" ref="docFile" @change="handleDocUpload" accept=".txt,.pdf,.docx,.doc" style="width: 100%" />
+          <div style="font-size:12px; color:#909399; margin-top:5px">支持直接解析 PDF/Word，系统将自动混流进案卷</div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -70,10 +83,12 @@ import api from '../api'
 const filters = ref({ alert_level: '' })
 const tableData = ref([])
 const dialogVisible = ref(false)
+const includeMockImage = ref(false)
 
 const mockForm = reactive({
   title: '市政热线流转单', source:'12345热线', domain:'劳动诉求', 
-  enterprise_name: '', personnel_count: 1, amount: 0, content: ''
+  enterprise_name: '', personnel_count: 1, amount: 0, content: '',
+  claimant_privacy: '公开', images: []
 })
 
 const getAlertColor = (level) => {
@@ -87,18 +102,40 @@ const fetchData = async () => {
   const params = {}
   if (filters.value.alert_level) params.alert_level = filters.value.alert_level
   const res = await api.listClues(params)
-  // Filtering out resolved in Warning center normally, but here we show all to demonstrate flow.
   tableData.value = res.data
 }
 
 const handleMockIngest = async () => {
   try {
+    if (includeMockImage.value) {
+      mockForm.images = ["mock_img_base64_data"]
+    } else {
+      mockForm.images = []
+    }
     await api.ingestClue(mockForm)
-    ElMessage.success("12345流转单下发成功，规则引擎正在碰撞中")
+    ElMessage.success("12345流转线索下发成功，关键词拦截已通过")
     dialogVisible.value = false
     setTimeout(fetchData, 1000)
   } catch(e) {
-    ElMessage.error("流转失败")
+    ElMessage.error(e.response?.data?.detail || "流转失败(可能触发关键词拦截)")
+  }
+}
+
+const handleDocUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  try {
+    const res = await api.uploadDoc(formData)
+    if (res.data && res.data.parsed_text) {
+      mockForm.content += `\n【附件提纯内容】\n${res.data.parsed_text}`
+      ElMessage.success("文档解析成功并混入流转诉求中")
+    }
+  } catch(e) {
+    ElMessage.error("文档解析发生异常或格式不支持")
   }
 }
 

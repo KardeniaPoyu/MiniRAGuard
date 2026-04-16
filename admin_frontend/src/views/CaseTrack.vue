@@ -6,22 +6,26 @@
           <el-table-column prop="title" label="案件摘要" min-width="150" />
           <el-table-column prop="enterprise_name" label="涉案企业" width="150" />
           <el-table-column prop="case_type" label="定性" width="120" />
-          <el-table-column label="工单进度" width="300">
+          <el-table-column label="协同进度" width="300">
             <template #default="scope">
-               <div v-for="task in scope.row.tasks" :key="task.id" style="border:1px solid #EBEEF5; padding:5px; margin-bottom:5px;">
-                  发送至: <b>{{task.to_dept}}</b> [{{task.status}}]<br/>
-                  <div v-if="task.status==='待签收' && role !== '观察员'">
-                    <el-button type="primary" size="small" @click="openFeedback(scope.row.id, task.id)">模拟外部单位回传结果</el-button>
+               <div v-for="task in scope.row.tasks" :key="task.id" style="border:1px solid #EBEEF5; padding:8px; margin-bottom:8px; border-radius:4px; background:#fafafa;">
+                  <div style="font-weight:bold; color:#409EFF">目标: {{task.to_dept}}</div>
+                  <div style="font-size:12px; color:#909399;">状态: {{task.status}}</div>
+                  <div v-if="task.status==='待签收' && (role === '检察官' || role === '管理员')">
+                    <el-button type="primary" size="small" style="margin-top:5px" @click="openFeedback(scope.row.id, task.id)">模拟外部单位回传结果</el-button>
                   </div>
-                  <div v-else-if="task.status!=='待签收'">
-                    <span style="color: #67C23A">回传: {{task.feedback}}</span>
+                  <div v-else-if="task.status!=='待签收'" style="margin-top:5px; border-top: 1px dashed #dcdfe6; padding-top:5px;">
+                    <div style="font-size:13px;"><span style="color: #67C23A; font-weight:bold">回函:</span> {{task.feedback_content}}</div>
+                    <div v-if="task.feedback_images && task.feedback_images.length" style="color:#E6A23C; font-size:11px;">
+                       已挂载凭证码: {{task.feedback_images.join(', ')}}
+                    </div>
                   </div>
                </div>
             </template>
           </el-table-column>
-          <el-table-column label="闭环操作" width="120">
+          <el-table-column label="操作" width="100">
             <template #default="scope">
-              <el-button type="success" size="small" @click="handleResolve(scope.row.id)" v-if="role !== '观察员'">完结归档</el-button>
+              <el-button type="info" size="small" @click="handleResolve(scope.row.id)" v-if="role !== '观察员' && scope.row.status !== '已结案'">完结归档</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -61,7 +65,7 @@ const fetchData = async () => {
 }
 
 const openFeedback = (clue_id, task_id) => {
-  currentTaskId.value = task_id
+  currentTaskId.value = clue_id // Use clue_id for synergyReply
   feedbackForm.feedback = '行政强制命令已依法送达并履约'
   evidenceStr.value = 'E-Doc-99881'
   feedbackDialogVisible.value = true
@@ -69,25 +73,25 @@ const openFeedback = (clue_id, task_id) => {
 
 const submitFeedback = async () => {
   try {
-    await api.feedbackTask(currentTaskId.value, { 
+    await api.synergyReply(currentTaskId.value, { 
       feedback: feedbackForm.feedback, 
       evidence_urls: [evidenceStr.value] 
     })
-    ElMessage.success("数据共享网回传成功")
+    ElMessage.success("外部单位协同回执已入库")
     feedbackDialogVisible.value = false
     fetchData()
   } catch(e) {
-    ElMessage.error(e.response?.data?.detail || '暂无权限')
+    ElMessage.error(e.response?.data?.detail || '暂无权限或回复失败')
   }
 }
 
 const handleResolve = async (clue_id) => {
   try {
     await api.resolveClue(clue_id)
-    ElMessage.success('案件已合规结案')
+    ElMessage.success('案件已依法完结归档')
     fetchData()
   } catch(e) {
-    ElMessage.error(e.response?.data?.detail || '暂无权限')
+    ElMessage.error(e.response?.data?.detail || '操作失败')
   }
 }
 

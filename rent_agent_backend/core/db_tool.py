@@ -83,6 +83,15 @@ def init_db() -> None:
                 created_at TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                target_role TEXT,
+                message TEXT,
+                is_read INTEGER DEFAULT 0,
+                created_at TEXT
+            )
+        """)
         conn.commit()
 
 init_db()
@@ -205,10 +214,16 @@ def list_clues(status: str = None, alert_level: str = None, case_type: str = Non
 def get_stats() -> dict:
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
-        total = conn.execute("SELECT COUNT(*) as c FROM clues").fetchone()["c"]
+        total = conn.execute("SELECT COUNT(*) as c FROM clues WHERE status IN ('已结案', '已反馈')").fetchone()["c"]
         
-        status_rows = conn.execute("SELECT status, COUNT(*) as c FROM clues GROUP BY status").fetchall()
+        status_rows = conn.execute("SELECT status, COUNT(*) as c FROM clues WHERE status IN ('已结案', '已反馈') GROUP BY status").fetchall()
         status_dist = {r["status"]: r["c"] for r in status_rows}
+        
+        domain_rows = conn.execute("SELECT domain, COUNT(*) as c FROM clues WHERE status IN ('已结案', '已反馈') GROUP BY domain").fetchall()
+        domain_dist = [{"name": r["domain"], "value": r["c"]} for r in domain_rows]
+
+        case_type_rows = conn.execute("SELECT case_type, COUNT(*) as c FROM clues WHERE status IN ('已结案', '已反馈') AND case_type != '' GROUP BY case_type").fetchall()
+        case_type_dist = [{"name": r["case_type"], "value": r["c"]} for r in case_type_rows]
         
         # Dashboard wants enterprise hot spots (e.g., enterprise with >1 complaint)
         hot_enterprises = conn.execute("SELECT enterprise_name, COUNT(*) as c, SUM(personnel_count) as pc FROM clues WHERE enterprise_name!='' GROUP BY enterprise_name ORDER BY c DESC LIMIT 5").fetchall()
@@ -219,6 +234,8 @@ def get_stats() -> dict:
     return {
         "total": total,
         "status_distribution": status_dist,
+        "domain_distribution": domain_dist,
+        "case_type_distribution": case_type_dist,
         "alert_distribution": alert_dist,
         "hot_enterprises": [{"name": r["enterprise_name"], "count": r["c"], "personnel": r["pc"]} for r in hot_enterprises]
     }
@@ -276,3 +293,20 @@ def get_audit_logs(limit: int = 100) -> list:
         conn.row_factory = sqlite3.Row
         rows = conn.execute("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
         return [dict(r) for r in rows]
+
+def create_notification(target_role: str, message: str) -> None:
+    now = _now_iso()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("INSERT INTO notifications (target_role, message, created_at) VALUES (?, ?, ?)", (target_role, message, now))
+        conn.commit()
+
+def get_unread_notifications(role: str) -> list:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * FROM notifications WHERE target_role=? AND is_read=0 ORDER BY created_at DESC", (role,)).fetchall()
+        return [dict(r) for r in rows]
+
+def mark_notifications_read(role: str) -> None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("UPDATE notifications SET is_read=1 WHERE target_role=? AND is_read=0", (role,))
+        conn.commit()

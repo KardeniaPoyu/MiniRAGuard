@@ -7,11 +7,22 @@
           <el-descriptions border :column="2">
             <el-descriptions-item label="企业名称" :span="2">
                <span style="font-weight:bold">{{ clue.enterprise_name }}</span>
+               <el-tag v-if="clue.claimant_privacy==='保密'" type="warning" size="small" style="margin-left:10px">诉求人私密</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="涉案人数">{{ clue.personnel_count }}</el-descriptions-item>
+            <el-descriptions-item label="涉案人数">{{ clue.personnel_count }} 人</el-descriptions-item>
             <el-descriptions-item label="标的金额">￥{{ clue.amount }}</el-descriptions-item>
+            
+            <!-- AI 预扫描提取字段 -->
+            <template v-if="clue.risk_detail && clue.risk_detail.employer">
+               <el-descriptions-item label="AI 扫描单位" :span="2">
+                  <span style="color: #67C23A">{{ clue.risk_detail.employer }}</span>
+               </el-descriptions-item>
+               <el-descriptions-item label="AI 提取金额">{{ clue.risk_detail.amount }}</el-descriptions-item>
+               <el-descriptions-item label="AI 提取数量">{{ clue.risk_detail.worker_count }}</el-descriptions-item>
+            </template>
+
             <el-descriptions-item label="原件内容" :span="2">
-              <div style="white-space: pre-wrap; background:#f5f7fa; padding:10px; border-radius:4px;">{{ clue.content }}</div>
+              <div style="white-space: pre-wrap; background:#f5f7fa; padding:10px; border-radius:4px; font-size:13px;">{{ clue.content }}</div>
             </el-descriptions-item>
             <el-descriptions-item label="预警结论" :span="2">
               <el-tag :type="clue.alert_level==='红色预警'?'danger':(clue.alert_level==='黄色预警'?'warning':'primary')">
@@ -53,9 +64,8 @@
           </div>
           
           <el-divider v-if="role !== '观察员' && role !== '部门负责人'" />
-          <div style="display: flex; gap: 10px; margin-top:20px;" v-if="role !== '观察员' && role !== '部门负责人'">
-            <el-button type="danger" style="flex:1" @click="handleDecision('拟起诉')">转为支持起诉案件 (联动法院)</el-button>
-            <el-button type="info" style="flex:1" @click="handleDecision('不起诉')">线索终结 (不起诉)</el-button>
+          <div style="margin-top:20px;" v-if="role !== '观察员' && role !== '部门负责人'">
+            <el-button type="info" style="width:100%" @click="handleResolve">线索办结归档</el-button>
           </div>
         </el-card>
       </el-col>
@@ -125,13 +135,10 @@ const handlePush = async () => {
   }
 }
 
-const handleDecision = async (decisionStr) => {
+const handleResolve = async () => {
   try {
-    await api.decision(route.params.id, {
-      decision: decisionStr,
-      reason: clue.value.risk_detail?.procuratorial_advice || "综合研判"
-    })
-    ElMessage.success(decisionStr === '拟起诉' ? '已转法院协同支持起诉' : '已归档不起诉')
+    await api.resolveClue(route.params.id)
+    ElMessage.success('案件已合规结案')
     router.push('/cases')
   } catch(e) {
     ElMessage.error(e.response?.data?.detail || '操作失败')
