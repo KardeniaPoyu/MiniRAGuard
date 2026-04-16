@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="logo-box">
         <el-icon :size="48" color="#40a9ff"><Box /></el-icon>
-        <h2>基层检察协同平台</h2>
+        <h2>数律智检</h2>
       </div>
       <el-form :model="form" @submit.prevent="handleLogin" class="login-form">
         <el-form-item>
