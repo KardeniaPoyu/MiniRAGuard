@@ -37,6 +37,7 @@ from core.judger import judge_clue
 from core.alerter import trigger_alert
 from core.vision_tool import extract_contract
 from core.auth_tool import verify_password, create_access_token, decode_access_token
+from core.reviewer import review_contract
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,9 +61,13 @@ analyze_semaphore = asyncio.Semaphore(get_max_concurrent())
 
 @asynccontextmanager
 async def lifespan(app_ctx: FastAPI):
-    init_db()
-    seed_mock_data()  
-    seed_users()  # 植入测试用户
+    is_prod = os.getenv("PRODUCTION", "false").lower() == "true"
+    if is_prod:
+        logger.info("[startup] 生产模式启动，跳过内置数据植入")
+    else:
+        seed_mock_data()  
+        seed_users()  # 植入测试用户
+    
     required_keys = ["DEEPSEEK_API_KEY"]
     missing = [k for k in required_keys if not os.getenv(k)]
     if missing:
@@ -78,13 +83,18 @@ async def lifespan(app_ctx: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+if not allowed_origins or allowed_origins == [""]:
+    allowed_origins = ["*"] if os.getenv("PRODUCTION", "false").lower() != "true" else []
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -126,6 +136,9 @@ class ChatRequest(BaseModel):
     question: str
     context: dict[str, Any]
     history: list[dict[str, Any]]
+
+class AnalyzeRequest(BaseModel):
+    images: list[str]
 
 
 # ===================== API: Auth =====================
@@ -361,6 +374,33 @@ async def api_mark_notifications_read(current_user: dict = Depends(get_current_u
 async def api_chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
     answer = chat(req.question, req.context, req.history)
     return {"answer": answer}
+
+@app.post("/api/analyze")
+async def api_analyze_contract(req: AnalyzeRequest):
+    """公开接口：直接审查合同图片并返回结果，不强制登录"""
+    if not req.images:
+        raise HTTPException(400, "未上传图片")
+    
+    combined_text = ""
+    for b64 in req.images:
+        try:
+            ocr_text = await asyncio.to_thread(extract_contract, b64)
+            combined_text += ocr_text + "\n"
+        except Exception as e:
+            logger.error(f"OCR 提取失败: {e}")
+            continue
+            
+    if not combined_text.strip():
+        raise HTTPException(400, "无法从图片中识别文字")
+        
+    try:
+        legal_context = await asyncio.to_thread(retrieve_legal_context, combined_text)
+        result = await asyncio.to_thread(review_contract, combined_text, legal_context)
+        result["contract_text"] = combined_text
+        return result
+    except Exception as e:
+        logger.error(f"分析失败: {e}")
+        raise HTTPException(500, f"内部研判引擎错误: {str(e)}")
 
 @app.get("/health")
 async def health():

@@ -1,8 +1,9 @@
-import jwt
-import hashlib
-from datetime import datetime, timedelta, timezone
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "my_super_secret_jwt_key_for_qingju"
+load_dotenv()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "my_super_secret_jwt_key_for_qingju")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 

@@ -1,10 +1,13 @@
 import json
+import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = str(BASE_DIR / "risk_platform.db")
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
+DB_PATH = str(DATA_DIR / "risk_platform.db")
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -244,8 +247,8 @@ def get_stats() -> dict:
 def seed_mock_data():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.execute("SELECT COUNT(*) as c FROM clues").fetchone()[0]
-        if c > 0:
-            return # already seeded
+        if c > 0 or os.getenv("SEED_MOCK_DATA", "true").lower() == 'false':
+            return # already seeded or disabled
     
     # 模拟数据填充
     data = [
@@ -260,6 +263,8 @@ def seed_mock_data():
 
 def seed_users():
     from core.auth_tool import get_password_hash
+    if os.getenv("SEED_USERS", "true").lower() == 'false':
+        return
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
         if c > 0: return

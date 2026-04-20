@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - backend_data:/app/rent_agent_backend/vector_store
+      - db_data:/app/rent_agent_backend/data
+    networks:
+      - qingju-network
+    restart: always
+
+  frontend:
+    build:
+      context: ./admin_frontend
+      dockerfile: Dockerfile
+    networks:
+      - qingju-network
+    restart: always
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: qingju-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./deploy/certs:/etc/nginx/certs
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - qingju-network
+    restart: always
+
+networks:
+  qingju-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  db_data:

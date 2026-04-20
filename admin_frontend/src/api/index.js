@@ -2,7 +2,7 @@ import axios from 'axios'
 import router from '../router'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 60000
 })
 
@@ -44,6 +44,8 @@ export default {
   getStats: () => api.get('/stats'),
   getLogs: () => api.get('/logs'),
   uploadDoc: (formData) => api.post('/upload_doc', formData, {headers:{'Content-Type': 'multipart/form-data'}}),
+  analyze: (data) => api.post('/analyze', data),
   getUnreadNotifications: () => api.get('/notifications/unread'),
+
   markNotificationsRead: () => api.post('/notifications/read')
 }

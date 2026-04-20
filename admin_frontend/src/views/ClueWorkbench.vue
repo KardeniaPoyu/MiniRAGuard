@@ -72,7 +72,8 @@
     </el-row>
     
     <!-- 校验密码 -->
-    <el-dialog v-model="dialogVisible" title="验明检察官身份身份" width="400px">
+    <el-dialog v-model="dialogVisible" title="验明检察官身份" width="400px">
+
       <el-form>
         <el-form-item label="安全密码">
           <el-input v-model="authPassword" type="password" show-password placeholder="请输入账号密码以确权" />

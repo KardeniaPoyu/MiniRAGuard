@@ -1,6 +1,7 @@
 # --- Secrets / env ---
 .env
 .env.*
+!*.env.example
 *.env
 
 # --- Python ---
@@ -19,6 +20,7 @@ venv/
 cache.db
 rent_agent_backend/cache.db
 rent_agent_backend/vector_store/
+rent_agent_backend/data/*.db
 
 # --- Logs ---
 *.log
