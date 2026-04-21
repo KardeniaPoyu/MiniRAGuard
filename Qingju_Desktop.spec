@@ -49,7 +49,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='admin_frontend/public/favicon.ico' # 如果有图标可以设置
 )
 coll = COLLECT(
     exe,
