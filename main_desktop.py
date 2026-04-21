@@ -85,7 +85,8 @@ def run_app():
         # 如果没有 Key，加载本地配置页面
         # 使用绝对路径以确保打包后也能找到
         setup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setup_api.html")
-        start_url = f"file:///{setup_path.replace('\\', '/')}"
+        formatted_setup_path = setup_path.replace('\\', '/')
+        start_url = f"file:///{formatted_setup_path}"
     else:
         start_url = f"http://127.0.0.1:{PORT}/login"
 
