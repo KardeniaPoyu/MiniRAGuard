@@ -1,25 +1,38 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
+
+# 第三方复杂库全量采集逻辑
+libs = ['chromadb', 'pydantic', 'sentence_transformers', 'uvicorn', 'fastapi']
+datas, binaries, hiddenimports = [], [], []
+
+for lib in libs:
+    d, b, h = collect_all(lib)
+    datas += d
+    binaries += b
+    hiddenimports += h
+
+# 合并原有静态资源
+datas += [
+    ('admin_frontend/dist', 'admin_frontend/dist'),
+    ('setup_api.html', '.'),
+    ('rent_agent_backend/data', 'rent_agent_backend/data'),
+    ('rent_agent_backend/vector_store', 'rent_agent_backend/vector_store'),
+]
 
 block_cipher = None
 
 a = Analysis(
     ['main_desktop.py'],
-    pathex=['rent_agent_backend'],                          # 强制将后端文件夹加入搜索路径
-    binaries=[],
-    datas=[
-        ('admin_frontend/dist', 'admin_frontend/dist'),      # 包含前端界面
-        ('setup_api.html', '.'),                            # 包含初始化页面
-        ('rent_agent_backend/data', 'rent_agent_backend/data'), # 包含本地数据库
-        ('rent_agent_backend/vector_store', 'rent_agent_backend/vector_store'), # 包含AI法条索引
-    ],
-    hiddenimports=[
+    pathex=['rent_agent_backend'],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports + [
         'uvicorn.logging',
         'uvicorn.protocols',
         'uvicorn.protocols.http',
         'uvicorn.protocols.http.auto',
         'uvicorn.lifespan.off',
         'uvicorn.lifespan',
-        'fastapi',
         'starlette.staticfiles'
     ],
     hookspath=[],
@@ -43,7 +56,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,                  # 设置为 False，这样启动时不会弹黑窗口
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
