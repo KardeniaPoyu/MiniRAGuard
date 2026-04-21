@@ -2,7 +2,10 @@
 from PyInstaller.utils.hooks import collect_all
 
 # 第三方复杂库全量采集逻辑
-libs = ['chromadb', 'pydantic', 'sentence_transformers', 'uvicorn', 'fastapi']
+libs = [
+    'chromadb', 'pydantic', 'sentence_transformers', 'uvicorn', 'fastapi', 
+    'opentelemetry', 'onnxruntime', 'numpy', 'tokenizers'
+]
 datas, binaries, hiddenimports = [], [], []
 
 for lib in libs:
