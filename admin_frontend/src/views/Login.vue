@@ -42,6 +42,7 @@ const handleLogin = async () => {
     // 获取用户身份
     const meRes = await api.getMe()
     localStorage.setItem('username', meRes.data.username)
+    localStorage.setItem('real_name', meRes.data.real_name || meRes.data.username)
     localStorage.setItem('role', meRes.data.role)
     
     ElMessage.success(`欢迎回来，${meRes.data.role}`)

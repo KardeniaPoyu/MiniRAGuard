@@ -87,14 +87,21 @@ def init_db() -> None:
             )
         """)
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS notifications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                target_role TEXT,
-                message TEXT,
-                is_read INTEGER DEFAULT 0,
-                created_at TEXT
+            CREATE TABLE IF NOT EXISTS sys_configs (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                updated_at TEXT
             )
         """)
+        # Initialize default configs if not present
+        defaults = [
+            ("system_name", "数律智检", _now_iso()),
+            ("dept_name", "XX人民检察院", _now_iso()),
+            ("red_alert_threshold", "100000", _now_iso()),
+            ("yellow_alert_threshold", "10000", _now_iso()),
+            ("ai_model", "deepseek-chat", _now_iso())
+        ]
+        conn.executemany("INSERT OR IGNORE INTO sys_configs (key, value, updated_at) VALUES (?, ?, ?)", defaults)
         conn.commit()
 
 init_db()
@@ -314,4 +321,22 @@ def get_unread_notifications(role: str) -> list:
 def mark_notifications_read(role: str) -> None:
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("UPDATE notifications SET is_read=1 WHERE target_role=? AND is_read=0", (role,))
+        conn.commit()
+
+def get_sys_configs() -> dict:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT key, value FROM sys_configs").fetchall()
+        return {r["key"]: r["value"] for r in rows}
+
+def update_sys_configs(configs: dict) -> None:
+    now = _now_iso()
+    with sqlite3.connect(DB_PATH) as conn:
+        for k, v in configs.items():
+            conn.execute("INSERT OR REPLACE INTO sys_configs (key, value, updated_at) VALUES (?, ?, ?)", (k, str(v), now))
+        conn.commit()
+
+def update_password(username: str, hashed_password: str) -> None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("UPDATE users SET hashed_password=? WHERE username=?", (hashed_password, username))
         conn.commit()

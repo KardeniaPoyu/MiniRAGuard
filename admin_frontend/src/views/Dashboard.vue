@@ -1,42 +1,78 @@
 <template>
-  <div class="dashboard">
-    <el-row :gutter="20" class="stat-cards">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <el-icon class="header-icon"><ShoppingCart /></el-icon>
+      <span class="header-text">多维治理大屏</span>
+    </div>
+
+    <el-row :gutter="24" class="stat-cards">
       <el-col :span="8">
-        <el-card shadow="always" class="gradient-card blue">
-          <div class="stat-title">总计办结线索</div>
-          <div class="stat-value">{{ stats.total }} <span class="unit">件</span></div>
-        </el-card>
+        <div class="stat-card card-blue">
+          <div class="stat-content">
+            <div class="stat-title">总计办结线索</div>
+            <div class="stat-value">
+              <span class="number">{{ stats.total }}</span>
+              <span class="unit">件</span>
+            </div>
+          </div>
+        </div>
       </el-col>
       <el-col :span="8">
-        <el-card shadow="always" class="gradient-card green">
-          <div class="stat-title">最高频治理领域</div>
-          <div class="stat-value">{{ topDomainName }}</div>
-        </el-card>
+        <div class="stat-card card-light-blue">
+          <div class="stat-content">
+            <div class="stat-title">最高频治理领域</div>
+            <div class="stat-value">
+              <span class="text-value">{{ topDomainName }}</span>
+            </div>
+          </div>
+        </div>
       </el-col>
       <el-col :span="8">
-        <el-card shadow="always" class="gradient-card purple">
-          <div class="stat-title">治理攻坚重灾区</div>
-          <div class="stat-value">{{ topEnterpriseName }}</div>
-        </el-card>
+        <div class="stat-card card-white">
+          <div class="stat-content">
+            <div class="stat-title">治理攻坚重灾区</div>
+            <div class="stat-value">
+              <span class="text-value">{{ topEnterpriseName }}</span>
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="charts-row" style="margin-top: 20px;">
+    <el-row :gutter="24" class="charts-row">
       <el-col :span="12">
-        <el-card header="已办结线索领域分布 (专项指标)" shadow="hover">
+        <el-card class="chart-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span>已办结线索领域分布（专项指标）</span>
+            </div>
+          </template>
           <div ref="barChart" class="chart-box"></div>
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card header="高发投诉企业排行榜" shadow="hover">
-          <el-table :data="stats.hot_enterprises" style="width: 100%" height="300">
-            <el-table-column type="index" label="排名" width="60" />
-            <el-table-column prop="name" label="涉案企业/主体" />
-            <el-table-column prop="count" label="线索计件" width="100">
-               <template #default="s"><el-tag type="danger" effect="plain">{{ s.row.count }}件</el-tag></template>
+        <el-card class="table-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span>高发投诉企业排行榜</span>
+            </div>
+          </template>
+          <el-table :data="stats.hot_enterprises" style="width: 100%" class="custom-table">
+            <el-table-column type="index" label="排名" width="80" align="left">
+              <template #default="scope">
+                <span class="rank-number">{{ scope.$index + 1 }}</span>
+              </template>
             </el-table-column>
-            <el-table-column prop="personnel" label="关联人数" width="100">
-               <template #default="s"><span style="font-weight:bold">{{ s.row.personnel }}</span> 人</template>
+            <el-table-column prop="name" label="涉案企业/主体" min-width="180" show-overflow-tooltip />
+            <el-table-column prop="count" label="线索计件" width="120" align="right">
+              <template #default="scope">
+                <span class="clue-box">{{ scope.row.count }}件</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="personnel" label="关联人数" width="120" align="right">
+              <template #default="scope">
+                <span class="personnel-count">{{ scope.row.personnel }}人</span>
+              </template>
             </el-table-column>
           </el-table>
         </el-card>
@@ -47,6 +83,7 @@
 
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue'
+import { ShoppingCart } from '@element-plus/icons-vue'
 import api from '../api'
 
 const stats = ref({ total: 0, domain_distribution: [], case_type_distribution: [], hot_enterprises: [] })
@@ -72,13 +109,17 @@ const renderCharts = () => {
   const yData = (stats.value.domain_distribution || []).map(d => d.value)
   
   bar.setOption({
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    tooltip: { 
+      trigger: 'axis', 
+      axisPointer: { type: 'shadow' },
+      formatter: '{b}<br/>{a}: {c} 件'
+    },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: { type: 'value', boundaryGap: [0, 0.01] },
     yAxis: { type: 'category', data: xData },
     series: [
       {
-        name: '办结案件量',
+        name: '线索量',
         type: 'bar',
         data: yData,
         itemStyle: {
@@ -108,14 +149,170 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.dashboard { padding: 10px; }
-.stat-cards { margin-bottom: 20px; }
-.gradient-card { color: #fff; border: none; border-radius: 8px; }
-.gradient-card.blue { background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%); }
-.gradient-card.green { background: linear-gradient(135deg, #52c41a 0%, #b7eb8f 100%); }
-.gradient-card.purple { background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%); }
-.stat-title { font-size: 15px; margin-bottom: 12px; opacity: 0.9; }
-.stat-value { font-size: 32px; font-weight: bold; }
-.unit { font-size: 14px; font-weight: normal; opacity: 0.8; }
-.chart-box { height: 300px; width: 100%; }
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.header-icon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.header-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.stat-cards {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  position: relative;
+  height: 150px;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+/* Use block.svg as a textured overlay to preserve underlying colors/transparency */
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../assets/block.svg') no-repeat center center;
+  background-size: cover;
+  opacity: 0.85; /* Highly visible lines */
+  mix-blend-mode: overlay; /* Blends beautifully with base gradients */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-white::before {
+  opacity: 0.25;
+  filter: invert(0.8); /* Make lines dark on light background */
+}
+
+.stat-content {
+  position: relative;
+  z-index: 2;
+}
+
+.card-blue {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  color: white;
+}
+
+.card-light-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.card-white {
+  background: linear-gradient(135deg, #e0f2ff 0%, #ffffff 100%);
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.1) !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(24, 144, 255, 0.15);
+}
+
+.card-white:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+}
+
+.stat-title {
+  font-size: 15px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.stat-value {
+  margin-top: auto;
+}
+
+.number {
+  font-size: 42px;
+  font-weight: 700;
+}
+
+.unit {
+  font-size: 16px;
+  margin-left: 8px;
+  opacity: 0.8;
+}
+
+.text-value {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.charts-row {
+  margin-top: 24px;
+}
+
+.chart-card, .table-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+.card-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.chart-box {
+  height: 380px;
+  width: 100%;
+}
+
+.custom-table {
+  --el-table-header-bg-color: #f8f9fb;
+  --el-table-header-text-color: #909399;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rank-number {
+  font-weight: bold;
+  color: #303133;
+}
+
+.clue-box {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #ff4d4f;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.personnel-count {
+  font-weight: 500;
+  color: #606266;
+}
 </style>

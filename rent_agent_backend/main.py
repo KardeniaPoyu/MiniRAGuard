@@ -29,6 +29,9 @@ from core.db_tool import (
     create_notification,
     get_unread_notifications,
     mark_notifications_read,
+    get_sys_configs,
+    update_sys_configs,
+    update_password as db_update_password,
     DB_PATH
 )
 from core.chat_tool import chat
@@ -36,7 +39,7 @@ from core.rag_tool import retrieve_legal_context
 from core.judger import judge_clue
 from core.alerter import trigger_alert
 from core.vision_tool import extract_contract
-from core.auth_tool import verify_password, create_access_token, decode_access_token
+from core.auth_tool import verify_password, create_access_token, decode_access_token, get_password_hash
 from core.reviewer import review_contract
 
 logging.basicConfig(
@@ -138,7 +141,19 @@ class ChatRequest(BaseModel):
     history: list[dict[str, Any]]
 
 class AnalyzeRequest(BaseModel):
-    images: list[str]
+    title: str
+    content: str
+    enterprise_name: Optional[str] = ""
+    personnel_count: Optional[int] = 1
+    amount: Optional[float] = 0.0
+    images: Optional[list[str]] = []
+
+class SettingsUpdateRequest(BaseModel):
+    configs: dict[str, Any]
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str
 
 
 # ===================== API: Auth =====================
@@ -157,7 +172,20 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
 
 @app.get("/api/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
-    return {"username": current_user["username"], "role": current_user["role"]}
+    return {
+        "username": current_user["username"], 
+        "role": current_user["role"],
+        "real_name": current_user.get("real_name", current_user["username"])
+    }
+
+@app.post("/api/auth/change_password")
+async def change_password(req: PasswordChangeRequest, current_user: dict = Depends(get_current_user)):
+    if not verify_password(req.old_password, current_user["hashed_password"]):
+        raise HTTPException(400, "原密码不正确")
+    
+    new_hashed = get_password_hash(req.new_password)
+    db_update_password(current_user["username"], new_hashed)
+    return {"message": "密码修改成功"}
 
 
 # ===================== API: Logs =====================
@@ -173,17 +201,21 @@ def _do_alert_work(clue_id: int):
     clue = get_clue(clue_id)
     if not clue: return
     
+    configs = get_sys_configs()
+    red_thresh = float(configs.get("red_alert_threshold", 100000))
+    yellow_thresh = float(configs.get("yellow_alert_threshold", 10000))
+
     amount = clue.get("amount", 0.0)
-    if amount >= 100000:
+    if amount >= red_thresh:
         alert_level = "红色预警"
-        factors = [{"factor": "涉案金额特别巨大", "desc": "总计金额超过10万元阈值"}]
-    elif amount >= 10000:
+        factors = [{"factor": "涉案金额巨大", "desc": f"总计金额超过配置阈值({red_thresh}元)"}]
+    elif amount >= yellow_thresh:
         alert_level = "黄色预警"
-        factors = [{"factor": "涉案金额较大", "desc": "总计金额超过1万元阈值"}]
+        factors = [{"factor": "涉案金额较大", "desc": f"总计金额超过配置阈值({yellow_thresh}元)"}]
     else:
         alert_level = "蓝色预警"
         factors = [{"factor": "一般性质隐患", "desc": "金额在常规阈值之下"}]
-
+    
     update_clue_alert(clue_id, alert_level, factors)
 
 @app.post("/api/ingest")
@@ -375,32 +407,87 @@ async def api_chat(req: ChatRequest, current_user: dict = Depends(get_current_us
     answer = chat(req.question, req.context, req.history)
     return {"answer": answer}
 
+@app.get("/api/settings")
+async def api_get_settings(current_user: dict = Depends(get_current_user)):
+    return get_sys_configs()
+
+@app.post("/api/settings")
+async def api_update_settings(req: SettingsUpdateRequest, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "管理员":
+        raise HTTPException(403, "仅管理员可修改系统配置")
+    update_sys_configs(req.configs)
+    return {"message": "配置已更新"}
+
 @app.post("/api/analyze")
-async def api_analyze_contract(req: AnalyzeRequest):
-    """公开接口：直接审查合同图片并返回结果，不强制登录"""
-    if not req.images:
-        raise HTTPException(400, "未上传图片")
+async def api_analyze_clue_public(req: AnalyzeRequest, background_tasks: BackgroundTasks):
+    """公开接口：市民线索提交 + AI 研判入库一体化，不强制登录"""
+    # 1. 整合全案文本 (表单内容 + 图片 OCR)
+    final_content = req.content
+    if req.images:
+        for b64 in req.images:
+            try:
+                ocr_text = await asyncio.to_thread(extract_contract, b64)
+                final_content += f"\n【图片证据文字提取】: {ocr_text}"
+            except Exception as e:
+                logger.error(f"OCR 提取失败: {e}")
+                continue
+
+    # 2. 预研判检索法律依据
+    legal_context = await asyncio.to_thread(retrieve_legal_context, final_content)
     
-    combined_text = ""
-    for b64 in req.images:
-        try:
-            ocr_text = await asyncio.to_thread(extract_contract, b64)
-            combined_text += ocr_text + "\n"
-        except Exception as e:
-            logger.error(f"OCR 提取失败: {e}")
-            continue
-            
-    if not combined_text.strip():
-        raise HTTPException(400, "无法从图片中识别文字")
-        
-    try:
-        legal_context = await asyncio.to_thread(retrieve_legal_context, combined_text)
-        result = await asyncio.to_thread(review_contract, combined_text, legal_context)
-        result["contract_text"] = combined_text
-        return result
-    except Exception as e:
-        logger.error(f"分析失败: {e}")
-        raise HTTPException(500, f"内部研判引擎错误: {str(e)}")
+    # 3. 调用 AI 核心研判
+    result = await asyncio.to_thread(
+        judge_clue,
+        title=req.title,
+        enterprise=req.enterprise_name,
+        amount=req.amount,
+        count=req.personnel_count,
+        clue_content=final_content,
+        legal_context=legal_context
+    )
+
+    # 4. 异步持久化入库 (来源固定为群众投诉)
+    clue_id = create_clue(
+        title=req.title,
+        source="群众投诉",
+        domain="劳动违法",
+        content=final_content,
+        enterprise_name=req.enterprise_name,
+        personnel_count=req.personnel_count,
+        amount=req.amount
+    )
+    
+    # 手动触发金额分流量表预警
+    background_tasks.add_task(_do_alert_work, clue_id)
+    
+    # 回填 AI 研判结果到数据库以供检察官查看
+    update_clue_risk(
+        clue_id=clue_id,
+        risk_level=result.get("risk_level", "中风险"),
+        risk_summary=result.get("risk_summary", ""),
+        risk_detail=result,
+        case_type=result.get("case_type", "行政监督线索")
+    )
+
+    # 5. 为了适配前端 LeadSubmission.vue 的特定 UI，进行格式转换
+    # 映射 risk_factors 到 LeadSubmission.vue 的 analysis_results
+    ui_analysis_results = []
+    for factor in result.get("risk_factors", []):
+        ui_analysis_results.append({
+            "risk_type": factor.get("factor", "违法特征识别"),
+            "risk_level": "高风险" if factor.get("severity") == "高" else ("中风险" if factor.get("severity") == "中" else "低风险"),
+            "reason": factor.get("description", ""),
+            "legal_basis": factor.get("legal_basis", ""),
+            "advice": result.get("recommended_action", "建议向当地检察院或人社局咨询。")
+        })
+
+    return {
+        "clue_id": clue_id,
+        "overall_risk": result.get("risk_level", "自动研判中"),
+        "summary": result.get("risk_summary", ""),
+        "analysis_results": ui_analysis_results,
+        "recommended_action": result.get("recommended_action", "")
+    }
 
 @app.get("/health")
 async def health():

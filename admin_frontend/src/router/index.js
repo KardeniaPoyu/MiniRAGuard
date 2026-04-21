@@ -8,7 +8,9 @@ const routes = [
   { path: '/warnings', name: 'WarningCenter', component: () => import('../views/WarningCenter.vue') },
   { path: '/clues/:id/workbench', name: 'ClueWorkbench', component: () => import('../views/ClueWorkbench.vue') },
   { path: '/cases', name: 'CaseTrack', component: () => import('../views/CaseTrack.vue') },
-  { path: '/audit', name: 'AuditLogs', component: () => import('../views/AuditLogs.vue') }
+  { path: '/audit', name: 'AuditLogs', component: () => import('../views/AuditLogs.vue') },
+  { path: '/settings', name: 'Settings', component: () => import('../views/Settings.vue') },
+  { path: '/security', name: 'Security', component: () => import('../views/Security.vue') }
 ]
 
 const router = createRouter({
@@ -16,7 +18,7 @@ const router = createRouter({
   routes
 })
 
-const publicPages = ['ContractReview', 'Login']
+const publicPages = ['LeadSubmission', 'Login']
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')

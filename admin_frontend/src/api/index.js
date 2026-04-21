@@ -47,5 +47,9 @@ export default {
   analyze: (data) => api.post('/analyze', data),
   getUnreadNotifications: () => api.get('/notifications/unread'),
 
-  markNotificationsRead: () => api.post('/notifications/read')
+  markNotificationsRead: () => api.post('/notifications/read'),
+  
+  getSettings: () => api.get('/settings'),
+  updateSettings: (configs) => api.post('/settings', { configs }),
+  changePassword: (old_password, new_password) => api.post('/auth/change_password', { old_password, new_password })
 }
