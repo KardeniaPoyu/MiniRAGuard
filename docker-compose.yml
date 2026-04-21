@@ -8,10 +8,10 @@ services:
     env_file:
       - .env
     volumes:
-      - ./rent_agent_backend/vector_store:/app/rent_agent_backend/vector_store
-      - ./rent_agent_backend/data:/app/rent_agent_backend/data
+      - ./backend/vector_store:/app/backend/vector_store
+      - ./backend/data:/app/backend/data
     networks:
-      - qingju-network
+      - shulv-network
     restart: always
 
   frontend:
@@ -19,12 +19,12 @@ services:
       context: ./admin_frontend
       dockerfile: Dockerfile
     networks:
-      - qingju-network
+      - shulv-network
     restart: always
 
   nginx:
     image: nginx:stable-alpine
-    container_name: qingju-nginx
+    container_name: shulv-nginx
     ports:
       - "80:80"
     volumes:
@@ -33,9 +33,9 @@ services:
       - backend
       - frontend
     networks:
-      - qingju-network
+      - shulv-network
     restart: always
 
 networks:
-  qingju-network:
+  shulv-network:
     driver: bridge

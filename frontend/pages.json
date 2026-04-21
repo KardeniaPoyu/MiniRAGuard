@@ -1,0 +1,82 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "青居智选",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "default"
+      }
+    },
+    {
+      "path": "pages/chat/chat",
+      "style": {
+        "navigationBarTitleText": "AI 法律助手",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/helpline/helpline",
+      "style": {
+        "navigationBarTitleText": "法律求助热线",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/risklib/risklib",
+      "style": {
+        "navigationBarTitleText": "高频风险规则库",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "个人中心",
+        "navigationBarBackgroundColor": "#1A3A5C",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/records/records",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
+    },
+    {
+      "path": "pages/result/result",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#1A3A5C"
+      }
+    }
+  ],
+  "subPackages": [],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "青居智选",
+    "navigationBarBackgroundColor": "#1A3A5C",
+    "backgroundColor": "#F4F6F9"
+  },
+  "networkTimeout": {
+    "request": 180000,
+    "connectSocket": 60000,
+    "uploadFile": 180000,
+    "downloadFile": 60000
+  }
+}

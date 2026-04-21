@@ -21,8 +21,8 @@ __pycache__/
 
 # 运行时产物（容器中重新生成）
 cache.db
-rent_agent_backend/cache.db
-rent_agent_backend/vector_store/
+backend/cache.db
+backend/vector_store/
 
 # Git
 .git/

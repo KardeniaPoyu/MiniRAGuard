@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, os.path.abspath('rent_agent_backend'))
+sys.path.insert(0, os.path.abspath('backend'))
 import base64
 import json
 import time
@@ -40,7 +40,7 @@ def run_test(test_id):
         results.append(f"请求耗时: {elapsed:.2f}s")
         return elapsed
     except Exception as e:
-        results.append(f"❌ 运行错误: {e}")
+        results.append(f"�?运行错误: {e}")
         return 120
 
 print("Running Test 1 (Cold Start expected ~40s)")

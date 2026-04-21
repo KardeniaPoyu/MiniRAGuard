@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, os.path.abspath('rent_agent_backend'))
+sys.path.insert(0, os.path.abspath('backend'))
 import base64
 import json
 import time
@@ -15,7 +15,7 @@ def run_test(test_id):
     results.append(f"=== Test {test_id} ===")
     try:
         if not Path(IMAGE_PATH).exists():
-             results.append(f"❌ 图片不存在: {IMAGE_PATH}")
+             results.append(f"�?图片不存�? {IMAGE_PATH}")
              return None, 120
              
         with open(IMAGE_PATH, "rb") as f:
@@ -41,7 +41,7 @@ def run_test(test_id):
             results.append(f"Error: {resp.text}")
             return None, elapsed
     except Exception as e:
-        results.append(f"❌ 运行异常: {e}")
+        results.append(f"�?运行异常: {e}")
         results.append(traceback.format_exc())
         return None, 120
 

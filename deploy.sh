@@ -1,7 +1,7 @@
 #!/bin/bash
-# Qingju One-Click Deployment Script
+# 数律智检 · 一键部署脚本
 
-echo "🚀 Starting Qingju Deployment..."
+echo "🚀 正在启动 数律智检 部署流程..."
 
 # Ensure .env exists
 if [ ! -f .env ]; then

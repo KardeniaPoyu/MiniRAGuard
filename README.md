@@ -1,44 +1,113 @@
-# 青居智选（Qingju）
+# 数律智检 · 基层治理风险研判平台
 
-基于 API 与轻量级 RAG 的租房合同审查系统（微信小程序 + FastAPI）。
+> 基于 AI 的检察智能辅助系统，实现从线索录入 → 风险研判 → 协同跟进的全流程数字化闭环。
 
-## 目标与边界
+---
 
-- **目标**：帮助在校大学生在签约前快速识别租房合同中的潜在法律风险条款，并支持基于审查结果的多轮追问。
-- **边界**：不提供正式法律咨询，不替代律师意见；输出仅作辅助参考。
+## 快速开始
 
-## API 契约（MVP 必须稳定）
+### 方式一：生产安装包（推荐）
 
-### 1) 合同审查
+适合最终用户，提供标准 Windows 安装/卸载体验。
 
-- **POST** `/api/analyze`
-- **请求**：`{ "images": [base64_p1, base64_p2, ...] }`
-- **响应**：包含 `overall_risk / summary / analysis_results`
-- **字段约束**：
-  - `analysis_results[].risk_level`：仅允许「高风险 / 中风险 / 低风险」
-  - `analysis_results[].legal_basis`：固定格式「《法规名称》第X条」
-  - `analysis_results[].original_text`：用于前端合同全文字符串匹配高亮
+```bash
+# 开发者在 installer/ 目录运行
+installer\build_installer.bat
+```
 
-### 2) 多轮对话
+生成产物：`dist_installer\数律智检_Setup_v1.0.0.exe`
 
-- **POST** `/api/chat`
-- **请求**：`{ "question": "...", "context": {...}, "history": [{"role":"user|assistant","content":"..."}] }`
-- **响应**：`{ "answer": "..." }`（自由文本）
+**前置条件（仅开发机需要）**：
+- [Node.js 18+](https://nodejs.org/)
+- [Python 3.11+](https://www.python.org/)
+- [Inno Setup 6](https://jrsoftware.org/isdl.php)
 
-## 部署与安装
+---
 
-- **服务器安装命令**：`pip install -r requirements.txt`
-- **注意**：`torch` 不在依赖列表中，`sentence-transformers` 会自动安装适合 CPU 的依赖，无需手动指定。
+### 方式二：Docker 本地部署（团队内部共享）
 
-## Git 协作约定（建议）
+适合内网多人访问，无需安装包。
 
-- **分支**：`main` 保持可部署/可演示；日常开发使用 `feat/*`、`fix/*` 等功能分支并通过 PR 合并。
-- **提交信息**：Conventional Commits（例如 `feat: add analyze endpoint`）。
-- **敏感信息**：`.env` 禁止入库（已在 `.gitignore` 忽略）。
-- **运行产物**：`rent_agent_backend/cache.db`、`rent_agent_backend/vector_store/` 禁止入库（已忽略）。
+```bash
+# 1. 复制并填写环境变量
+cp .env.example .env
+# 编辑 .env，填入 DEEPSEEK_API_KEY
 
-## 上线前置条件（验收红线）
+# 2. 一键启动
+docker-compose up -d --build
 
-- 后端对外 **HTTPS**
-- 使用 **已 ICP 备案域名** 并在微信公众平台配置为 `request` 合法域名
+# 3. 访问
+# 管理端：http://localhost
+```
 
+---
+
+### 方式三：开发环境运行
+
+```bash
+# 后端
+pip install -r requirements.txt
+cd backend
+uvicorn main:app --reload --port 8000
+
+# 前端（新终端）
+cd admin_frontend
+npm install && npm run dev
+```
+
+---
+
+## 架构说明
+
+```
+数律智检/
+├── backend/                 # FastAPI 后端（Python 3.11）
+│   ├── core/                # 业务核心（RAG、研判、数据库、鉴权）
+│   ├── scripts/             # 初始化脚本（构建向量索引）
+│   └── main.py              # 应用入口，生产模式自动托管前端
+├── admin_frontend/          # Vue 3 管理端前端
+│   └── src/views/           # 大屏、工作台、设置等页面
+├── installer/               # 安装包工程
+│   ├── build_installer.bat  # 一键构建脚本（开发者用）
+│   ├── installer.iss        # Inno Setup 安装向导配置
+│   └── launcher.py          # 轻量级桌面启动器源码
+├── deploy/                  # 服务器部署配置
+│   └── nginx.conf           # Nginx 反向代理配置
+└── docker-compose.yml       # Docker 编排文件
+```
+
+---
+
+## 环境变量
+
+复制 `.env.example` 为 `.env` 并填写：
+
+| 变量名 | 说明 | 必填 |
+|--------|------|------|
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | ✅ |
+| `JWT_SECRET_KEY` | JWT 签名密钥（随机字符串） | ✅ |
+| `PRODUCTION` | 设为 `true` 跳过测试数据植入 | 可选 |
+
+---
+
+## 默认账号
+
+| 角色 | 用户名 | 初始密码 |
+|------|--------|----------|
+| 管理员 | `admin` | `admin123` |
+
+> **安全提示**：生产部署前请修改初始密码。
+
+---
+
+## 技术栈
+
+| 层次 | 技术 |
+|------|------|
+| 前端 | Vue 3 + Vite + Element Plus |
+| 后端 | FastAPI + uvicorn |
+| AI | LlamaIndex + ChromaDB + DeepSeek |
+| 嵌入模型 | sentence-transformers (HuggingFace) |
+| 数据库 | SQLite |
+| 容器 | Docker + Nginx |
+| 安装包 | Inno Setup 6 |

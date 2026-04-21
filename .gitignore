@@ -1,41 +1,57 @@
-# --- Secrets / env ---
-.env
-.env.*
-!*.env.example
-*.env
-
-# --- Python ---
+# ── Byte-compiled / optimized / DLL files ────────────────────────────────
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-coverage.xml
-htmlcov/
+*$py.class
+*.pyo
+
+# ── Distribution / packaging ──────────────────────────────────────────────
+dist/
+dist_installer/
+build/
+*.egg-info/
+.eggs/
+
+# ── Virtual environments ──────────────────────────────────────────────────
 .venv/
 venv/
+env/
 
-# --- Backend runtime artifacts (per tech doc v1.6) ---
-cache.db
-rent_agent_backend/cache.db
-rent_agent_backend/vector_store/
-rent_agent_backend/data/*.db
+# ── Environment & secrets ─────────────────────────────────────────────────
+.env
+.env.local
+*.env
 
-# --- Logs ---
+# ── Frontend build artifacts ──────────────────────────────────────────────
+admin_frontend/node_modules/
+admin_frontend/dist/
+rent_agent_frontend/node_modules/
+
+# ── Database & vector store (runtime data) ───────────────────────────────
+backend/data/*.db
+backend/vector_store/
+
+# ── Logs ─────────────────────────────────────────────────────────────────
 *.log
+logs/
 
-# --- Node / frontend build artifacts (if any) ---
-node_modules/
-dist/
+# ── macOS ────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
 
-# --- UniApp / HBuilderX / IDE ---
-.hbuilderx/
-.idea/
-.vscode/
-
-# --- OS ---
+# ── Windows ──────────────────────────────────────────────────────────────
 Thumbs.db
 Desktop.ini
-.DS_Store
 
+# ── IDE ──────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Installer build cache ────────────────────────────────────────────────
+installer/assets/数律智检.exe
+installer/assets/*.exe
+installer/build/

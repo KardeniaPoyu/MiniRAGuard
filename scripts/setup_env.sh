@@ -1,5 +1,5 @@
 #!/bin/bash
-# Qingju Environment Setup Script
+# 数律智检 · 环境初始化脚本
 
 if [ ! -f .env ]; then
     cp .env.example .env
