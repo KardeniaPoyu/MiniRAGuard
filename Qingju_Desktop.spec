@@ -4,7 +4,7 @@ block_cipher = None
 
 a = Analysis(
     ['main_desktop.py'],
-    pathex=[],
+    pathex=['rent_agent_backend'],                          # 强制将后端文件夹加入搜索路径
     binaries=[],
     datas=[
         ('admin_frontend/dist', 'admin_frontend/dist'),      # 包含前端界面
