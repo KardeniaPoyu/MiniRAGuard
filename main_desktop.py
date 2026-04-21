@@ -15,8 +15,18 @@ from fastapi.middleware.cors import CORSMiddleware
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from rent_agent_backend.main import app as backend_app
 
-# 1. 配置文件管理
+# 1. 配置文件管理与资源定位
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".qingju_config.json")
+
+def resource_path(relative_path):
+    """ 获取资源的绝对路径，兼容开发环境和 PyInstaller 打包环境 """
+    try:
+        # PyInstaller 会创建一个临时文件夹并将路径存入 _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
@@ -82,9 +92,8 @@ def run_app():
 
     # 初始加载 URL
     if not api_key:
-        # 如果没有 Key，加载本地配置页面
-        # 使用绝对路径以确保打包后也能找到
-        setup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setup_api.html")
+        # 使用资源定位辅助函数
+        setup_path = resource_path("setup_api.html")
         formatted_setup_path = setup_path.replace('\\', '/')
         start_url = f"file:///{formatted_setup_path}"
     else:
@@ -108,8 +117,8 @@ def run_app():
     webview.start(debug=False)
 
 if __name__ == "__main__":
-    # 挂载前端打包后的静态资源
-    dist_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "admin_frontend", "dist")
+    # 使用资源定位辅助函数挂载前端静态资源
+    dist_path = resource_path(os.path.join("admin_frontend", "dist"))
     if os.path.exists(dist_path):
         backend_app.mount("/", StaticFiles(directory=dist_path, html=True), name="ui")
     else:
