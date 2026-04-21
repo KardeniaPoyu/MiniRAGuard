@@ -11,8 +11,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 # 导入现有的后端业务逻辑
-# 确保 rent_agent_backend 路径在 sys.path 中
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# 确保项目根目录和后端文件夹都在 sys.path 中，解决打包后的模块导入问题
+base_dir = os.path.dirname(os.path.abspath(__file__))
+if hasattr(sys, '_MEIPASS'):
+    base_dir = sys._MEIPASS
+
+sys.path.insert(0, base_dir)
+sys.path.insert(0, os.path.join(base_dir, "rent_agent_backend"))
+
 from rent_agent_backend.main import app as backend_app
 
 # 1. 配置文件管理与资源定位
