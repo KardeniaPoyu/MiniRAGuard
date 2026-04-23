@@ -34,20 +34,14 @@ KEYWORD_MAP: dict[str, str] = {
 def retrieve_legal_context(contract_text: str) -> str:
     """
     双路检索：语义向量 Top-3 + 关键词强制召回，合并去重后返回法条上下文字符串。
-
-    约束：
-    - Settings.llm = None（检索阶段不需要 LLM）
-    - Settings.embed_model 必须显式指定为 HuggingFaceEmbedding（不能依赖默认值）
-    - ChromaDB 使用 PersistentClient，路径 ./vector_store，collection civil_code
     """
+    import os
+    if os.getenv("SKIP_RAG", "true").lower() == "true":
+        return "（RAG 法律库已通过配置禁用，将基于通用法律知识进行研判）"
 
     # 动态导入重型库
     from llama_index.core import Settings
     Settings.llm = None
-    
-    import os
-    if os.getenv("SKIP_RAG", "true").lower() == "true":
-        return "（RAG 法律库已通过配置禁用，将基于通用法律知识进行研判）"
 
     if not VECTOR_STORE_DIR.exists():
         return "（本地法律检索库未就绪，将基于通用法律知识进行研判）"

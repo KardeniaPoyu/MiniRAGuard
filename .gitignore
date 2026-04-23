@@ -5,7 +5,7 @@ __pycache__/
 *.pyo
 
 # ── Distribution / packaging ──────────────────────────────────────────────
-dist/
+# dist/
 dist_installer/
 build/
 *.egg-info/
@@ -23,7 +23,7 @@ env/
 
 # ── Frontend build artifacts ──────────────────────────────────────────────
 admin_frontend/node_modules/
-admin_frontend/dist/
+# admin_frontend/dist/
 rent_agent_frontend/node_modules/
 
 # ── Database & vector store (runtime data) ───────────────────────────────
