@@ -394,6 +394,12 @@ async def api_get_clue(id: int, current_user: dict = Depends(get_current_user)):
 async def api_list_clues(status: Optional[str] = None, alert_level: Optional[str] = None, case_type: Optional[str] = None, limit: int = 50, current_user: dict = Depends(get_current_user)):
     return list_clues(status, alert_level, case_type, limit)
 
+@app.delete("/api/clues/{id}")
+async def api_delete_clue(id: int, current_user: dict = Depends(get_current_user)):
+    if delete_clue(id):
+        return {"message": "线索记录已成功物理删除"}
+    raise HTTPException(status_code=404, detail="线索记录不存在")
+
 @app.get("/api/stats")
 async def api_get_stats(current_user: dict = Depends(get_current_user)):
     return get_stats()
