@@ -45,19 +45,21 @@ UninstallDisplayIcon={app}\{#AppExeName}
 CreateUninstallRegKey=yes
 
 [Languages]
-Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "chinesesimplified"; MessagesFile: "ChineseSimplified.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加任务:"; Flags: checked
-Name: "startmenuicon"; Description: "创建开始菜单快捷方式"; GroupDescription: "附加任务:"; Flags: checked
+Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加任务:"
+Name: "startmenuicon"; Description: "创建开始菜单快捷方式"; GroupDescription: "附加任务:"
 
 [Files]
 ; ── 便携式 Python 环境（含所有依赖，由 build_installer.bat 预先生成）──
 Source: "..\build\portable_env\*"; DestDir: "{app}\python"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; ── 后端代码 ──
-Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs
-Excludes: "__pycache__,*.pyc,vector_store,data"
+; ── Embedding 模型 ──
+Source: "..\build\models\*"; DestDir: "{app}\models"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; ── 后端代码（包含预置向量库） ──
+Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__,*.pyc,data"
 
 ; ── 前端静态资源 ──
 Source: "..\admin_frontend\dist\*"; DestDir: "{app}\frontend"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -65,11 +67,12 @@ Source: "..\admin_frontend\dist\*"; DestDir: "{app}\frontend"; Flags: ignorevers
 ; ── 启动器 ──
 Source: "launcher.py"; DestDir: "{app}"; Flags: ignoreversion
 
-; ── 初始化引导页 ──
-Source: "..\setup_api.html"; DestDir: "{app}"; Flags: ignoreversion
+; ── 资源文件 ──
+Source: "setup_api.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "loading.html"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ── 编译好的轻量启动器 EXE ──
-Source: "assets\launcher.exe"; DestDir: "{app}"; DestName: "{#AppExeName}"; Flags: ignoreversion
+Source: "assets\数律智检.exe"; DestDir: "{app}"; DestName: "{#AppExeName}"; Flags: ignoreversion
 
 ; ── 图标资源 ──
 Source: "assets\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
@@ -90,4 +93,6 @@ Filename: "{app}\{#AppExeName}"; Description: "立即启动 {#AppName}"; Flags: 
 ; 卸载时清除运行时生成的缓存和日志（用户数据在主目录不删除）
 Type: filesandordirs; Name: "{app}\backend\__pycache__"
 Type: filesandordirs; Name: "{app}\backend\data"
+Type: filesandordirs; Name: "{app}\backend\vector_store"
 Type: filesandordirs; Name: "{app}\python\__pycache__"
+Type: filesandordirs; Name: "{app}\models"

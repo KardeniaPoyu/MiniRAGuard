@@ -93,6 +93,15 @@ def init_db() -> None:
                 updated_at TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                target_role TEXT,
+                message TEXT,
+                is_read INTEGER DEFAULT 0,
+                created_at TEXT
+            )
+        """)
         # Initialize default configs if not present
         defaults = [
             ("system_name", "数律智检", _now_iso()),

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在启动 - 数律智检</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --accent: #3b82f6;
+            --text: #f8fafc;
+            --primary-glow: rgba(59, 130, 246, 0.3);
+        }
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            filter: blur(60px);
+            z-index: -1;
+            animation: pulse 4s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.3; }
+            to { transform: scale(1.2); opacity: 0.6; }
+        }
+        .container {
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            width: 80%;
+            max-width: 500px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .loader-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .loader-progress {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            animation: slide 2s infinite ease-in-out;
+        }
+        @keyframes slide {
+            0% { width: 10%; transform: translateX(-100%); }
+            50% { width: 40%; }
+            100% { width: 10%; transform: translateX(500%); }
+        }
+        .status {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            height: 1.5rem;
+        }
+        .detail {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            height: 1.2rem;
+            margin-top: 8px;
+        }
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            display: none;
+        }
+        .diag-btn {
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: none;
+            transition: all 0.2s;
+        }
+        .diag-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="container">
+        <div class="logo">数律智检</div>
+        <div class="status" id="statusText">正在初始化系统...</div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+        <div class="detail" id="detailText">准备连接后端引擎</div>
+        <div id="errorArea" class="error-msg">后端连接超时，请检查系统资源或查看日志</div>
+        <button id="diagBtn" class="diag-btn" onclick="openLog()">查看诊断日志</button>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('statusText');
+        const detailText = document.getElementById('detailText');
+        const errorArea = document.getElementById('errorArea');
+
+        let baseUrl = 'http://127.0.0.1:8000'; // Default
+        
+        async function initPort() {
+            try {
+                if (window.pywebview && window.pywebview.api) {
+                    const port = await window.pywebview.api.get_target_port();
+                    if (port) {
+                        baseUrl = `http://127.0.0.1:${port}`;
+                        console.log("Got port from API:", port);
+                        checkStatus(); // Start polling after getting port
+                        return;
+                    }
+                }
+                // If api not ready yet, retry
+                setTimeout(initPort, 100);
+            } catch (e) {
+                console.error("Failed to get port from API:", e);
+                setTimeout(initPort, 100);
+            }
+        }
+        
+        const stageMap = {
+            'booting': '正在启动引擎核心...',
+            'seeding': '正在植入法律知识库...',
+            'loading_rag': '正在加载语义研判模型...',
+            'ready': '系统就绪',
+            'error': '启动异常'
+        };
+
+        let retryCount = 0;
+        const MAX_RETRIES = 240; // 120 seconds
+        const DIAG_THRESHOLD = 30; // Show diag button after 15s (30 * 500ms)
+
+        function openLog() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.open_log();
+            }
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${baseUrl}/api/system/status`);
+                if (!response.ok) throw new Error('Network response not ok');
+                
+                const data = await response.json();
+                
+                // Update UI
+                if (data.stage) {
+                    statusText.innerText = stageMap[data.stage] || '同步状态中...';
+                }
+                
+                if (data.message) {
+                    detailText.innerText = data.message;
+                }
+
+                if (data.ready) {
+                    statusText.innerText = '启动成功！正在载入界面...';
+                    setTimeout(() => {
+                        // 恢复原生跳转，iframe 跨域隔离会导致 Vue localStorage 失效引发白屏
+                        window.location.replace(baseUrl);
+                    }, 500);
+                    return;
+                }
+
+                // Continue polling
+                retryCount++;
+                if (retryCount > DIAG_THRESHOLD) {
+                    document.getElementById('diagBtn').style.display = 'inline-block';
+                }
+                setTimeout(checkStatus, 500);
+                
+            } catch (error) {
+                console.error("Polling error:", error);
+                retryCount++;
+                
+                if (retryCount > MAX_RETRIES) {
+                    errorArea.style.display = 'block';
+                    detailText.innerText = '无法连接到后端服务';
+                } else {
+                    // Backoff slightly if it's the very beginning
+                    setTimeout(checkStatus, 800);
+                }
+            }
+        }
+
+        // Start initialization
+        initPort();
+    </script>
+</body>
+</html>

@@ -1,11 +1,27 @@
 import asyncio
 import logging
 import os
+import json
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
 import uvicorn
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Depends, Request
+
+logger = logging.getLogger(__name__)
+
+# ── 系统启动状态追踪 ──────────────────────────────────────────────────────
+class StartupStatus:
+    stage = "booting"  # booting, seeding, loading_rag, ready
+    message = "系统核心正在启动..."
+
+    @classmethod
+    def update(cls, stage: str, message: str):
+        cls.stage = stage
+        cls.message = message
+        logger.info(f"[status] {stage}: {message}")
+
+startup_status = StartupStatus()
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
@@ -67,6 +83,7 @@ analyze_semaphore = asyncio.Semaphore(get_max_concurrent())
 @asynccontextmanager
 async def lifespan(app_ctx: FastAPI):
     is_prod = os.getenv("PRODUCTION", "false").lower() == "true"
+    StartupStatus.update("seeding", "正在初始化系统数据环境...")
     if is_prod:
         logger.info("[startup] 生产模式启动，跳过内置数据植入")
     else:
@@ -76,12 +93,29 @@ async def lifespan(app_ctx: FastAPI):
     if not os.getenv("DEEPSEEK_API_KEY"):
         logger.warning("[startup] 未检测到 DEEPSEEK_API_KEY，AI 研判功能将不可用")
 
-    logger.info("[startup] 预加载 RAG 索引...")
-    try:
-        retrieve_legal_context("拖欠工资")
-    except Exception as e:
-        logger.warning(f"RAG预加载未完成: {e}")
-    logger.info("[startup] RAG 索引预加载完成")
+    async def warmup_rag():
+        from core.rag_tool import is_rag_available
+        if not is_rag_available():
+            logger.info("[startup] RAG 系统已禁用或不可用，切换到纯 API 轻量模式")
+            StartupStatus.update("ready", "系统已就绪（轻量模式）")
+            return
+
+        StartupStatus.update("loading_rag", "正在初始化法律库语义检索系统 (BGE Local)...")
+        logger.info("[startup] 开始预加载 RAG 索引 (后台)...")
+        try:
+            import asyncio
+            loop = asyncio.get_event_loop()
+            # 在子线程运行耗时检索任务
+            await loop.run_in_executor(None, retrieve_legal_context, "合同违约")
+            StartupStatus.update("ready", "系统已就绪，正在准备主界面")
+            logger.info("[startup] RAG 索引预加载完成")
+        except Exception as e:
+            StartupStatus.update("ready", "系统已就绪（轻量模式 - 检索引擎加载失败）")
+            logger.warning(f"RAG预加载由于数据库版本或连接问题未完成: {e}")
+
+    # 异步启动热身任务，不阻塞 yield
+    import asyncio
+    asyncio.create_task(warmup_rag())
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -98,14 +132,27 @@ app.add_middleware(
 # 安装后路径结构: {app}/backend/ 和 {app}/frontend/
 _frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
 if os.path.isdir(_frontend_dir):
-    app.mount("/assets", StaticFiles(directory=os.path.join(_frontend_dir, "assets")), name="assets")
-
+    _assets_dir = os.path.join(_frontend_dir, "assets")
+    if os.path.isdir(_assets_dir):
+        app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+    
     @app.get("/", include_in_schema=False)
     @app.get("/login", include_in_schema=False)
     @app.get("/dashboard", include_in_schema=False)
     async def serve_spa():
         return FileResponse(os.path.join(_frontend_dir, "index.html"))
 
+
+
+# ── 系统状态接口 ───────────────────────────────────────────────────────
+@app.get("/api/system/status")
+async def get_system_status():
+    """供加载页查询真实启动进度"""
+    return {
+        "stage": StartupStatus.stage,
+        "message": StartupStatus.message,
+        "ready": StartupStatus.stage == "ready"
+    }
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -119,6 +166,41 @@ async def get_current_user(token: str = Depends(oauth2_scheme), request: Request
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
     return user
+
+class ApiKeyUpdate(BaseModel):
+    key: str
+
+@app.post("/api/system/update_api_key")
+async def update_api_key(update: ApiKeyUpdate, user: dict = Depends(get_current_user)):
+    if user["role"] != "管理员":
+        raise HTTPException(status_code=403, detail="只有管理员可以更新 API 密钥")
+    
+    key = update.key.strip()
+    if not key.startswith("sk-") or len(key) < 20:
+        raise HTTPException(status_code=400, detail="无效的 API 密钥格式")
+    
+    # Update in-memory for current session
+    os.environ["DEEPSEEK_API_KEY"] = key
+    
+    # Persist to ~/.shulv_config.json for future launches
+    config_path = os.path.join(os.path.expanduser("~"), ".shulv_config.json")
+    try:
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump({"api_key": key}, f)
+        return {"status": "success", "message": "API 密钥已更新且已持久化"}
+    except Exception as e:
+        logger.error(f"Failed to persist API key: {e}")
+        return {"status": "success", "message": "API 密钥已在当前会话生效，但保存到文件失败"}
+
+@app.get("/api/system/config_info")
+async def get_config_info(user: dict = Depends(get_current_user)):
+    """获取脱敏后的配置信息"""
+    key = os.getenv("DEEPSEEK_API_KEY", "")
+    masked_key = f"{key[:6]}***{key[-4:]}" if len(key) > 10 else "***"
+    return {
+        "has_key": bool(key),
+        "masked_key": masked_key
+    }
 
 
 # ===================== Models =====================
@@ -238,7 +320,8 @@ async def api_ingest_clue(req: IngestClue, background_tasks: BackgroundTasks, cu
     if req.images:
         for b64 in req.images:
             try:
-                ocr_text = extract_contract(b64)
+                import asyncio
+                ocr_text = await asyncio.to_thread(extract_contract, b64)
                 final_content += f"\n【图片证据文字提取】: {ocr_text}"
             except Exception as e:
                 logger.error(f"OCR提取失败: {e}")

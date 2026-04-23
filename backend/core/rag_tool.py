@@ -1,18 +1,23 @@
 from __future__ import annotations
-
 from pathlib import Path
-
-import chromadb
-from llama_index.core import Settings, VectorStoreIndex
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.vector_stores.chroma import ChromaVectorStore
-
 from core.semantic_chunking import dedupe_keep_order
+
+# 注意：为了支持轻量模式，重型 AI 库（chromadb, llama_index）现在都在函数内部按需导入
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 VECTOR_STORE_DIR = BASE_DIR / "vector_store"
 COLLECTION_NAME = "civil_code"
-EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
+
+# 优先使用本地模型（安装包或构建目录）
+LOCAL_MODEL_PATH = BASE_DIR.parent / "models" / "bge-small-zh-v1.5"
+BUILD_MODEL_PATH = BASE_DIR.parent / "build" / "models" / "bge-small-zh-v1.5"
+
+if LOCAL_MODEL_PATH.exists():
+    EMBED_MODEL_NAME = str(LOCAL_MODEL_PATH)
+elif BUILD_MODEL_PATH.exists():
+    EMBED_MODEL_NAME = str(BUILD_MODEL_PATH)
+else:
+    EMBED_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 
 KEYWORD_MAP: dict[str, str] = {
     "食品安全": "《食品安全法》关键条款：生产经营许可、违规添加、虚假标注",
@@ -36,17 +41,31 @@ def retrieve_legal_context(contract_text: str) -> str:
     - ChromaDB 使用 PersistentClient，路径 ./vector_store，collection civil_code
     """
 
+    # 动态导入重型库
+    from llama_index.core import Settings
     Settings.llm = None
-    Settings.embed_model = HuggingFaceEmbedding(model_name=EMBED_MODEL_NAME)
+    
+    import os
+    if os.getenv("SKIP_RAG", "true").lower() == "true":
+        return "（RAG 法律库已通过配置禁用，将基于通用法律知识进行研判）"
 
     if not VECTOR_STORE_DIR.exists():
-        raise FileNotFoundError(
-            f"未找到向量库目录：{VECTOR_STORE_DIR.resolve()}。请先运行 scripts/build_index.py 构建向量库。"
-        )
+        return "（本地法律检索库未就绪，将基于通用法律知识进行研判）"
 
-    client = chromadb.PersistentClient(path=str(VECTOR_STORE_DIR))
-    collection = client.get_or_create_collection(COLLECTION_NAME)
+    try:
+        from llama_index.core import Settings, VectorStoreIndex
+        from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+        from llama_index.vector_stores.chroma import ChromaVectorStore
+        import chromadb
 
+        Settings.embed_model = HuggingFaceEmbedding(model_name=EMBED_MODEL_NAME)
+        client = chromadb.PersistentClient(path=str(VECTOR_STORE_DIR))
+        collection = client.get_or_create_collection(COLLECTION_NAME)
+    except Exception as e:
+        return f"（法律库检索系统初始化失败: {e}，将基于通用法律知识进行研判）"
+
+    from llama_index.vector_stores.chroma import ChromaVectorStore
+    from llama_index.core import VectorStoreIndex
     vector_store = ChromaVectorStore(chroma_collection=collection)
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
@@ -101,5 +120,14 @@ def retrieve_legal_context(contract_text: str) -> str:
             forced_hits.append(f"[关键词召回] {keyword}：{hint}")
 
     merged = dedupe_keep_order([*semantic_hits, *forced_hits])
-    return "\n\n".join(merged)
+    return "\n\n".join(merged) if merged else "（未检索到直接关联法条，将基于通用法律知识研判）"
+
+
+def is_rag_available() -> bool:
+    """检查 RAG 是否可用（目录存在且未被显式禁用）"""
+    import os
+    # 默认禁用 RAG 以确保在所有设备上的极致启动速度和稳定性
+    if os.getenv("SKIP_RAG", "true").lower() == "true":
+        return False
+    return VECTOR_STORE_DIR.exists()
 

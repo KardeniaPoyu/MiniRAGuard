@@ -51,5 +51,7 @@ export default {
   
   getSettings: () => api.get('/settings'),
   updateSettings: (configs) => api.post('/settings', { configs }),
-  changePassword: (old_password, new_password) => api.post('/auth/change_password', { old_password, new_password })
+  changePassword: (old_password, new_password) => api.post('/auth/change_password', { old_password, new_password }),
+  updateApiKey: (key) => api.post('/system/update_api_key', { key }),
+  getConfigInfo: () => api.get('/system/config_info')
 }

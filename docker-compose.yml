@@ -1,41 +1,18 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    volumes:
-      - ./backend/vector_store:/app/backend/vector_store
-      - ./backend/data:/app/backend/data
-    networks:
-      - shulv-network
-    restart: always
-
-  frontend:
-    build:
-      context: ./admin_frontend
-      dockerfile: Dockerfile
-    networks:
-      - shulv-network
-    restart: always
-
-  nginx:
-    image: nginx:stable-alpine
-    container_name: shulv-nginx
+  shulv-zhijian:
+    build: .
+    container_name: qingju-app
     ports:
-      - "80:80"
+      - "80:8000"
     volumes:
-      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - backend
-      - frontend
-    networks:
-      - shulv-network
+      # 将本地数据库文件映射到容器内，保证数据持久化
+      - ./backend/risk_platform.db:/app/backend/risk_platform.db
+      # 如果需要存储上传的附件
+      - ./backend/data:/app/backend/data
+    environment:
+      - PRODUCTION=true
+      - SKIP_RAG=true
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     restart: always
-
-networks:
-  shulv-network:
-    driver: bridge
