@@ -63,12 +63,18 @@
           <el-tag type="info">{{scope.row.status}}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="200">
         <template #default="scope">
           <el-button v-if="scope.row.status === '待研判'" type="primary" size="small" @click="$router.push(`/clues/${scope.row.id}/workbench`)">
             提取卷宗研发
           </el-button>
           <el-button v-else type="default" size="small" disabled>已研发或未阻截</el-button>
+          
+          <el-popconfirm title="确定彻底删除此案例吗？" @confirm="handleDelete(scope.row.id)">
+            <template #reference>
+              <el-button link type="danger" size="small" style="margin-left: 10px;">删除</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -137,6 +143,11 @@ const handleDocUpload = async (event) => {
   } catch(e) {
     ElMessage.error("文档解析发生异常或格式不支持")
   }
+}
+
+const handleDelete = async (id) => {
+  await api.deleteClue(id)
+  fetchData()
 }
 
 onMounted(() => fetchData())
