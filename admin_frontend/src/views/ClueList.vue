@@ -29,9 +29,14 @@
       <el-table-column prop="created_at" label="录入时间" width="180">
         <template #default="scope">{{ new Date(scope.row.created_at).toLocaleString() }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="180">
         <template #default="scope">
           <el-button link type="primary" @click="$router.push(`/clues/${scope.row.id}`)">详情</el-button>
+          <el-popconfirm title="确定删除此记录吗？" @confirm="handleDelete(scope.row.id)">
+            <template #reference>
+              <el-button link type="danger">删除</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -58,6 +63,11 @@ const fetchData = async () => {
   if (filters.value.domain) params.domain = filters.value.domain
   const res = await api.listClues(params)
   tableData.value = res.data
+}
+
+const handleDelete = async (id) => {
+  await api.deleteClue(id)
+  fetchData()
 }
 
 onMounted(() => fetchData())

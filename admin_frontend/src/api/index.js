@@ -41,6 +41,7 @@ export default {
   synergyReply: (id, payload) => api.post(`/clues/${id}/synergy_reply`, payload),
   decision: (id, payload) => api.post(`/clues/${id}/decision`, payload),
   resolveClue: (id) => api.post(`/clues/${id}/resolve`),
+  deleteClue: (id) => api.delete(`/clues/${id}`),
   getStats: () => api.get('/stats'),
   getLogs: () => api.get('/logs'),
   uploadDoc: (formData) => api.post('/upload_doc', formData, {headers:{'Content-Type': 'multipart/form-data'}}),
