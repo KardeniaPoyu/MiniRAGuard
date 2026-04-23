@@ -18,7 +18,7 @@ export SKIP_RAG=true
 
 # 4. 清理旧进程（防止端口占用）
 echo "正在清理旧进程..."
-fuser -k 8000/tcp > /dev/null 2>&1 || pkill -f uvicorn > /dev/null 2>&1
+ps -ef | grep "[u]vicorn main:app" | awk '{print $2}' | xargs -r kill -9 > /dev/null 2>&1
 
 # 5. 启动后端 (后台运行)
 echo "正在启动后台服务 (端口 8000)..."
