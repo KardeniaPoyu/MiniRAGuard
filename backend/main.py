@@ -50,6 +50,7 @@ from core.db_tool import (
     get_sys_configs,
     update_sys_configs,
     update_password as db_update_password,
+    delete_clue,
     DB_PATH
 )
 from core.chat_tool import chat
