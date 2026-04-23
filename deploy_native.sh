@@ -16,7 +16,11 @@ pip3 install -r backend/requirements_minimal.txt
 export PRODUCTION=true
 export SKIP_RAG=true
 
-# 4. 启动后端 (后台运行)
+# 4. 清理旧进程（防止端口占用）
+echo "正在清理旧进程..."
+fuser -k 8000/tcp > /dev/null 2>&1 || pkill -f uvicorn > /dev/null 2>&1
+
+# 5. 启动后端 (后台运行)
 echo "正在启动后台服务 (端口 8000)..."
 # 必须在 backend 目录内启动，否则 Python 找不到 core 模块
 cd backend
