@@ -130,7 +130,8 @@ app.add_middleware(
 
 # ── 生产模式：托管前端静态资源 ──────────────────────────────────────────
 # 安装后路径结构: {app}/backend/ 和 {app}/frontend/
-_frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+# 修改为直接指向管理后台的编译目录
+_frontend_dir = os.path.join(os.path.dirname(__file__), "..", "admin_frontend", "dist")
 if os.path.isdir(_frontend_dir):
     _assets_dir = os.path.join(_frontend_dir, "assets")
     if os.path.isdir(_assets_dir):
