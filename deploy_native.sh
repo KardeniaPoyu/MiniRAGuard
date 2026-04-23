@@ -18,8 +18,10 @@ export SKIP_RAG=true
 
 # 4. 启动后端 (后台运行)
 echo "正在启动后台服务 (端口 8000)..."
-# 使用 nohup 保证退出终端后服务依然运行
-nohup python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+# 必须在 backend 目录内启动，否则 Python 找不到 core 模块
+cd backend
+nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > ../server.log 2>&1 &
+cd ..
 
 echo "=== 部署完成！ ==="
 echo "服务已在后台运行，端口: 8000"
