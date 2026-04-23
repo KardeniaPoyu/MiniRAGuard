@@ -295,7 +295,7 @@ def seed_users():
         conn.executemany("INSERT INTO users (username, hashed_password, role, real_name, created_at) VALUES (?, ?, ?, ?, ?)", users)
         conn.commit()
 
-def get_user_by_username(username: str) -> dict | None:
+def get_user_by_username(username: str) -> Optional[dict]:
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         row = conn.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
