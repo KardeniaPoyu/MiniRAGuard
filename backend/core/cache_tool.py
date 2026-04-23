@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from typing import Optional, Union
 import hashlib, json, secrets, sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -74,7 +74,7 @@ def init_db() -> None:
 # ──────────────────────────── cache ────────────────────────────
 
 
-def get_cache(text: str) -> dict | None:
+def get_cache(text: str) -> Optional[dict]:
     init_db()
     with sqlite3.connect(DB_PATH) as conn:
         row = conn.execute("SELECT result FROM cache WHERE md5=?", (_md5(text),)).fetchone()
@@ -89,7 +89,7 @@ def set_cache(text: str, result: dict) -> None:
         conn.commit()
 
 
-def get_cache_by_md5(md5: str) -> dict | None:
+def get_cache_by_md5(md5: str) -> Optional[dict]:
     init_db()
     with sqlite3.connect(DB_PATH) as conn:
         row = conn.execute("SELECT result FROM cache WHERE md5=?", (md5,)).fetchone()
@@ -192,7 +192,7 @@ def get_or_create_user(openid: str) -> dict:
         }
 
 
-def get_user_by_token(token: str) -> dict | None:
+def get_user_by_token(token: str) -> Optional[dict]:
     """通过 token 查找用户，token 不存在或已过期返回 None。"""
     init_db()
     now = _now_iso()
@@ -330,7 +330,7 @@ def get_analyze_records(openid: str, limit: int = 20) -> list:
     ]
 
 
-def get_record_detail(openid: str, image_md5: str) -> dict | None:
+def get_record_detail(openid: str, image_md5: str) -> Optional[dict]:
     """
     获取某条记录的完整审查结果。
     先验证该记录属于该用户，再从 cache 表取完整 JSON。

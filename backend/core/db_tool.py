@@ -1,6 +1,7 @@
 import json
 import os
 import sqlite3
+from typing import Any, Optional, Union
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -174,7 +175,7 @@ def mark_resolved(clue_id: int) -> None:
         conn.execute("UPDATE clues SET status='已结案', updated_at=? WHERE id=?", (now, clue_id))
         conn.commit()
 
-def get_clue(clue_id: int) -> dict | None:
+def get_clue(clue_id: int) -> Optional[dict]:
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         row = conn.execute("SELECT * FROM clues WHERE id=?", (clue_id,)).fetchone()
