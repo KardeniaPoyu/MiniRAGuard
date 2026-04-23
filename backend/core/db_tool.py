@@ -350,3 +350,11 @@ def update_password(username: str, hashed_password: str) -> None:
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("UPDATE users SET hashed_password=? WHERE username=?", (hashed_password, username))
         conn.commit()
+
+def delete_clue(clue_id: int) -> bool:
+    with sqlite3.connect(DB_PATH) as conn:
+        # 同时清理相关的推送记录（可选，但推荐）
+        conn.execute("DELETE FROM push_records WHERE clue_id=?", (clue_id,))
+        cur = conn.execute("DELETE FROM clues WHERE id=?", (clue_id,))
+        conn.commit()
+        return cur.rowcount > 0
