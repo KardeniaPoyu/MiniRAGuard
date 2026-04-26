@@ -1,37 +1,57 @@
-# Python
+# ── Byte-compiled / optimized / DLL files ────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
-.venv/
+*.pyo
+
+# ── Distribution / packaging ──────────────────────────────────────────────
+# dist/
+dist_installer/
 build/
-dist/
 *.egg-info/
+.eggs/
 
-# Environment
+# ── Virtual environments ──────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Environment & secrets ─────────────────────────────────────────────────
 .env
+.env.local
+*.env
 
-# Database & Cache
-*.db
+# ── Frontend build artifacts ──────────────────────────────────────────────
+admin_frontend/node_modules/
+# admin_frontend/dist/
+rent_agent_frontend/node_modules/
+
+# ── Database & vector store (runtime data) ───────────────────────────────
+backend/data/*.db
+backend/vector_store/
+
+# ── Logs ─────────────────────────────────────────────────────────────────
 *.log
-vector_store/
-cache/
+logs/
 
-# AI IDE & Tools
-.cursorrules
-.gemini/
-.antigravity/
-.cortex/
-.idea/
-.vscode/
-
-# Project Specific
-log.txt
-reflog.txt
-demo.mp4
-backend/.env
-miniraguard/cache.db
-examples/rent_assistant/backend/cache.db
-
-# OS
+# ── macOS ────────────────────────────────────────────────────────────────
 .DS_Store
+.AppleDouble
+
+# ── Windows ──────────────────────────────────────────────────────────────
 Thumbs.db
+Desktop.ini
+
+# ── IDE ──────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Installer build cache ────────────────────────────────────────────────
+installer/assets/数律智检.exe
+installer/assets/*.exe
+installer/build/

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数律智检 · 初始化配置</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:    #0a0f1e;
+      --bg-panel:   rgba(15, 25, 50, 0.85);
+      --border:     rgba(99, 179, 237, 0.18);
+      --accent:     #3b82f6;
+      --accent-2:   #06b6d4;
+      --text-main:  #e2e8f0;
+      --text-muted: #94a3b8;
+      --success:    #10b981;
+      --error:      #ef4444;
+      --warning:    #f59e0b;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(6,182,212,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(99,102,241,0.07) 0%, transparent 70%);
+      animation: drift 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      0%   { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.06) translate(-12px, 8px); }
+    }
+
+    /* ── Grid lines overlay ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative; z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 0;
+    }
+
+    /* ── Logo / Brand ── */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .brand-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 0 32px rgba(59,130,246,0.35), 0 0 0 1px rgba(59,130,246,0.2);
+      position: relative;
+    }
+
+    .brand-icon::after {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(6,182,212,0.4));
+      z-index: -1;
+      filter: blur(8px);
+    }
+
+    .brand-name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, #93c5fd, #67e8f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      font-weight: 400;
+    }
+
+    /* ── Card ── */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 40px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow:
+        0 8px 48px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(255,255,255,0.04) inset;
+      animation: fadeUp 0.7s ease both 0.1s;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Step indicator ── */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(99,179,237,0.2);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .step-dot.active {
+      background: var(--accent);
+      transform: scale(1.25);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .step-dot.done {
+      background: var(--success);
+    }
+
+    .step-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    /* ── Section heading ── */
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .section-desc a {
+      color: var(--accent-2);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(6,182,212,0.4);
+      transition: border-color 0.2s;
+    }
+
+    .section-desc a:hover { border-color: var(--accent-2); }
+
+    /* ── Input field ── */
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    #apiKeyInput {
+      width: 100%;
+      padding: 13px 44px 13px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: 'Inter', monospace;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    }
+
+    #apiKeyInput::placeholder { color: rgba(148,163,184,0.45); }
+
+    #apiKeyInput:focus {
+      border-color: rgba(59,130,246,0.55);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+
+    #apiKeyInput.input-error {
+      border-color: rgba(239,68,68,0.55);
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.10);
+    }
+
+    #apiKeyInput.input-success {
+      border-color: rgba(16,185,129,0.55);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.10);
+    }
+
+    .toggle-vis {
+      position: absolute;
+      right: 13px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex; align-items: center;
+      transition: color 0.2s;
+      font-size: 16px;
+    }
+
+    .toggle-vis:hover { color: var(--text-main); }
+
+    /* ── Message area ── */
+    .msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      min-height: 20px;
+      margin-bottom: 20px;
+      padding: 0 2px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.25s, transform 0.25s;
+    }
+
+    .msg.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .msg.success { color: var(--success); }
+    .msg.error   { color: var(--error); }
+    .msg.info    { color: var(--accent-2); }
+
+    /* ── Button ── */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.30);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(59,130,246,0.45);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary .btn-text { position: relative; z-index: 1; }
+
+    .btn-primary .btn-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: none;
+    }
+
+    .btn-primary:hover:not(:disabled) .btn-shimmer {
+      animation: shimmer 0.8s ease forwards;
+    }
+
+    @keyframes shimmer {
+      to { transform: translateX(100%); }
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Info tip ── */
+    .tip-box {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .tip-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+    .tip-text {
+      font-size: 12px;
+      color: rgba(245,158,11,0.9);
+      line-height: 1.6;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(148,163,184,0.4);
+      letter-spacing: 0.06em;
+      animation: fadeUp 0.8s ease both 0.3s;
+    }
+
+    /* ── Success state overlay ── */
+    .success-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      padding: 8px 0;
+    }
+
+    .success-overlay.show { display: flex; }
+
+    .success-icon-wrap {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.12);
+      border: 2px solid rgba(16,185,129,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .success-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .launch-btn {
+      margin-top: 8px;
+      padding: 12px 40px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, box-shadow 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+    }
+
+    .launch-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(16,185,129,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">⚖️</div>
+      <div class="brand-name">数律智检</div>
+      <div class="brand-subtitle">基层治理风险研判平台 · 初始化向导</div>
+    </div>
+
+    <!-- Card -->
+    <div class="card" id="mainCard">
+
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <span class="step-label">API 密钥配置 · 第 1 步，共 1 步</span>
+      </div>
+
+      <!-- Main form (hidden after success) -->
+      <div id="formSection">
+        <div class="section-title">配置 DeepSeek API 密钥</div>
+        <div class="section-desc">
+          本平台使用 DeepSeek 大模型进行智能风险研判。请前往
+          <a href="#" onclick="openLink('https://platform.deepseek.com/api_keys'); return false;" id="linkApiPage">
+            platform.deepseek.com
+          </a>
+          获取 API Key，并粘贴至下方。密钥将安全存储于本地，重装软件后仍可使用。
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="apiKeyInput">DeepSeek API Key</label>
+          <div class="input-wrap">
+            <input
+              type="password"
+              id="apiKeyInput"
+              placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="toggle-vis" id="toggleVisBtn" title="显示/隐藏" onclick="toggleVisibility()">👁</button>
+          </div>
+        </div>
+
+        <div class="msg" id="msgBox" role="alert"></div>
+
+        <button class="btn-primary" id="saveBtn" onclick="handleSave()">
+          <div class="btn-shimmer"></div>
+          <span class="btn-text" id="saveBtnText">保存并启动</span>
+        </button>
+
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text">
+            API Key 仅保存在您的本地计算机（<code>~/.shulv_config.json</code>），不会上传至任何服务器。
+          </div>
+        </div>
+      </div>
+
+      <!-- Success section -->
+      <div class="success-overlay" id="successSection">
+        <div class="success-icon-wrap">✅</div>
+        <div class="success-title">配置成功！</div>
+        <div class="success-sub">
+          API Key 已成功保存到本地。<br/>
+          应用将在 2 秒内启动，本窗口随之关闭。<br/>
+          <small style="opacity: 0.7; font-size: 0.8rem;">提示：首次启动加载模型需约 1 分钟，请稍后...</small>
+        </div>
+        <div class="spinner"></div>
+      </div>
+
+    </div><!-- /card -->
+
+    <div class="footer">数律智检 v1.0.0 &nbsp;·&nbsp; © 2025 数律智检研发团队</div>
+
+  </div><!-- /page -->
+
+  <script>
+    // ── Pywebview bridge check ──────────────────────────────────────────────
+    function getPythonApi() {
+      // pywebview injects window.pywebview.api after DOMContentLoaded
+      return (window.pywebview && window.pywebview.api) ? window.pywebview.api : null;
+    }
+
+    // ── Open external link ──────────────────────────────────────────────────
+    function openLink(url) {
+      const api = getPythonApi();
+      if (api && api.open_url) {
+        api.open_url(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+
+    // ── Toggle password visibility ──────────────────────────────────────────
+    function toggleVisibility() {
+      const inp = document.getElementById('apiKeyInput');
+      const btn = document.getElementById('toggleVisBtn');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        inp.type = 'password';
+        btn.textContent = '👁';
+      }
+    }
+
+    // ── Show message ────────────────────────────────────────────────────────
+    function showMsg(text, type) {
+      const box = document.getElementById('msgBox');
+      box.textContent = text;
+      box.className = 'msg visible ' + type;
+    }
+
+    function clearMsg() {
+      const box = document.getElementById('msgBox');
+      box.className = 'msg';
+      box.textContent = '';
+    }
+
+    // ── Validate ────────────────────────────────────────────────────────────
+    function validateKey(key) {
+      if (!key || key.trim().length < 10) {
+        return 'API Key 不能为空，且长度应大于 10 个字符';
+      }
+      if (!key.trim().startsWith('sk-')) {
+        return 'API Key 格式不正确，应以 "sk-" 开头';
+      }
+      return null;
+    }
+
+    // ── Handle save ─────────────────────────────────────────────────────────
+    async function handleSave() {
+      const inp = document.getElementById('apiKeyInput');
+      const btn = document.getElementById('saveBtn');
+      const btnText = document.getElementById('saveBtnText');
+      const key = inp.value.trim();
+
+      // Client-side validation
+      const validErr = validateKey(key);
+      if (validErr) {
+        inp.className = inp.className.replace(/input-(error|success)/g, '') + ' input-error';
+        showMsg('⚠ ' + validErr, 'error');
+        inp.focus();
+        return;
+      }
+
+      inp.className = inp.className.replace(/input-(error|success)/g, '');
+      clearMsg();
+
+      // Disable button, show spinner
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span>正在保存…';
+
+      const api = getPythonApi();
+
+      if (!api) {
+        // Dev/browser mode fallback
+        setTimeout(() => {
+          showSuccess();
+        }, 1200);
+        return;
+      }
+
+      try {
+        const result = await api.save_api_key(key);
+        if (result && result.status === 'success') {
+          inp.className = inp.className.replace(/input-(error|success)/g, '') + ' input-success';
+          showMsg('✓ 保存成功', 'success');
+          setTimeout(showSuccess, 600);
+        } else {
+          const msg = (result && result.message) ? result.message : '保存失败，请重试';
+          inp.className = inp.className.replace(/input-(error|success)/g, '') + ' input-error';
+          showMsg('✗ ' + msg, 'error');
+          btn.disabled = false;
+          btnText.textContent = '保存并启动';
+        }
+      } catch (e) {
+        showMsg('✗ 调用后端失败: ' + e.toString(), 'error');
+        btn.disabled = false;
+        btnText.textContent = '保存并启动';
+      }
+    }
+
+    // ── Show success overlay ────────────────────────────────────────────────
+    function showSuccess() {
+      document.getElementById('dot1').className = 'step-dot done';
+      document.getElementById('dot2').className = 'step-dot active';
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('successSection').classList.add('show');
+
+      // 通知后端关闭当前窗口并继续启动流程
+      setTimeout(() => {
+        if (window.pywebview && window.pywebview.api) {
+          window.pywebview.api.destroy_window();
+        }
+      }, 2000);
+    }
+
+    // ── Allow Enter to submit ───────────────────────────────────────────────
+    document.getElementById('apiKeyInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handleSave();
+    });
+
+    // ── Focus input immediately ─────────────────────────────────────────────
+    window.addEventListener('load', function() {
+      document.getElementById('apiKeyInput').focus();
+    });
+  </script>
+</body>
+</html>

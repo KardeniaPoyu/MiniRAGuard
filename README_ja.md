@@ -1,122 +1,54 @@
 <div align="center">
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>🛡️ MiniRAGuard</h1>
+<h1>MiniRAGuard</h1>
 
-  <p>
-    <strong>軽量フルスタック RAG 監査エージェントテンプレート</strong><br>
-    <em>わずか 10 分で、独自の垂直領域マルチモーダル AI RAG 監査アシスタントを構築。</em>
-  </p>
+<p>
+    <strong>監査およびコンプライアンス審査のためのフルスタック多モーダル RAG テンプレート</strong>
+</p>
 
-  <p>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=B0C4B1" alt="License"></a>
-  </p>
+<p>
+    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/MiniRAGuard?style=flat-square" alt="Stars"></a>
+    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/MiniRAGuard?style=flat-square" alt="Forks"></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License"></a>
+</p>
 
-  <p>
+<p>
     <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi" alt="FastAPI">
     <img src="https://img.shields.io/badge/UniApp-2B9939?style=flat-square&logo=vuedotjs" alt="UniApp">
     <img src="https://img.shields.io/badge/DeepSeek-0d6efd?style=flat-square" alt="DeepSeek">
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
-  </p>
+</p>
 
 [**English**](./README.md) | [**简体中文**](./README_zh.md) | [**日本語**](./README_ja.md)
 
 </div>
 
-<br/>
-
-## 📖 目次
-
-- [✨ MiniRAGuard とは？](#-miniraguard-とは)
-- [🏗️ ディレクトリ構造](#-ディレクトリ構造)
-- [🚀 クイックスタート](#-クイックスタート)
-- [🔥 核心的なハイライト](#-核心的なハイライト)
-- [🏗️ 技術アーキテクチャ](#-技術アーキテクチャ)
-- [🛠️ 独自の AI エージェントを構築する](#-独自の-ai-エージェントを構築する)
-- [🤝 貢献とライセンス](#-貢献とライセンス)
-
 ---
 
-## ✨ MiniRAGuard とは？
+## 概要
 
-監査、財務報告、苦情審査などの**垂直監査領域**において、開発者は「画像の不鮮明さ」「LLM のハルシネーション（幻覚）」「高頻度のリクエスト処理」という 3 つの大きな課題に直面しています。
+MiniRAGuard は、視覚大モデル（VLM）と検索拡張生成（RAG）を統合したフルスタック技術テンプレートです。垂直ドメインにおけるドキュメント監査、コンプライアンス審査、および自動構造化解析のための標準化された実装を提供します。
 
-これらに対し、**MiniRAGuard** は**極めて軽量で、すぐに使える**フルスタック RAG ビジネステンプレートを提供します。**VLM (視覚大モデル)** と **RAG (検索拡張生成)** を組み合わせ、AI がローカルのナレッジベースに基づいて厳密に推論することを強制。これにより、開発者はドキュメント検索と出力制限メカニズムを垂直領域のアプリケーションに迅速に組み込むことができます。
+## 技術的特徴
 
-**MiniRAGuard** は、LLM を活用した複雑なドキュメント審査プロセスに対して、エンジニアリングにおける確定性と境界制御を提供することを目指しています。ミニマリストな RAG 実装だけでなく、完全なビジネスデモ UI も付属。**TXT ファイルをライブラリに追加し、プロンプトを修正するだけ**で、独自の AI アシスタントを即座に稼働させることができます。わずか 10 分で WeChat ミニプログラムやウェブサイトをデプロイでき、初心者の方が RAG アーキテクチャを学ぶのに最適です。
+- **知識ベースに基づく検索拡張 (RAG)**: Sentence-Transformers とローカルベクトルデータベースを利用し、モデルの推論を事前定義された規則に厳密に依存させることで、ハルシネーションを抑制します。
+- **多モーダルドキュメント解析**: VLM インターフェース（デフォルトで Qwen-VL）を統合し、スキャンデータ、画像、PDF からの自動構造化データ抽出を実現します。
+- **監査ワークフローの制約**: 法律や財務監査などの機密性の高いビジネスシナリオにおいて、モデルの出力境界を定義するための「審査・フィードバック」プロンプトテンプレートを内蔵しています。
 
----
+## デモ (Demo)
 
-## 🚀 ビジネスデモ (Demo)
-
-組み込みのデモ： **「賃貸アシスタント/契約コンプライアンスリスク監査」** は `examples/rent_assistant` ディレクトリにあります。
+組み込みの賃貸コンプライアンスアシスタントのビデオデモ：
 
 https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
-<br/>
+## エンジニアリングコンポーネント
+  - **バックエンド**: FastAPI を使用した高性能非同期 API。
+  - **フロントエンド**: UniApp/Vue を使用したクロスプラットフォームビジネスインターフェース。
+- **システムの安定性と最適化**:
+  - **リクエストキャッシュ**: MD5 ベースのファイル検証により、重複リクエストを遮断し、API コストを削減します。
+  - **並行制御**: セマフォベースのフロー制御により、LLM エンドポイントへの同時リクエスト数を制限し、サービスの安定性を確保します。
 
-## 🔥 核心的なハイライト
-
-- **ローカルナレッジベースに基づく RAG 検索と生成 (Fact-based RAG)**  
-  法務や財務などの厳格なシナリオ向けに、Sentence-Transformers を使用してローカルベクトルデータベース (VectorDB) を構築。LLM は推論前にローカルデータベースから関連する規制を検索することで、「ハルシネーション」を大幅に削減し、判断の具体的な根拠を提示します。
-- **すぐに使えるマルチモーダルドキュメントアクセス**  
-  主要な VLM インターフェース呼び出しロジック（デフォルト Qwen-VL API）を統合。契約書のスキャンデータ、画像、PDF を直接アップロードして重要情報を迅速に抽出できます。
-- **軽量なコンプライアンス審査ワークフロー**  
-  「審査・フィードバック」の基本プロンプトテンプレートを内蔵。賃貸契約書や定型条項などの機密テキストを処理する際の LLM の出力境界を効果的に制限し、ビジネス側の PoC に最適です。
-- **フロントエンド・バックエンド分離の完全なビジネススキャフォールド**  
-  `backend` (FastAPI) と `frontend` (Vue/UniApp) のエンジニアリング済みのソースコードを同梱。RAG の実装を学びながら、そのままデモとして利用できる UI も手に入ります。
-- **並行処理とキャッシュ制御 (Concurrency & Caching)**
-  - **MD5 キャッシュメカニズム**: ファイルの MD5 を計算して重複確認をインターセプト。不要な API トークン消費と遅延を大幅に削減します。
-  - **セマフォ制限**: バックエンドのスレッドフロー制御により、トラフィックピーク時でも LLM への同時リクエスト数を制限し、安定した運用を確保します。
-
----
-
-## 🏗️ ディレクトリ構造 (Structure)
-
-```text
-.
-├── miniraguard/          # 抽象コアフレームワーク (Abstract Core)
-├── examples/
-│   └── rent_assistant/   # 公式デモ「賃貸アシスタント」
-│       ├── backend/      # 業務ロジック実装
-│       ├── frontend/     # UniApp モバイル源码
-│       └── data/         # 業務ナレッジ / ベクトル DB ストレージ
-├── docs/                 # ドキュメント
-└── tests/                # ユニットテスト
-```
-
----
-
-## 🚀 クイックスタート (賃貸アシスタントを例に)
-
-### 1. バックエンドのデプロイ
-
-```bash
-# 1. クローンしてディレクトリに移動
-git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
-cd MiniRAGuard/examples/rent_assistant/backend
-
-# 2. 依存関係のインストールと環境設定
-pip install -r ../../../requirements.txt 
-cp .env.example .env # API キーを入力
-
-# 3. 起動！
-python main.py
-```
-
-### 2. フロントエンドのデプロイ
-
-1. [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE をダウンロードしてインストールします。
-2. `examples/rent_assistant/frontend` ディレクトリをインポート。
-3. `config.js` の `BASE_URL` をデプロイしたバックエンドのアドレスに更新します。
-4. 内蔵ブラウザまたは WeChat DevTools で実行！
-
----
-
-## 🏗️ 技術アーキテクチャ
+## 技術アーキテクチャ
 
 ```mermaid
 graph TD
@@ -137,28 +69,39 @@ graph TD
     API_Gateway -->|6. 動的なレンダリング| User
 ```
 
----
+## ディレクトリ構造
 
-## 🛠️ 独自の AI エージェントを構築する
+- `miniraguard/`: コアフレームワークの抽象化層。
+- `examples/`: ビジネス実装例（賃貸コンプライアンスアシスタントなど）。
+  - `backend/`: バックエンドビジネスロジック。
+  - `frontend/`: フロントエンド UniApp ソースコード。
+  - `data/`: 業務知識ベースとベクトルストレージ。
+- `docs/`: 技術ドキュメント。
 
-1. **ナレッジの注入**: `examples/rent_assistant/data/` をクリアし、独自の TXT や Markdown を追加。
-2. **インデックスの再構築**: 既存の `vector_store` を削除すると、次回の起動時に自動的に再構築されます。
-3. **ロジックの調整**: `examples/rent_assistant/backend/prompts.py` のシステムプロンプトを修正します。
+## クイックスタート
 
----
+### 1. バックエンドのデプロイ
 
-## 📈 Star History
+```bash
+git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
+cd MiniRAGuard/examples/rent_assistant/backend
+pip install -r ../../../requirements.txt 
+cp .env.example .env # API_KEY を設定
+python main.py
+```
 
-<a href="https://www.star-history.com/?repos=KardeniaPoyu%2FMiniRAGuard&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
- </picture>
-</a>
+### 2. フロントエンドのデプロイ
 
-## 🤝 貢献とライセンス
+1. HBuilderX に `examples/rent_assistant/frontend` をインポートします。
+2. `config.js` の `BASE_URL` をバックエンドのアドレスに更新します。
+3. 内蔵ブラウザまたは WeChat 開発者ツールで実行します。
 
-誤字の修正から、MiniRAGuard を使った素晴らしいアプリケーションの構築まで、プルリクエストをお待ちしています！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+## カスタマイズ
 
-このプロジェクトは **[MIT](LICENSE)** ライセンスの下で公開されています。役立った場合は、⭐ **Star** をいただけると励みになります！
+1. **知識の注入**: `examples/rent_assistant/data/` のファイルを独自の TXT または Markdown ファイルに置き換えます。
+2. **インデックスのリセット**: `vector_store` ディレクトリを削除すると、次回の起動時にインデックスが再構築されます。
+3. **ロジックの調整**: `backend/prompts.py` のシステムプロンプトを修正します。
+
+## ライセンス
+
+このプロジェクトは [MIT](LICENSE) ライセンスの下で公開されています。

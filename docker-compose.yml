@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  shulv-zhijian:
+    build: .
+    container_name: qingju-app
+    ports:
+      - "80:8000"
+    volumes:
+      # 将本地数据库文件映射到容器内，保证数据持久化
+      - ./backend/risk_platform.db:/app/backend/risk_platform.db
+      # 如果需要存储上传的附件
+      - ./backend/data:/app/backend/data
+    environment:
+      - PRODUCTION=true
+      - SKIP_RAG=true
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    restart: always

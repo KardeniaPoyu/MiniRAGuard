@@ -40,7 +40,7 @@ def run_test(test_id):
         results.append(f"请求耗时: {elapsed:.2f}s")
         return elapsed
     except Exception as e:
-        results.append(f"❌ 运行错误: {e}")
+        results.append(f"�?运行错误: {e}")
         return 120
 
 print("Running Test 1 (Cold Start expected ~40s)")

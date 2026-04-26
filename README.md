@@ -1,164 +1,204 @@
+<<<<<<< Updated upstream
+# 数律智检 · 基层治理风险研判平台
+
+> 基于 AI 的检察智能辅助系统，实现从线索录入 → 风险研判 → 协同跟进的全流程数字化闭环。
+
+---
+
+## 快速开始
+
+### 方式一：生产安装包（推荐）
+
+适合最终用户，提供标准 Windows 安装/卸载体验。
+
+```bash
+# 开发者在 installer/ 目录运行
+installer\build_installer.bat
+```
+
+生成产物：`dist_installer\数律智检_Setup_v1.0.0.exe`
+
+**前置条件（仅开发机需要）**：
+- [Node.js 18+](https://nodejs.org/)
+- [Python 3.11+](https://www.python.org/)
+- [Inno Setup 6](https://jrsoftware.org/isdl.php)
+
+---
+
+### 方式二：Docker 本地部署（团队内部共享）
+=======
 <div align="center">
-  <!-- <img src="./docs/assets/banner.png" width="100%" alt="MiniRAGuard Banner"> -->
 
-  <h1>🛡️ MiniRAGuard</h1>
+<h1>MiniRAGuard</h1>
 
-  <p>
-    <strong>A Lightweight Full-stack RAG Audit Agent Template</strong><br>
-    <em>Build your own vertical multimodal AI RAG audit assistant in just 10 minutes.</em>
-  </p>
+<p>
+    <strong>Full-stack Multimodal RAG Template for Auditing and Compliance Review</strong>
+</p>
 
-  <p>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=F3DFA2&logo=github" alt="Stars"></a>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=7E8D85&logo=github" alt="Forks"></a>
-    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/issues"><img src="https://img.shields.io/github/issues/KardeniaPoyu/MiniRAGuard?style=for-the-badge&color=E8C8CD&logo=github" alt="Issues"></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=B0C4B1" alt="License"></a>
-  </p>
+<p>
+    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/stargazers"><img src="https://img.shields.io/github/stars/KardeniaPoyu/MiniRAGuard?style=flat-square" alt="Stars"></a>
+    <a href="https://github.com/KardeniaPoyu/MiniRAGuard/network/members"><img src="https://img.shields.io/github/forks/KardeniaPoyu/MiniRAGuard?style=flat-square" alt="Forks"></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License"></a>
+</p>
 
-  <p>
+<p>
     <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi" alt="FastAPI">
     <img src="https://img.shields.io/badge/UniApp-2B9939?style=flat-square&logo=vuedotjs" alt="UniApp">
     <img src="https://img.shields.io/badge/DeepSeek-0d6efd?style=flat-square" alt="DeepSeek">
     <img src="https://img.shields.io/badge/Qwen__VL-ff6a00?style=flat-square" alt="Qwen-VL">
-  </p>
+</p>
 
 [**English**](./README.md) | [**简体中文**](./README_zh.md) | [**日本語**](./README_ja.md)
 
 </div>
 
-<br/>
-
-## 📖 Table of Contents
-
-- [✨ What is MiniRAGuard?](#-what-is-miniraguard)
-- [🏗️ Directory Structure](#-directory-structure)
-- [🚀 Quick Start](#-quick-start)
-- [🔥 Core Highlights](#-core-highlights)
-- [🏗️ Architecture](#-architecture)
-- [🛠️ Build Your Own AI Agent](#-build-your-own-ai-agent)
-- [🤝 Contributing & License](#-contributing--license)
-
 ---
 
-## ✨ What is MiniRAGuard?
+## Overview
 
-In **vertical audit fields** such as medical auditing, financial reporting, and petition review, developers often face three major pain points: **unstructured/blurry image data**, **frequent LLM hallucinations**, and **difficulty handling high-concurrency requests**.
+MiniRAGuard is a full-stack technical template integrating Vision Large Models (VLM) and Retrieval-Augmented Generation (RAG). It provides a standardized implementation for document auditing, compliance review, and automated structured parsing in vertical domains.
 
-Addressing these three points, **MiniRAGuard** provides a **lightweight, out-of-the-box** full-stack RAG business template. By combining **VLM (Vision Large Models)** with **RAG (Retrieval-Augmented Generation)**, it forces the AI to reason strictly based on your local knowledge base, helping developers quickly integrate document retrieval and output constraint mechanisms into vertical applications.
+## Technical Features
 
-**MiniRAGuard** aims to provide engineering certainty and boundary control for complex document review processes powered by LLMs. It includes not only a minimalist RAG implementation but also a complete business showcase UI. Simply **drop your TXT files into the library and modify a single Prompt** to launch your specialized assistant. Launch and deploy a WeChat mini-program or website in just ten minutes—perfect for beginners to learn the RAG architecture.
+- **Fact-based Retrieval-Augmented Generation**: Utilizes Sentence-Transformers and a local vector database to ensure model reasoning is grounded in predefined regulations, reducing hallucinations.
+- **Multimodal Document Parsing**: Integrated VLM support (defaulting to Qwen-VL) for automated structured data extraction from scans, images, and PDFs.
+- **Audit Workflow Constraints**: Built-in "review-feedback" Prompt templates to define output boundaries for sensitive business scenarios like legal or financial audits.
 
----
+## Demo
 
-## 🚀 Business Instance Demo
-
-Demonstrating with the built-in **"Receipt/Contract Compliance Risk Assistant"** instance located in `examples/rent_assistant`:
+Video demonstration of the built-in Rental Compliance Assistant:
 
 https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
-<br/>
+## Engineering Components
+  - **Backend**: High-performance asynchronous API built with FastAPI.
+  - **Frontend**: Cross-platform business interface built with UniApp/Vue.
+- **System Stability & Optimization**:
+  - **Request Caching**: MD5-based file verification to intercept redundant requests and reduce API costs.
+  - **Concurrency Control**: Semaphore-based flow control to limit concurrent requests to LLM endpoints, ensuring service stability.
 
-## 🔥 Core Highlights
+## Architecture
+>>>>>>> Stashed changes
 
-- **Fact-based RAG Search & Generation**  
-  Specifically for legal, financial, and other serious scenarios, the system uses Sentence-Transformers to build a local vector database (VectorDB). The LLM retrieves relevant regulations from the local database before reasoning, significantly reducing "hallucinations" and providing concrete sources for judgments.
-- **Out-of-the-box Multimodal Document Access**  
-  Integrated mainstream VLM interface call logic (default Qwen-VL API), supporting direct upload of contract scans, images, or PDFs to quickly extract key information. Developers can process documents without writing complex multimodal parsing code.
-- **Lightweight Compliance Review Workflow**  
-  Built-in basic "review-feedback" Prompt template design, effectively constraining output boundaries for sensitive texts (like leases or boilerplate clauses). Ideal for business-side PoCs (Proof of Concept).
-- **Full-stack Scaffold with Separated Frontend/Backend**  
-  Provides complete production-grade source code for `backend` (FastAPI) and `frontend` (Vue/UniApp). Developers can learn RAG implementation while having a ready-to-use UI for demonstrations.
-- **Concurrency & Cache Control**
-  - **MD5 Caching Mechanism**: Intercepts repeated verifications by calculating file MD5, reducing unnecessary API Token consumption and latency.
-  - **Semaphore Flow Control**: Backend thread flow control ensures stable service operation during traffic spikes by limiting concurrent requests to the LLM.
+适合内网多人访问，无需安装包。
 
----
+```bash
+# 1. 复制并填写环境变量
+cp .env.example .env
+# 编辑 .env，填入 DEEPSEEK_API_KEY
 
-## 🏗️ Directory Structure
+# 2. 一键启动
+docker-compose up -d --build
 
-```text
-.
-├── miniraguard/          # Abstract Core Framework
-├── examples/
-│   └── rent_assistant/   # Official "Rental Assistant" Demo
-│       ├── backend/      # Business logic implementation
-│       ├── frontend/     # UniApp mobile source code
-│       └── data/         # Business knowledge base & vector DB storage
-├── docs/                 # Documentation
-└── tests/                # Unit tests
+# 3. 访问
+# 管理端：http://localhost
+```
+
+## Directory Structure
+
+<<<<<<< Updated upstream
+### 方式三：开发环境运行
+
+```bash
+# 后端
+pip install -r requirements.txt
+cd backend
+uvicorn main:app --reload --port 8000
+
+# 前端（新终端）
+cd admin_frontend
+npm install && npm run dev
+```
+=======
+- `miniraguard/`: Abstract core framework.
+- `examples/`: Business implementation examples (e.g., Rental Compliance Assistant).
+  - `backend/`: Backend business logic.
+  - `frontend/`: Frontend UniApp source code.
+  - `data/`: Knowledge base and vector storage.
+- `docs/`: Technical documentation.
+
+## Quick Start
+>>>>>>> Stashed changes
+
+### 1. Backend Deployment
+
+<<<<<<< Updated upstream
+## 架构说明
+
+```
+数律智检/
+├── backend/                 # FastAPI 后端（Python 3.11）
+│   ├── core/                # 业务核心（RAG、研判、数据库、鉴权）
+│   ├── scripts/             # 初始化脚本（构建向量索引）
+│   └── main.py              # 应用入口，生产模式自动托管前端
+├── admin_frontend/          # Vue 3 管理端前端
+│   └── src/views/           # 大屏、工作台、设置等页面
+├── installer/               # 安装包工程
+│   ├── build_installer.bat  # 一键构建脚本（开发者用）
+│   ├── installer.iss        # Inno Setup 安装向导配置
+│   └── launcher.py          # 轻量级桌面启动器源码
+├── deploy/                  # 服务器部署配置
+│   └── nginx.conf           # Nginx 反向代理配置
+└── docker-compose.yml       # Docker 编排文件
 ```
 
 ---
 
-## 🚀 Quick Start (Rental Assistant Demo)
+## 环境变量
 
-### 1. Deploy Backend
+复制 `.env.example` 为 `.env` 并填写：
 
+| 变量名 | 说明 | 必填 |
+|--------|------|------|
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | ✅ |
+| `JWT_SECRET_KEY` | JWT 签名密钥（随机字符串） | ✅ |
+| `PRODUCTION` | 设为 `true` 跳过测试数据植入 | 可选 |
+
+---
+
+## 默认账号
+
+| 角色 | 用户名 | 初始密码 |
+|------|--------|----------|
+| 管理员 | `admin` | `admin123` |
+
+> **安全提示**：生产部署前请修改初始密码。
+
+---
+
+## 技术栈
+
+| 层次 | 技术 |
+|------|------|
+| 前端 | Vue 3 + Vite + Element Plus |
+| 后端 | FastAPI + uvicorn |
+| AI | LlamaIndex + ChromaDB + DeepSeek |
+| 嵌入模型 | sentence-transformers (HuggingFace) |
+| 数据库 | SQLite |
+| 容器 | Docker + Nginx |
+| 安装包 | Inno Setup 6 |
+=======
 ```bash
-# 1. Clone and enter directory
 git clone https://github.com/KardeniaPoyu/MiniRAGuard.git
 cd MiniRAGuard/examples/rent_assistant/backend
-
-# 2. Install dependencies and configure environment
 pip install -r ../../../requirements.txt 
-cp .env.example .env # Add your API KEY
-
-# 3. Launch!
+cp .env.example .env # Add your API_KEY
 python main.py
 ```
 
-### 2. Deploy Frontend
+### 2. Frontend Deployment
 
-1. Download and install [HBuilderX](https://www.dcloud.io/hbuilderx.html) IDE.
-2. Import the `examples/rent_assistant/frontend` directory.
-3. Update `BASE_URL` in `config.js` to your deployed backend address.
-4. Run in the built-in browser or WeChat DevTools!
+1. Import `examples/rent_assistant/frontend` into HBuilderX.
+2. Update `BASE_URL` in `config.js` to your backend address.
+3. Run in the built-in browser or WeChat DevTools.
 
----
+## Customization
 
-## 🏗️ Architecture
+1. **Inject Knowledge**: Replace files in `examples/rent_assistant/data/` with your own TXT or Markdown files.
+2. **Reset Index**: Delete the `vector_store` directory; the index will be rebuilt on the next startup.
+3. **Adjust Logic**: Modify the System Prompt in `backend/prompts.py`.
 
-```mermaid
-graph TD
-    User((Client)) -->|Upload Images| API_Gateway[FastAPI Gateway]
-    
-    subgraph Modular AI Pipeline
-        API_Gateway -->|1. Vision Parse| VL[VLM Engine]
-        VL -->|2. Text Content| RAG_Engine[Lightweight RAG]
-        
-        subgraph Local Knowledge Base
-            RAG_Engine <-->|3. Knowledge Match| VectorDB[(Local Vector Store)]
-        end
-        
-        RAG_Engine -->|4. Augmented Context| LLM[DeepSeek Model]
-    end
-    
-    LLM -->|5. Structured Result| API_Gateway
-    API_Gateway -->|6. Dynamic Rendering| User
-```
+## License
 
----
-
-## 🛠️ Build Your Own AI Agent
-
-1. **Inject Private Knowledge**: Clear `examples/rent_assistant/data/` and add your own TXT or Markdown manuals.
-2. **Rebuild Vector Index**: Delete the `vector_store` directory; it will be automatically rebuilt on the next startup.
-3. **Adjust Business Logic**: Modify the System Prompt in `examples/rent_assistant/backend/prompts.py`.
-
----
-
-## 📈 Star History
-
-<a href="https://www.star-history.com/?repos=KardeniaPoyu%2FMiniRAGuard&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=KardeniaPoyu/MiniRAGuard&type=date&legend=top-left" />
- </picture>
-</a>
-
-## 🤝 Contributing & License
-
-Whether you fixed a typo or built an amazing application using MiniRAGuard, we look forward to your Pull Request! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-This project is licensed under the **[MIT](LICENSE)** license. If you find this project helpful, please give it a ⭐ **Star**!
+This project is licensed under the [MIT](LICENSE) License.
+>>>>>>> Stashed changes

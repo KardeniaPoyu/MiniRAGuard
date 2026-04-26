@@ -21,10 +21,8 @@ __pycache__/
 
 # Runtime artifacts (should be unique per environment)
 cache.db
-miniraguard/cache.db
-examples/rent_assistant/backend/cache.db
-examples/rent_assistant/data/vector_store/
-vector_store/
+backend/cache.db
+backend/vector_store/
 
 # Git
 .git/
