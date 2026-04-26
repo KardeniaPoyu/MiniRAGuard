@@ -50,18 +50,23 @@ https://github.com/user-attachments/assets/28709a21-b789-4ed4-9fc6-ffad16611da7
 
 ## Architecture
 
-适合内网多人访问，无需安装包。
-
-```bash
-# 1. 复制并填写环境变量
-cp .env.example .env
-# 编辑 .env，填入 DEEPSEEK_API_KEY
-
-# 2. 一键启动
-docker-compose up -d --build
-
-# 3. 访问
-# 管理端：http://localhost
+```mermaid
+graph TD
+    User((Client)) -->|Upload Images| API_Gateway[FastAPI Gateway]
+    
+    subgraph Modular AI Pipeline
+        API_Gateway -->|1. Vision Parse| VL[VLM Engine]
+        VL -->|2. Text Content| RAG_Engine[Lightweight RAG]
+        
+        subgraph Local Knowledge Base
+            RAG_Engine <-->|3. Knowledge Match| VectorDB[(Local Vector Store)]
+        end
+        
+        RAG_Engine -->|4. Augmented Context| LLM[DeepSeek Model]
+    end
+    
+    LLM -->|5. Structured Result| API_Gateway
+    API_Gateway -->|6. Dynamic Rendering| User
 ```
 
 ## Directory Structure
