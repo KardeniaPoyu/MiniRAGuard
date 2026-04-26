@@ -1,2 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Language Statistics - Hide HTML and documentation from language bar
+*.html linguist-documentation
+*.md linguist-documentation
+loading.html linguist-vendored
+setup_api.html linguist-vendored
+admin_frontend/dist/* linguist-vendored
+backend/vector_store/* linguist-vendored
