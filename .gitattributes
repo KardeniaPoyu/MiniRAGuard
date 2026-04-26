@@ -1,10 +1,23 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Language Statistics - Hide HTML and documentation from language bar
-*.html linguist-documentation
-*.md linguist-documentation
+# Language Statistics - Global overrides to hide bloat
+*.html linguist-detectable=false
+*.tex linguist-detectable=false
+*.md linguist-detectable=false
+*.log linguist-detectable=false
+*.pdf linguist-vendored
+*.json linguist-vendored
+
+# Ignore specific directories that might be tracked by mistake
+.venv/** linguist-vendored
+build/** linguist-vendored
+dist/** linguist-vendored
+admin_frontend/dist/** linguist-vendored
+admin_frontend/node_modules/** linguist-vendored
+backend/vector_store/** linguist-vendored
+docs/** linguist-documentation
+
+# Specific UI files in root
 loading.html linguist-vendored
 setup_api.html linguist-vendored
-admin_frontend/dist/* linguist-vendored
-backend/vector_store/* linguist-vendored
