@@ -1,23 +1,39 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# 1. 默认全量屏蔽：将所有文件标记为已忽略（vendored），不计入语言统计
+* linguist-vendored
 
-# Language Statistics - Global overrides to hide bloat
+# 2. 核心代码白名单：仅对以下源码目录开启统计（Opt-in）
+# 后端与核心逻辑
+backend/**/*.py linguist-vendored=false
+miniraguard/**/*.py linguist-vendored=false
+scripts/**/*.py linguist-vendored=false
+tests/**/*.py linguist-vendored=false
+
+# 前端管理后台 (Vue 3)
+admin_frontend/src/**/*.vue linguist-vendored=false
+admin_frontend/src/**/*.js linguist-vendored=false
+admin_frontend/src/**/*.ts linguist-vendored=false
+admin_frontend/src/**/*.css linguist-vendored=false
+
+# 移动端前端 (UniApp)
+frontend/**/*.vue linguist-vendored=false
+frontend/**/*.js linguist-vendored=false
+frontend/**/*.ts linguist-vendored=false
+frontend/**/*.css linguist-vendored=false
+
+# 3. 强制类型屏蔽：防止特定后缀（如大型日志或库文档）误判为 TeX 或 HTML
 *.html linguist-detectable=false
 *.tex linguist-detectable=false
 *.md linguist-detectable=false
 *.log linguist-detectable=false
-*.pdf linguist-vendored
-*.json linguist-vendored
+*.pdf linguist-detectable=false
+*.json linguist-detectable=false
+*.spec linguist-detectable=false
 
-# Ignore specific directories that might be tracked by mistake
+# 4. 重点目录二次确认屏蔽
 .venv/** linguist-vendored
 build/** linguist-vendored
 dist/** linguist-vendored
-admin_frontend/dist/** linguist-vendored
+installer/build/** linguist-vendored
 admin_frontend/node_modules/** linguist-vendored
+admin_frontend/dist/** linguist-vendored
 backend/vector_store/** linguist-vendored
-docs/** linguist-documentation
-
-# Specific UI files in root
-loading.html linguist-vendored
-setup_api.html linguist-vendored
