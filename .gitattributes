@@ -1,39 +1,28 @@
-# 1. 默认全量屏蔽：将所有文件标记为已忽略（vendored），不计入语言统计
+# 1. 默认全量屏蔽：所有文件均标记为 vendored，不计入语言统计
 * linguist-vendored
 
-# 2. 核心代码白名单：仅对以下源码目录开启统计（Opt-in）
-# 后端与核心逻辑
+# 2. 核心业务代码白名单：仅统计 Python 源码，确立 Python 为项目主语言
 backend/**/*.py linguist-vendored=false
 miniraguard/**/*.py linguist-vendored=false
 scripts/**/*.py linguist-vendored=false
 tests/**/*.py linguist-vendored=false
 
-# 前端管理后台 (Vue 3)
-admin_frontend/src/**/*.vue linguist-vendored=false
-admin_frontend/src/**/*.js linguist-vendored=false
-admin_frontend/src/**/*.ts linguist-vendored=false
-admin_frontend/src/**/*.css linguist-vendored=false
-
-# 移动端前端 (UniApp)
-frontend/**/*.vue linguist-vendored=false
-frontend/**/*.js linguist-vendored=false
-frontend/**/*.ts linguist-vendored=false
-frontend/**/*.css linguist-vendored=false
-
-# 3. 强制类型屏蔽：防止特定后缀（如大型日志或库文档）误判为 TeX 或 HTML
+# 3. 强制屏蔽前端及非核心语言：将其视为配套组件（vendored），不显示在统计条中
+*.vue linguist-detectable=false
+*.js linguist-detectable=false
+*.ts linguist-detectable=false
+*.css linguist-detectable=false
 *.html linguist-detectable=false
 *.tex linguist-detectable=false
 *.md linguist-detectable=false
 *.log linguist-detectable=false
-*.pdf linguist-detectable=false
 *.json linguist-detectable=false
-*.spec linguist-detectable=false
 
-# 4. 重点目录二次确认屏蔽
+# 4. 大型目录二次确认屏蔽
 .venv/** linguist-vendored
 build/** linguist-vendored
 dist/** linguist-vendored
-installer/build/** linguist-vendored
-admin_frontend/node_modules/** linguist-vendored
-admin_frontend/dist/** linguist-vendored
+admin_frontend/** linguist-vendored
+frontend/** linguist-vendored
 backend/vector_store/** linguist-vendored
+docs/** linguist-documentation
